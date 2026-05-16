@@ -37,7 +37,8 @@ public class SecurityConfig {
                                 "/api/health",
                                 "/h2-console/**",
                                 "/api/auth/register",
-                                "/api/auth/login"
+                                "/api/auth/login",
+                                "/api/categories"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
