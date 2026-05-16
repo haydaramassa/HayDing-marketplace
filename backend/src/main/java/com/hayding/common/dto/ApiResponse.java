@@ -1,4 +1,4 @@
-package com.hayding.common;
+package com.hayding.common.dto;
 
 import java.time.LocalDateTime;
 

@@ -1,6 +1,6 @@
 package com.hayding.health;
 
-import com.hayding.common.ApiResponse;
+import com.hayding.common.dto.ApiResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
