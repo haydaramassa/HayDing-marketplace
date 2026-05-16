@@ -6,6 +6,7 @@ import com.hayding.common.enums.ProductStatus;
 import com.hayding.product.dto.ProductCreateRequest;
 import com.hayding.product.dto.ProductImageResponse;
 import com.hayding.product.dto.ProductResponse;
+import com.hayding.product.dto.ProductUpdateRequest;
 import com.hayding.product.model.Product;
 import com.hayding.product.model.ProductImage;
 import com.hayding.product.repository.ProductImageRepository;
@@ -37,8 +38,7 @@ public class ProductService {
 
     @Transactional
     public ProductResponse createProduct(ProductCreateRequest request, String sellerEmail) {
-        User seller = userRepository.findByEmail(sellerEmail.toLowerCase().trim())
-                .orElseThrow(() -> new IllegalArgumentException("Seller not found"));
+        User seller = getUserByEmail(sellerEmail);
 
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new IllegalArgumentException("Category not found"));
@@ -55,25 +55,7 @@ public class ProductService {
 
         Product savedProduct = productRepository.save(product);
 
-        if (request.getImageUrls() != null && !request.getImageUrls().isEmpty()) {
-            int index = 0;
-
-            for (String imageUrl : request.getImageUrls()) {
-                if (imageUrl == null || imageUrl.isBlank()) {
-                    continue;
-                }
-
-                ProductImage image = new ProductImage(
-                        imageUrl.trim(),
-                        savedProduct,
-                        index == 0,
-                        index
-                );
-
-                productImageRepository.save(image);
-                index++;
-            }
-        }
+        saveImages(savedProduct, request.getImageUrls());
 
         return getProductById(savedProduct.getId());
     }
@@ -82,10 +64,17 @@ public class ProductService {
     public List<ProductResponse> getActiveProducts() {
         return productRepository.findByProductStatus(ProductStatus.ACTIVE)
                 .stream()
-                .map(product -> ProductResponse.fromEntity(
-                        product,
-                        getImageResponses(product.getId())
-                ))
+                .map(this::toProductResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProductResponse> getMyProducts(String sellerEmail) {
+        User seller = getUserByEmail(sellerEmail);
+
+        return productRepository.findBySellerId(seller.getId())
+                .stream()
+                .map(this::toProductResponse)
                 .toList();
     }
 
@@ -94,6 +83,125 @@ public class ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
 
+        return toProductResponse(product);
+    }
+
+    @Transactional
+    public ProductResponse updateProduct(Long productId,
+                                         ProductUpdateRequest request,
+                                         String sellerEmail) {
+        User seller = getUserByEmail(sellerEmail);
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+
+        validateProductOwner(product, seller);
+
+        if (request.getTitle() != null && !request.getTitle().isBlank()) {
+            product.setTitle(request.getTitle());
+        }
+
+        if (request.getDescription() != null && !request.getDescription().isBlank()) {
+            product.setDescription(request.getDescription());
+        }
+
+        if (request.getPrice() != null) {
+            product.setPrice(request.getPrice());
+        }
+
+        if (request.getCity() != null && !request.getCity().isBlank()) {
+            product.setCity(request.getCity());
+        }
+
+        if (request.getConditionStatus() != null) {
+            product.setConditionStatus(request.getConditionStatus());
+        }
+
+        if (request.getProductStatus() != null) {
+            product.setProductStatus(request.getProductStatus());
+        }
+
+        if (request.getCategoryId() != null) {
+            Category category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+
+            product.setCategory(category);
+        }
+
+        Product savedProduct = productRepository.save(product);
+
+        if (request.getImageUrls() != null) {
+            productImageRepository.deleteByProductId(savedProduct.getId());
+            saveImages(savedProduct, request.getImageUrls());
+        }
+
+        return getProductById(savedProduct.getId());
+    }
+
+    @Transactional
+    public void deleteProduct(Long productId, String sellerEmail) {
+        User seller = getUserByEmail(sellerEmail);
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+
+        validateProductOwner(product, seller);
+
+        product.setProductStatus(ProductStatus.DELETED);
+        productRepository.save(product);
+    }
+
+    @Transactional
+    public ProductResponse markProductAsSold(Long productId, String sellerEmail) {
+        User seller = getUserByEmail(sellerEmail);
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+
+        validateProductOwner(product, seller);
+
+        product.setProductStatus(ProductStatus.SOLD);
+        Product savedProduct = productRepository.save(product);
+
+        return getProductById(savedProduct.getId());
+    }
+
+    private User getUserByEmail(String email) {
+        return userRepository.findByEmail(email.toLowerCase().trim())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    }
+
+    private void validateProductOwner(Product product, User seller) {
+        if (!product.getSeller().getId().equals(seller.getId())) {
+            throw new IllegalArgumentException("You are not allowed to manage this product");
+        }
+    }
+
+    private void saveImages(Product product, List<String> imageUrls) {
+        if (imageUrls == null || imageUrls.isEmpty()) {
+            return;
+        }
+
+        int index = 0;
+
+        for (String imageUrl : imageUrls) {
+            if (imageUrl == null || imageUrl.isBlank()) {
+                continue;
+            }
+
+            ProductImage image = new ProductImage(
+                    imageUrl.trim(),
+                    product,
+                    index == 0,
+                    index
+            );
+
+            productImageRepository.save(image);
+            index++;
+        }
+    }
+
+    private ProductResponse toProductResponse(Product product) {
         return ProductResponse.fromEntity(
                 product,
                 getImageResponses(product.getId())
