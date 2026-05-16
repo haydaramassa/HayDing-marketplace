@@ -1,5 +1,7 @@
 package com.hayding.auth.controller;
 
+import com.hayding.auth.dto.AuthResponse;
+import com.hayding.auth.dto.LoginRequest;
 import com.hayding.auth.dto.RegisterRequest;
 import com.hayding.auth.service.AuthService;
 import com.hayding.common.dto.ApiResponse;
@@ -21,5 +23,11 @@ public class AuthController {
     public ApiResponse<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
         UserResponse user = authService.register(request);
         return ApiResponse.success("User registered successfully", user);
+    }
+
+    @PostMapping("/login")
+    public ApiResponse<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        AuthResponse authResponse = authService.login(request);
+        return ApiResponse.success("Login successful", authResponse);
     }
 }
