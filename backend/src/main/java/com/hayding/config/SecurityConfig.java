@@ -3,6 +3,7 @@ package com.hayding.config;
 import com.hayding.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -40,6 +41,7 @@ public class SecurityConfig {
                                 "/api/auth/login",
                                 "/api/categories"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/products", "/api/products/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
