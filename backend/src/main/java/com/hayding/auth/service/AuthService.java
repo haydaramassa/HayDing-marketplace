@@ -59,4 +59,12 @@ public class AuthService {
 
         return new AuthResponse(token, UserResponse.fromEntity(user));
     }
+
+    public UserResponse getCurrentUser(String email) {
+        User user = userRepository.findByEmail(email.toLowerCase().trim())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        return UserResponse.fromEntity(user);
+    }
+
 }
