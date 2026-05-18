@@ -2,11 +2,11 @@ const API_BASE_URL = "http://localhost:8080/api";
 
 async function request(path, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
+    ...options,
     headers: {
       "Content-Type": "application/json",
       ...(options.headers || {}),
     },
-    ...options,
   });
 
   let data = null;
@@ -40,5 +40,17 @@ export function loginUser(credentials) {
   return request("/auth/login", {
     method: "POST",
     body: JSON.stringify(credentials),
+  });
+}
+
+export function createProduct(productData) {
+  const token = localStorage.getItem("hayding-token");
+
+  return request("/products", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(productData),
   });
 }

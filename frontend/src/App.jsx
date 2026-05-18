@@ -3,6 +3,7 @@ import { LanguageProvider } from "./context/LanguageContext";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import CreateProduct from "./pages/CreateProduct";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/create-product" element={<CreateProduct />} />
         </Routes>
       </BrowserRouter>
     </LanguageProvider>
