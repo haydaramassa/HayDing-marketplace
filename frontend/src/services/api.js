@@ -54,3 +54,14 @@ export function createProduct(productData) {
     body: JSON.stringify(productData),
   });
 }
+
+export function getMyProducts() {
+    const token = localStorage.getItem("hayding-token");
+  
+    return request("/products/my", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
