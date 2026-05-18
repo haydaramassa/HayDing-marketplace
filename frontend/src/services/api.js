@@ -65,3 +65,9 @@ export function getMyProducts() {
       },
     });
   }
+
+  export function getProducts() {
+    return request("/products", {
+      method: "GET",
+    });
+  }

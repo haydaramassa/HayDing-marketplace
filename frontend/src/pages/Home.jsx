@@ -233,7 +233,7 @@ function handleLogout() {
         <nav className="nav-links">
           <a href="#categories">{t.navCategories}</a>
           <a href="#how-it-works">{t.navHowItWorks}</a>
-          <a href="#products">{t.navExplore}</a>
+          <Link to="/products">{t.navExplore}</Link>
         </nav>
 
         <div className="nav-actions">

@@ -1109,6 +1109,76 @@ font-size: 1.05rem;
   font-weight: 800;
 }
 
+.navbar {
+  width: min(1240px, calc(100% - 32px));
+}
+
+.nav-links {
+  gap: 16px;
+}
+
+.nav-links a {
+  white-space: nowrap;
+}
+
+.nav-actions {
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.nav-actions .btn {
+  padding: 11px 16px;
+  white-space: nowrap;
+}
+
+.logout-btn {
+  padding-inline: 15px;
+  background: rgba(255, 255, 255, 0.62);
+  color: var(--muted);
+  box-shadow: none;
+}
+
+.logout-btn:hover {
+  color: var(--accent-red);
+  border-color: rgba(184, 74, 61, 0.28);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.nav-actions .btn {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.nav-actions .btn:hover {
+  transform: translateY(-1px);
+}
+
+.nav-actions .btn-primary:hover {
+  box-shadow:
+    0 14px 30px rgba(32, 38, 36, 0.2),
+    0 0 20px rgba(201, 154, 46, 0.16);
+}
+
+.nav-actions .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 0 0 1px rgba(230, 222, 209, 0.85),
+    0 8px 18px rgba(201, 154, 46, 0.12);
+}
+
+.logout-btn:hover {
+  color: var(--accent-red);
+  border-color: rgba(184, 74, 61, 0.28);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 0 0 1px rgba(184, 74, 61, 0.16),
+    0 8px 18px rgba(184, 74, 61, 0.1);
+}
+
 /* Tablet */
 @media (max-width: 900px) {
   .navbar {
