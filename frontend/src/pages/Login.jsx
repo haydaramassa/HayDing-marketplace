@@ -1,12 +1,91 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
+import { loginUser } from "../services/api";
 import "../App.css";
 
 function Login() {
   const { isArabic, t } = useLanguage();
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  function handleChange(event) {
+    const { name, value } = event.target;
+
+    setFormData((currentData) => ({
+      ...currentData,
+      [name]: value,
+    }));
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    setMessage("");
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const data = await loginUser(formData);
+
+      const token =
+  data?.token ||
+  data?.accessToken ||
+  data?.jwt ||
+  data?.data?.token ||
+  data?.data?.accessToken ||
+  data?.data?.jwt;
+
+  const user = data?.user || data?.data?.user;
+
+if (user) {
+  localStorage.setItem("hayding-user", JSON.stringify(user));
+}
+
+      if (!token) {
+        throw new Error(
+          isArabic
+            ? "تم تسجيل الدخول، لكن لم يتم استلام رمز الدخول من السيرفر."
+            : "Login succeeded, but no token was received from the server."
+        );
+      }
+
+      localStorage.setItem("hayding-token", token);
+
+      setMessage(
+        isArabic
+          ? "تم تسجيل الدخول بنجاح. سيتم نقلك إلى الصفحة الرئيسية."
+          : "Login successful. Redirecting to homepage."
+      );
+
+      setTimeout(() => {
+        navigate("/");
+      }, 700);
+    } catch (err) {
+      setError(
+        err.message ||
+          (isArabic
+            ? "فشل تسجيل الدخول. تأكد من البريد الإلكتروني وكلمة المرور."
+            : "Login failed. Please check your email and password.")
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   return (
-    <div className={`auth-page ${isArabic ? "rtl" : ""}`} dir={isArabic ? "rtl" : "ltr"}>
+    <div
+      className={`auth-page ${isArabic ? "rtl" : ""}`}
+      dir={isArabic ? "rtl" : "ltr"}
+    >
       <div className="auth-card">
         <Link className="logo auth-logo" to="/">
           <span className="logo-mark">H</span>
@@ -19,19 +98,40 @@ function Login() {
 
         <p className="auth-text">{t.loginText}</p>
 
-        <form className="auth-form">
+        <form className="auth-form" onSubmit={handleSubmit}>
           <label>
             {t.email}
-            <input type="email" placeholder={t.loginEmailPlaceholder} />
+            <input
+              type="email"
+              name="email"
+              placeholder={t.loginEmailPlaceholder}
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
           </label>
 
           <label>
             {t.password}
-            <input type="password" placeholder={t.loginPasswordPlaceholder} />
+            <input
+              type="password"
+              name="password"
+              placeholder={t.loginPasswordPlaceholder}
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
           </label>
 
-          <button className="btn btn-primary" type="button">
-            {t.loginButton}
+          {error && <p className="auth-message auth-error">{error}</p>}
+          {message && <p className="auth-message auth-success">{message}</p>}
+
+          <button className="btn btn-primary" type="submit" disabled={isLoading}>
+            {isLoading
+              ? isArabic
+                ? "جارٍ تسجيل الدخول..."
+                : "Logging in..."
+              : t.loginButton}
           </button>
         </form>
 
