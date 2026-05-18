@@ -1,9 +1,17 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import "../App.css";
 
 function Home() {
     const { language, setLanguage, isArabic } = useLanguage();
+    const navigate = useNavigate();
+    const isLoggedIn = Boolean(localStorage.getItem("hayding-token"));
+
+function handleLogout() {
+  localStorage.removeItem("hayding-token");
+  localStorage.removeItem("hayding-user");
+  navigate("/");
+}
 
   const content = {
     DE: {
@@ -243,13 +251,27 @@ function Home() {
             ))}
           </div>
 
-                <Link className="btn btn-secondary" to="/login">
-        {t.login}
-        </Link>
+          {isLoggedIn ? (
+  <>
+    <Link className="btn btn-primary" to="/create-product">
+      {t.createAd}
+    </Link>
 
-        <Link className="btn btn-primary" to="/register">
-        {t.createAd}
-        </Link>
+    <button className="btn btn-secondary" type="button" onClick={handleLogout}>
+      {isArabic ? "تسجيل الخروج" : language === "EN" ? "Logout" : "Logout"}
+    </button>
+  </>
+) : (
+  <>
+    <Link className="btn btn-secondary" to="/login">
+      {t.login}
+    </Link>
+
+    <Link className="btn btn-primary" to="/register">
+      {t.createAd}
+    </Link>
+  </>
+)}
         </div>
       </header>
 
