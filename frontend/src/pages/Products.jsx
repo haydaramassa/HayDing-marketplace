@@ -132,7 +132,11 @@ function Products() {
         {!isLoading && !error && products.length > 0 && (
           <div className="my-products-grid">
             {products.map((product) => (
-              <article className="product-card my-product-card" key={product.id}>
+              <Link
+              className="product-card my-product-card product-card-link"
+              key={product.id}
+              to={`/products/${product.id}`}
+            >
                 <div className="product-image my-product-image">
                   <button
                     className="image-arrow image-arrow-left"
@@ -166,7 +170,7 @@ function Products() {
 
                   <strong>{product.price} €</strong>
                 </div>
-              </article>
+                </Link>
             ))}
           </div>
         )}

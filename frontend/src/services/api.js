@@ -71,3 +71,9 @@ export function getMyProducts() {
       method: "GET",
     });
   }
+
+  export function getProductById(productId) {
+    return request(`/products/${productId}`, {
+      method: "GET",
+    });
+  }

@@ -6,6 +6,7 @@ import Register from "./pages/Register";
 import CreateProduct from "./pages/CreateProduct";
 import MyProducts from "./pages/MyProducts";
 import Products from "./pages/Products";
+import ProductDetails from "./pages/ProductDetails";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/create-product" element={<CreateProduct />} />
           <Route path="/my-products" element={<MyProducts />} />
           <Route path="/products" element={<Products />} />
+          <Route path="/products/:productId" element={<ProductDetails />} />
         </Routes>
       </BrowserRouter>
     </LanguageProvider>
