@@ -1,6 +1,8 @@
+import { useState } from "react"
 import "./App.css";
 
 function App() {
+  const [language, setLanguage] = useState("DE");
   const categories = [
     "Elektronik",
     "Möbel",
@@ -46,9 +48,23 @@ function App() {
         </nav>
 
         <div className="nav-actions">
-          <button className="btn btn-secondary">Login</button>
-          <button className="btn btn-primary">Anzeige erstellen</button>
-        </div>
+        <div className="language-switcher" aria-label="Language switcher">
+  {["DE", "AR", "EN"].map((lang) => (
+    <button
+      className={`language-btn ${language === lang ? "active" : ""}`}
+      type="button"
+      key={lang}
+      onClick={() => setLanguage(lang)}
+      aria-pressed={language === lang}
+    >
+      {lang}
+    </button>
+  ))}
+</div>
+
+  <button className="btn btn-secondary">Login</button>
+  <button className="btn btn-primary">Anzeige erstellen</button>
+</div>
       </header>
 
       <main>

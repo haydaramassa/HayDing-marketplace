@@ -412,6 +412,32 @@ button {
   color: var(--muted);
 }
 
+.language-switcher {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px;
+}
+
+.language-btn {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 8px 10px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.language-btn.active {
+  background: var(--primary);
+  color: #ffffff;
+}
+
 @media (max-width: 900px) {
   .navbar {
     flex-wrap: wrap;
