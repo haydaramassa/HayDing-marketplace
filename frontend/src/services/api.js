@@ -77,3 +77,25 @@ export function getMyProducts() {
       method: "GET",
     });
   }
+
+  export function markProductAsSold(productId) {
+    const token = localStorage.getItem("hayding-token");
+  
+    return request(`/products/${productId}/mark-sold`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
+  
+  export function deleteProduct(productId) {
+    const token = localStorage.getItem("hayding-token");
+  
+    return request(`/products/${productId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }

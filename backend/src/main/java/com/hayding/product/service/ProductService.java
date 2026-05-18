@@ -72,7 +72,10 @@ public class ProductService {
     public List<ProductResponse> getMyProducts(String sellerEmail) {
         User seller = getUserByEmail(sellerEmail);
 
-        return productRepository.findBySellerId(seller.getId())
+        return productRepository.findBySellerIdAndProductStatusNot(
+                        seller.getId(),
+                        ProductStatus.DELETED
+                )
                 .stream()
                 .map(this::toProductResponse)
                 .toList();

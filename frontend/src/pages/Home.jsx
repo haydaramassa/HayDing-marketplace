@@ -265,7 +265,7 @@ function handleLogout() {
       {t.createAd}
     </Link>
 
-    <button className="btn btn-secondary" type="button" onClick={handleLogout}>
+    <button className="btn btn-secondary logout-btn" type="button" onClick={handleLogout}>
       {isArabic
         ? "تسجيل الخروج"
         : language === "EN"
