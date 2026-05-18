@@ -253,12 +253,24 @@ function handleLogout() {
 
           {isLoggedIn ? (
   <>
+    <Link className="btn btn-secondary" to="/my-products">
+      {isArabic
+        ? "إعلاناتي"
+        : language === "EN"
+          ? "My listings"
+          : "Meine Anzeigen"}
+    </Link>
+
     <Link className="btn btn-primary" to="/create-product">
       {t.createAd}
     </Link>
 
     <button className="btn btn-secondary" type="button" onClick={handleLogout}>
-      {isArabic ? "تسجيل الخروج" : language === "EN" ? "Logout" : "Logout"}
+      {isArabic
+        ? "تسجيل الخروج"
+        : language === "EN"
+          ? "Logout"
+          : "Logout"}
     </button>
   </>
 ) : (
