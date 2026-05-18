@@ -1,42 +1,52 @@
+import { Link } from "react-router-dom";
+import { useLanguage } from "../context/LanguageContext";
 import "../App.css";
 
 function Register() {
+  const { isArabic, t } = useLanguage();
+
   return (
-    <div className="auth-page">
+    <div className={`auth-page ${isArabic ? "rtl" : ""}`} dir={isArabic ? "rtl" : "ltr"}>
       <div className="auth-card">
-        <div className="logo auth-logo">
+        <Link className="logo auth-logo" to="/">
           <span className="logo-mark">H</span>
           <span>HayDing</span>
-        </div>
+        </Link>
 
-        <p className="eyebrow">Neu bei HayDing?</p>
+        <p className="eyebrow">{t.registerEyebrow}</p>
 
-        <h1>Konto erstellen</h1>
+        <h1>{t.registerTitle}</h1>
 
-        <p className="auth-text">
-          Erstelle dein Konto und nutze HayDing zum Kaufen und Verkaufen.
-        </p>
+        <p className="auth-text">{t.registerText}</p>
 
         <form className="auth-form">
           <label>
-            Name
-            <input type="text" placeholder="Dein Name" />
+            {t.name}
+            <input type="text" placeholder={t.registerNamePlaceholder} />
           </label>
 
           <label>
-            E-Mail
-            <input type="email" placeholder="name@example.com" />
+            {t.email}
+            <input type="email" placeholder={t.registerEmailPlaceholder} />
           </label>
 
           <label>
-            Passwort
-            <input type="password" placeholder="Mindestens 8 Zeichen" />
+            {t.password}
+            <input type="password" placeholder={t.registerPasswordPlaceholder} />
           </label>
 
           <button className="btn btn-primary" type="button">
-            Konto erstellen
+            {t.registerButton}
           </button>
         </form>
+
+        <p className="auth-switch">
+          {t.registerSwitchText} <Link to="/login">{t.registerSwitchLink}</Link>
+        </p>
+
+        <Link className="auth-back-link" to="/">
+          {t.backHome}
+        </Link>
       </div>
     </div>
   );

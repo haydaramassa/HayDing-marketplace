@@ -1,9 +1,9 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useLanguage } from "../context/LanguageContext";
 import "../App.css";
 
 function Home() {
-  const [language, setLanguage] = useState("DE");
+    const { language, setLanguage, isArabic } = useLanguage();
 
   const content = {
     DE: {
@@ -213,7 +213,6 @@ function Home() {
   };
 
   const t = content[language];
-  const isArabic = language === "AR";
 
   return (
     <div className={`app ${isArabic ? "rtl" : ""}`} dir={isArabic ? "rtl" : "ltr"}>

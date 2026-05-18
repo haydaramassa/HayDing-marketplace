@@ -1,38 +1,47 @@
+import { Link } from "react-router-dom";
+import { useLanguage } from "../context/LanguageContext";
 import "../App.css";
 
 function Login() {
+  const { isArabic, t } = useLanguage();
+
   return (
-    <div className="auth-page">
+    <div className={`auth-page ${isArabic ? "rtl" : ""}`} dir={isArabic ? "rtl" : "ltr"}>
       <div className="auth-card">
-        <div className="logo auth-logo">
+        <Link className="logo auth-logo" to="/">
           <span className="logo-mark">H</span>
           <span>HayDing</span>
-        </div>
+        </Link>
 
-        <p className="eyebrow">Willkommen zurück</p>
+        <p className="eyebrow">{t.loginEyebrow}</p>
 
-        <h1>Login</h1>
+        <h1>{t.loginTitle}</h1>
 
-        <p className="auth-text">
-          Melde dich an, um deine Anzeigen, Favoriten und Nachrichten zu
-          verwalten.
-        </p>
+        <p className="auth-text">{t.loginText}</p>
 
         <form className="auth-form">
           <label>
-            E-Mail
-            <input type="email" placeholder="name@example.com" />
+            {t.email}
+            <input type="email" placeholder={t.loginEmailPlaceholder} />
           </label>
 
           <label>
-            Passwort
-            <input type="password" placeholder="Dein Passwort" />
+            {t.password}
+            <input type="password" placeholder={t.loginPasswordPlaceholder} />
           </label>
 
           <button className="btn btn-primary" type="button">
-            Einloggen
+            {t.loginButton}
           </button>
         </form>
+
+        <p className="auth-switch">
+          {t.loginSwitchText} <Link to="/register">{t.loginSwitchLink}</Link>
+        </p>
+
+        <Link className="auth-back-link" to="/">
+          {t.backHome}
+        </Link>
       </div>
     </div>
   );
