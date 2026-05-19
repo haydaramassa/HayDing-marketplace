@@ -134,6 +134,23 @@ function ProductDetails() {
 
   const productImages = getProductImages(product);
   const selectedImage = productImages[selectedImageIndex] || "";
+  const hasMultipleImages = productImages.length > 1;
+
+  function goToPreviousImage() {
+    if (!hasMultipleImages) return;
+
+    setSelectedImageIndex((currentIndex) =>
+      currentIndex === 0 ? productImages.length - 1 : currentIndex - 1
+    );
+  }
+
+  function goToNextImage() {
+    if (!hasMultipleImages) return;
+
+    setSelectedImageIndex((currentIndex) =>
+      currentIndex === productImages.length - 1 ? 0 : currentIndex + 1
+    );
+  }
 
   return (
     <div
@@ -212,6 +229,40 @@ function ProductDetails() {
                   {isFavorite ? "♥" : "♡"}
                 </button>
 
+                {hasMultipleImages && (
+                  <>
+                    <button
+                      className="details-image-arrow details-image-arrow-left"
+                      type="button"
+                      onClick={goToPreviousImage}
+                      aria-label={text(
+                        "Vorheriges Bild",
+                        "الصورة السابقة",
+                        "Previous image"
+                      )}
+                    >
+                      ‹
+                    </button>
+
+                    <button
+                      className="details-image-arrow details-image-arrow-right"
+                      type="button"
+                      onClick={goToNextImage}
+                      aria-label={text(
+                        "Nächstes Bild",
+                        "الصورة التالية",
+                        "Next image"
+                      )}
+                    >
+                      ›
+                    </button>
+
+                    <span className="details-image-counter">
+                      {selectedImageIndex + 1}/{productImages.length}
+                    </span>
+                  </>
+                )}
+
                 {selectedImage ? (
                   <img
                     className="product-details-real-image"
@@ -223,9 +274,9 @@ function ProductDetails() {
                 )}
               </div>
 
-              <div className="product-thumbnails">
+              <div className="product-thumbnails product-thumbnails-scroll">
                 {productImages.length > 0 ? (
-                  productImages.slice(0, 3).map((imageUrl, index) => (
+                  productImages.map((imageUrl, index) => (
                     <button
                       type="button"
                       className={`thumbnail ${
@@ -234,7 +285,10 @@ function ProductDetails() {
                       key={imageUrl}
                       onClick={() => setSelectedImageIndex(index)}
                     >
-                      <img src={imageUrl} alt={`${product.title} ${index + 1}`} />
+                      <img
+                        src={imageUrl}
+                        alt={`${product.title} ${index + 1}`}
+                      />
                     </button>
                   ))
                 ) : (

@@ -18,8 +18,10 @@ function CreateProduct() {
     deliveryOption: "",
   });
 
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [selectedImagePreview, setSelectedImagePreview] = useState("");
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [selectedImagePreviews, setSelectedImagePreviews] = useState([]);
+  const [activePreviewIndex, setActivePreviewIndex] = useState(0);
+
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [error, setError] = useState("");
@@ -61,40 +63,102 @@ function CreateProduct() {
   }
 
   function handleImageChange(event) {
-    const file = event.target.files?.[0];
+    const files = Array.from(event.target.files || []);
 
     setError("");
 
-    if (!file) {
+    if (files.length === 0) {
       return;
     }
 
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    const maxImages = 5;
+    const maxSize = 5 * 1024 * 1024;
 
-    if (!allowedTypes.includes(file.type)) {
+    const availableSlots = maxImages - selectedImages.length;
+
+    if (availableSlots <= 0) {
       setError(
         text(
-          "Bitte wähle ein JPG-, PNG- oder WEBP-Bild.",
-          "يرجى اختيار صورة JPG أو PNG أو WEBP.",
-          "Please choose a JPG, PNG or WEBP image."
+          "Du kannst maximal 5 Bilder hinzufügen.",
+          "يمكنك إضافة 5 صور كحد أقصى.",
+          "You can add up to 5 images."
         )
       );
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
+    const limitedFiles = files.slice(0, availableSlots);
+
+    const invalidFile = limitedFiles.find(
+      (file) => !allowedTypes.includes(file.type)
+    );
+
+    if (invalidFile) {
       setError(
         text(
-          "Das Bild darf maximal 5MB groß sein.",
-          "يجب ألا يتجاوز حجم الصورة 5MB.",
-          "The image must be 5MB or smaller."
+          "Bitte wähle nur JPG-, PNG- oder WEBP-Bilder.",
+          "يرجى اختيار صور JPG أو PNG أو WEBP فقط.",
+          "Please choose only JPG, PNG or WEBP images."
         )
       );
       return;
     }
 
-    setSelectedImage(file);
-    setSelectedImagePreview(URL.createObjectURL(file));
+    const tooLargeFile = limitedFiles.find((file) => file.size > maxSize);
+
+    if (tooLargeFile) {
+      setError(
+        text(
+          "Jedes Bild darf maximal 5MB groß sein.",
+          "يجب ألا يتجاوز حجم كل صورة 5MB.",
+          "Each image must be 5MB or smaller."
+        )
+      );
+      return;
+    }
+
+    const newPreviews = limitedFiles.map((file) => URL.createObjectURL(file));
+
+    setSelectedImages((currentImages) => [...currentImages, ...limitedFiles]);
+    setSelectedImagePreviews((currentPreviews) => [
+      ...currentPreviews,
+      ...newPreviews,
+    ]);
+
+    if (selectedImagePreviews.length === 0) {
+      setActivePreviewIndex(0);
+    }
+
+    event.target.value = "";
+  }
+
+  function handleRemoveImage(indexToRemove) {
+    setSelectedImages((currentImages) =>
+      currentImages.filter((_, index) => index !== indexToRemove)
+    );
+
+    setSelectedImagePreviews((currentPreviews) => {
+      const previewToRemove = currentPreviews[indexToRemove];
+
+      if (previewToRemove) {
+        URL.revokeObjectURL(previewToRemove);
+      }
+
+      return currentPreviews.filter((_, index) => index !== indexToRemove);
+    });
+
+    setActivePreviewIndex((currentIndex) => {
+      if (indexToRemove === currentIndex) {
+        return 0;
+      }
+
+      if (indexToRemove < currentIndex) {
+        return currentIndex - 1;
+      }
+
+      return currentIndex;
+    });
   }
 
   async function handleSubmit(event) {
@@ -105,11 +169,15 @@ function CreateProduct() {
     setIsLoading(true);
 
     try {
-      let uploadedImageUrl = "";
+      let uploadedImageUrls = [];
 
-      if (selectedImage) {
+      if (selectedImages.length > 0) {
         setIsUploadingImage(true);
-        uploadedImageUrl = await uploadProductImage(selectedImage);
+
+        uploadedImageUrls = await Promise.all(
+          selectedImages.map((imageFile) => uploadProductImage(imageFile))
+        );
+
         setIsUploadingImage(false);
       }
 
@@ -120,7 +188,7 @@ function CreateProduct() {
         city: formData.city,
         conditionStatus: formData.conditionStatus,
         categoryId: Number(formData.categoryId),
-        imageUrls: uploadedImageUrl ? [uploadedImageUrl] : [],
+        imageUrls: uploadedImageUrls,
       });
 
       setMessage(
@@ -148,6 +216,9 @@ function CreateProduct() {
       setIsLoading(false);
     }
   }
+
+  const activePreviewImage = selectedImagePreviews[activePreviewIndex] || "";
+  const imageCount = selectedImagePreviews.length;
 
   return (
     <div
@@ -213,32 +284,32 @@ function CreateProduct() {
                   <h2>{text("Fotos", "الصور", "Photos")}</h2>
                   <p>
                     {text(
-                      "Zeige deinen Artikel mit einem echten Foto.",
-                      "اعرض الغرض بصورة حقيقية.",
-                      "Show your item with a real photo."
+                      "Füge bis zu 5 echte Fotos hinzu.",
+                      "أضف حتى 5 صور حقيقية.",
+                      "Add up to 5 real photos."
                     )}
                   </p>
                 </div>
               </div>
 
               <label className="upload-box upload-box-clickable">
-                {selectedImagePreview ? (
+                {activePreviewImage ? (
                   <img
                     className="upload-preview-image"
-                    src={selectedImagePreview}
+                    src={activePreviewImage}
                     alt={text("Vorschau", "معاينة", "Preview")}
                   />
                 ) : (
                   <>
                     <div className="upload-icon">＋</div>
                     <h3>
-                      {text("Foto hinzufügen", "إضافة صورة", "Add photo")}
+                      {text("Fotos hinzufügen", "إضافة صور", "Add photos")}
                     </h3>
                     <p>
                       {text(
-                        "JPG, PNG oder WEBP bis maximal 5MB.",
-                        "JPG أو PNG أو WEBP حتى 5MB كحد أقصى.",
-                        "JPG, PNG or WEBP up to 5MB."
+                        "JPG, PNG oder WEBP. Maximal 5 Bilder, je 5MB.",
+                        "JPG أو PNG أو WEBP. حتى 5 صور، كل صورة 5MB.",
+                        "JPG, PNG or WEBP. Up to 5 images, 5MB each."
                       )}
                     </p>
                   </>
@@ -248,15 +319,64 @@ function CreateProduct() {
                   className="upload-input"
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
+                  multiple
                   onChange={handleImageChange}
                 />
               </label>
 
-              {selectedImage && (
-                <p className="upload-file-name">
-                  {text("Ausgewählt:", "تم الاختيار:", "Selected:")}{" "}
-                  {selectedImage.name}
-                </p>
+              {imageCount > 0 && (
+                <div className="upload-thumbnails">
+                  {selectedImagePreviews.map((previewUrl, index) => (
+                    <div
+                      className={`upload-thumbnail ${
+                        activePreviewIndex === index ? "active" : ""
+                      }`}
+                      key={previewUrl}
+                    >
+                      <button
+                        className="upload-thumbnail-image"
+                        type="button"
+                        onClick={() => setActivePreviewIndex(index)}
+                        aria-label={text(
+                          "Bild auswählen",
+                          "اختيار الصورة",
+                          "Select image"
+                        )}
+                      >
+                        <img
+                          src={previewUrl}
+                          alt={`${text("Bild", "صورة", "Image")} ${index + 1}`}
+                        />
+                      </button>
+
+                      <button
+                        className="upload-thumbnail-remove"
+                        type="button"
+                        onClick={() => handleRemoveImage(index)}
+                        aria-label={text(
+                          "Bild entfernen",
+                          "إزالة الصورة",
+                          "Remove image"
+                        )}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+
+                  {imageCount < 5 && (
+                    <label className="upload-thumbnail upload-thumbnail-add">
+                      ＋
+                      <input
+                        className="upload-input"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        multiple
+                        onChange={handleImageChange}
+                      />
+                    </label>
+                  )}
+                </div>
               )}
             </section>
 
@@ -452,7 +572,11 @@ function CreateProduct() {
                 disabled={isLoading}
               >
                 {isUploadingImage
-                  ? text("Bild wird hochgeladen...", "جارٍ رفع الصورة...", "Uploading image...")
+                  ? text(
+                      "Bilder werden hochgeladen...",
+                      "جارٍ رفع الصور...",
+                      "Uploading images..."
+                    )
                   : isLoading
                     ? text(
                         "Wird veröffentlicht...",
@@ -474,13 +598,19 @@ function CreateProduct() {
 
           <div className="listing-preview-card">
             <div className="listing-preview-image">
-              {selectedImagePreview ? (
+              {activePreviewImage ? (
                 <img
-                  src={selectedImagePreview}
+                  src={activePreviewImage}
                   alt={text("Vorschau", "معاينة", "Preview")}
                 />
               ) : (
                 "📦"
+              )}
+
+              {imageCount > 0 && (
+                <span className="image-counter">
+                  {activePreviewIndex + 1}/{imageCount}
+                </span>
               )}
             </div>
 
@@ -510,9 +640,9 @@ function CreateProduct() {
             <strong>{text("Tipp", "نصيحة", "Tip")}</strong>
             <p>
               {text(
-                "Gute Fotos und ein ehrlicher Zustand schaffen Vertrauen.",
-                "الصور الجيدة والوصف الصادق يزيدان الثقة.",
-                "Good photos and an honest condition build trust."
+                "Mehrere gute Fotos helfen Käufern, den Artikel besser einzuschätzen.",
+                "عدة صور جيدة تساعد المشترين على فهم حالة الغرض بشكل أفضل.",
+                "Several good photos help buyers understand the item better."
               )}
             </p>
           </div>
