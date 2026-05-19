@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
-import { getProductById } from "../services/api";
+import {
+  addFavorite,
+  getFavorites,
+  getProductById,
+  removeFavorite,
+} from "../services/api";
 import "../App.css";
 
 function ProductDetails() {
@@ -10,13 +15,23 @@ function ProductDetails() {
   const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
+  const [isFavorite, setIsFavorite] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
   const [error, setError] = useState("");
 
   function text(de, ar, en) {
     if (isArabic) return ar;
     if (language === "EN") return en;
     return de;
+  }
+
+  function isLoggedIn() {
+    return Boolean(localStorage.getItem("hayding-token"));
+  }
+
+  function normalizeId(value) {
+    return Number(value);
   }
 
   function getConditionLabel(conditionStatus) {
@@ -28,14 +43,33 @@ function ProductDetails() {
       USED: text("Gebraucht", "مستعمل", "Used"),
     };
 
-    return labels[conditionStatus] || conditionStatus || text("Nicht angegeben", "غير محدد", "Not specified");
+    return (
+      labels[conditionStatus] ||
+      conditionStatus ||
+      text("Nicht angegeben", "غير محدد", "Not specified")
+    );
   }
 
   useEffect(() => {
     async function loadProduct() {
       try {
-        const data = await getProductById(productId);
-        setProduct(data?.data || data);
+        const productData = await getProductById(productId);
+        const loadedProduct = productData?.data || productData;
+
+        setProduct(loadedProduct);
+
+        if (isLoggedIn()) {
+          const favoritesData = await getFavorites();
+          const favorites = favoritesData?.data || favoritesData || [];
+
+          const favoriteIds = Array.isArray(favorites)
+            ? favorites.map((item) =>
+                normalizeId(item.productId || item.product?.id || item.id)
+              )
+            : [];
+
+          setIsFavorite(favoriteIds.includes(normalizeId(productId)));
+        }
       } catch (err) {
         setError(
           err.message ||
@@ -52,6 +86,36 @@ function ProductDetails() {
 
     loadProduct();
   }, [productId]);
+
+  async function handleFavoriteClick() {
+    if (!isLoggedIn()) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      setFavoriteLoading(true);
+
+      if (isFavorite) {
+        await removeFavorite(productId);
+        setIsFavorite(false);
+      } else {
+        await addFavorite(productId);
+        setIsFavorite(true);
+      }
+    } catch (err) {
+      setError(
+        err.message ||
+          text(
+            "Favorit konnte nicht aktualisiert werden.",
+            "تعذر تحديث المفضلة.",
+            "Could not update favorite."
+          )
+      );
+    } finally {
+      setFavoriteLoading(false);
+    }
+  }
 
   return (
     <div
@@ -79,7 +143,11 @@ function ProductDetails() {
             ))}
           </div>
 
-          <button className="btn btn-secondary" type="button" onClick={() => navigate(-1)}>
+          <button
+            className="btn btn-secondary"
+            type="button"
+            onClick={() => navigate(-1)}
+          >
             {text("Zurück", "رجوع", "Back")}
           </button>
         </div>
@@ -88,7 +156,11 @@ function ProductDetails() {
       <main className="product-details-page">
         {isLoading && (
           <p className="auth-message auth-success">
-            {text("Anzeige wird geladen...", "جارٍ تحميل الإعلان...", "Loading listing...")}
+            {text(
+              "Anzeige wird geladen...",
+              "جارٍ تحميل الإعلان...",
+              "Loading listing..."
+            )}
           </p>
         )}
 
@@ -98,20 +170,48 @@ function ProductDetails() {
           <div className="product-details-layout">
             <section className="product-details-gallery">
               <div className="product-details-image">
+                <button
+                  className={`favorite-btn details-favorite-btn ${
+                    isFavorite ? "active" : ""
+                  }`}
+                  type="button"
+                  onClick={handleFavoriteClick}
+                  disabled={favoriteLoading}
+                  aria-label={
+                    isFavorite
+                      ? text(
+                          "Aus Favoriten entfernen",
+                          "إزالة من المفضلة",
+                          "Remove from favorites"
+                        )
+                      : text(
+                          "Zu Favoriten hinzufügen",
+                          "إضافة إلى المفضلة",
+                          "Add to favorites"
+                        )
+                  }
+                >
+                  {isFavorite ? "♥" : "♡"}
+                </button>
+
                 <span>📦</span>
               </div>
 
               <div className="product-thumbnails">
-                <button type="button" className="thumbnail active">📦</button>
-                <button type="button" className="thumbnail">＋</button>
-                <button type="button" className="thumbnail">＋</button>
+                <button type="button" className="thumbnail active">
+                  📦
+                </button>
+                <button type="button" className="thumbnail">
+                  ＋
+                </button>
+                <button type="button" className="thumbnail">
+                  ＋
+                </button>
               </div>
             </section>
 
             <section className="product-details-info">
-              <p className="eyebrow">
-                {text("Anzeige", "إعلان", "Listing")}
-              </p>
+              <p className="eyebrow">{text("Anzeige", "إعلان", "Listing")}</p>
 
               <h1>{product.title}</h1>
 
@@ -120,17 +220,26 @@ function ProductDetails() {
               <div className="details-meta">
                 <div>
                   <span>{text("Stadt", "المدينة", "City")}</span>
-                  <strong>{product.city || text("Nicht angegeben", "غير محدد", "Not specified")}</strong>
+                  <strong>
+                    {product.city ||
+                      text("Nicht angegeben", "غير محدد", "Not specified")}
+                  </strong>
                 </div>
 
                 <div>
                   <span>{text("Zustand", "الحالة", "Condition")}</span>
-                  <strong>{getConditionLabel(product.conditionStatus || product.condition)}</strong>
+                  <strong>
+                    {getConditionLabel(
+                      product.conditionStatus || product.condition
+                    )}
+                  </strong>
                 </div>
 
                 <div>
                   <span>{text("Status", "الحالة العامة", "Status")}</span>
-                  <strong>{product.productStatus || text("Aktiv", "نشط", "Active")}</strong>
+                  <strong>
+                    {product.productStatus || text("Aktiv", "نشط", "Active")}
+                  </strong>
                 </div>
               </div>
 
@@ -149,10 +258,6 @@ function ProductDetails() {
               <div className="details-actions">
                 <button className="btn btn-primary" type="button">
                   {text("Nachricht senden", "إرسال رسالة", "Send message")}
-                </button>
-
-                <button className="btn btn-secondary" type="button">
-                  {text("Merken", "حفظ", "Save")}
                 </button>
               </div>
             </section>

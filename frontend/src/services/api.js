@@ -29,6 +29,14 @@ async function request(path, options = {}) {
   return data;
 }
 
+function getAuthHeaders() {
+  const token = localStorage.getItem("hayding-token");
+
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+}
+
 export function registerUser(userData) {
   return request("/auth/register", {
     method: "POST",
@@ -44,58 +52,63 @@ export function loginUser(credentials) {
 }
 
 export function createProduct(productData) {
-  const token = localStorage.getItem("hayding-token");
-
   return request("/products", {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(productData),
   });
 }
 
 export function getMyProducts() {
-    const token = localStorage.getItem("hayding-token");
-  
-    return request("/products/my", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-  }
+  return request("/products/my", {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+}
 
-  export function getProducts() {
-    return request("/products", {
-      method: "GET",
-    });
-  }
+export function getProducts() {
+  return request("/products", {
+    method: "GET",
+  });
+}
 
-  export function getProductById(productId) {
-    return request(`/products/${productId}`, {
-      method: "GET",
-    });
-  }
+export function getProductById(productId) {
+  return request(`/products/${productId}`, {
+    method: "GET",
+  });
+}
 
-  export function markProductAsSold(productId) {
-    const token = localStorage.getItem("hayding-token");
-  
-    return request(`/products/${productId}/mark-sold`, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-  }
-  
-  export function deleteProduct(productId) {
-    const token = localStorage.getItem("hayding-token");
-  
-    return request(`/products/${productId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-  }
+export function markProductAsSold(productId) {
+  return request(`/products/${productId}/mark-sold`, {
+    method: "PATCH",
+    headers: getAuthHeaders(),
+  });
+}
+
+export function deleteProduct(productId) {
+  return request(`/products/${productId}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+}
+
+export function getFavorites() {
+  return request("/favorites", {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+}
+
+export function addFavorite(productId) {
+  return request(`/favorites/${productId}`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+  });
+}
+
+export function removeFavorite(productId) {
+  return request(`/favorites/${productId}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+}

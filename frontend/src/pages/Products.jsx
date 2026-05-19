@@ -1,14 +1,22 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
-import { getProducts } from "../services/api";
+import {
+  addFavorite,
+  getFavorites,
+  getProducts,
+  removeFavorite,
+} from "../services/api";
 import "../App.css";
 
 function Products() {
   const { isArabic, language, setLanguage } = useLanguage();
+  const navigate = useNavigate();
 
   const [products, setProducts] = useState([]);
+  const [favoriteIds, setFavoriteIds] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [favoriteLoadingId, setFavoriteLoadingId] = useState(null);
   const [error, setError] = useState("");
 
   function text(de, ar, en) {
@@ -17,12 +25,27 @@ function Products() {
     return de;
   }
 
+  function isLoggedIn() {
+    return Boolean(localStorage.getItem("hayding-token"));
+  }
+
   useEffect(() => {
     async function loadProducts() {
       try {
         const data = await getProducts();
         const items = data?.data || data || [];
         setProducts(Array.isArray(items) ? items : []);
+
+        if (isLoggedIn()) {
+          const favoritesData = await getFavorites();
+          const favorites = favoritesData?.data || favoritesData || [];
+
+          const ids = Array.isArray(favorites)
+            ? favorites.map((item) => item.productId || item.id)
+            : [];
+
+          setFavoriteIds(ids);
+        }
       } catch (err) {
         setError(
           err.message ||
@@ -39,6 +62,43 @@ function Products() {
 
     loadProducts();
   }, []);
+
+  async function handleFavoriteClick(event, productId) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!isLoggedIn()) {
+      navigate("/login");
+      return;
+    }
+
+    const isFavorite = favoriteIds.includes(productId);
+
+    try {
+      setFavoriteLoadingId(productId);
+
+      if (isFavorite) {
+        await removeFavorite(productId);
+        setFavoriteIds((currentIds) =>
+          currentIds.filter((id) => id !== productId)
+        );
+      } else {
+        await addFavorite(productId);
+        setFavoriteIds((currentIds) => [...currentIds, productId]);
+      }
+    } catch (err) {
+      setError(
+        err.message ||
+          text(
+            "Favorit konnte nicht aktualisiert werden.",
+            "تعذر تحديث المفضلة.",
+            "Could not update favorite."
+          )
+      );
+    } finally {
+      setFavoriteLoadingId(null);
+    }
+  }
 
   return (
     <div
@@ -131,47 +191,78 @@ function Products() {
 
         {!isLoading && !error && products.length > 0 && (
           <div className="my-products-grid">
-            {products.map((product) => (
-              <Link
-              className="product-card my-product-card product-card-link"
-              key={product.id}
-              to={`/products/${product.id}`}
-            >
-                <div className="product-image my-product-image">
-                  <button
-                    className="image-arrow image-arrow-left"
-                    type="button"
-                    aria-label="Previous image"
-                  >
-                    ‹
-                  </button>
+            {products.map((product) => {
+              const isFavorite = favoriteIds.includes(product.id);
+              const isFavoriteLoading = favoriteLoadingId === product.id;
 
-                  <span className="image-counter">1/1</span>
+              return (
+                <Link
+                  className="product-card my-product-card product-card-link"
+                  key={product.id}
+                  to={`/products/${product.id}`}
+                >
+                  <div className="product-image my-product-image">
+                    <button
+                      className={`favorite-btn ${
+                        isFavorite ? "active" : ""
+                      }`}
+                      type="button"
+                      onClick={(event) =>
+                        handleFavoriteClick(event, product.id)
+                      }
+                      disabled={isFavoriteLoading}
+                      aria-label={
+                        isFavorite
+                          ? text(
+                              "Aus Favoriten entfernen",
+                              "إزالة من المفضلة",
+                              "Remove from favorites"
+                            )
+                          : text(
+                              "Zu Favoriten hinzufügen",
+                              "إضافة إلى المفضلة",
+                              "Add to favorites"
+                            )
+                      }
+                    >
+                      {isFavorite ? "♥" : "♡"}
+                    </button>
 
-                  <button
-                    className="image-arrow image-arrow-right"
-                    type="button"
-                    aria-label="Next image"
-                  >
-                    ›
-                  </button>
-                </div>
+                    <button
+                      className="image-arrow image-arrow-left"
+                      type="button"
+                      aria-label="Previous image"
+                    >
+                      ‹
+                    </button>
 
-                <div className="product-info">
-                  <span className="product-tag">
-                    {product.conditionStatus ||
-                      product.condition ||
-                      text("Aktiv", "نشط", "Active")}
-                  </span>
+                    <span className="image-counter">1/1</span>
 
-                  <h3>{product.title}</h3>
+                    <button
+                      className="image-arrow image-arrow-right"
+                      type="button"
+                      aria-label="Next image"
+                    >
+                      ›
+                    </button>
+                  </div>
 
-                  <p>{product.city}</p>
+                  <div className="product-info">
+                    <span className="product-tag">
+                      {product.conditionStatus ||
+                        product.condition ||
+                        text("Aktiv", "نشط", "Active")}
+                    </span>
 
-                  <strong>{product.price} €</strong>
-                </div>
+                    <h3>{product.title}</h3>
+
+                    <p>{product.city}</p>
+
+                    <strong>{product.price} €</strong>
+                  </div>
                 </Link>
-            ))}
+              );
+            })}
           </div>
         )}
       </main>
