@@ -2088,3 +2088,27 @@ font-size: 1.05rem;
     transform: translate(-50%, 0);
   }
 }
+
+/* Stable card action menu */
+.card-menu.open .card-menu-button {
+  transform: translateY(-1px);
+  background: #ffffff;
+  box-shadow:
+    0 12px 28px rgba(32, 38, 36, 0.14),
+    0 0 18px rgba(201, 154, 46, 0.16);
+}
+
+.card-menu.open .card-menu-list {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.card-menu::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 14px;
+}

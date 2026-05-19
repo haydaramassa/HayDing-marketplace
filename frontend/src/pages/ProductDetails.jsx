@@ -129,19 +129,19 @@ function ProductDetails() {
         </Link>
 
         <div className="create-header-actions">
-          <div className="language-switcher" aria-label="Language switcher">
-            {["DE", "AR", "EN"].map((lang) => (
-              <button
-                className={`language-btn ${language === lang ? "active" : ""}`}
-                type="button"
-                key={lang}
-                onClick={() => setLanguage(lang)}
-                aria-pressed={language === lang}
-              >
-                {lang}
-              </button>
-            ))}
-          </div>
+            <div className="language-switcher" aria-label="Language switcher">
+                {["DE", "EN", "AR"].map((lang) => (
+                    <button
+                    className={`language-btn ${language === lang ? "active" : ""}`}
+                    type="button"
+                    key={lang}
+                    onClick={() => setLanguage(lang)}
+                    aria-pressed={language === lang}
+                    >
+                    {lang}
+                    </button>
+                ))}
+             </div>
 
           <button
             className="btn btn-secondary"

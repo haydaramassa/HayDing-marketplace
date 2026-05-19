@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import {
@@ -15,6 +15,8 @@ function MyProducts() {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const menuRefs = useRef({});
 
   function text(de, ar, en) {
     if (isArabic) return ar;
@@ -144,6 +146,22 @@ function MyProducts() {
     loadMyProducts();
   }, [navigate]);
 
+  useEffect(() => {
+    function handleClickOutside(event) {
+      const openMenuElement = menuRefs.current[openMenuId];
+
+      if (openMenuElement && !openMenuElement.contains(event.target)) {
+        setOpenMenuId(null);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [openMenuId]);
+
   return (
     <div
       className={`create-page ${isArabic ? "rtl" : ""}`}
@@ -157,7 +175,7 @@ function MyProducts() {
 
         <div className="create-header-actions">
           <div className="language-switcher" aria-label="Language switcher">
-            {["DE", "AR", "EN"].map((lang) => (
+            {["DE", "EN", "AR"].map((lang) => (
               <button
                 className={`language-btn ${language === lang ? "active" : ""}`}
                 type="button"
@@ -248,23 +266,53 @@ function MyProducts() {
                 className="product-card my-product-card my-management-card"
                 key={product.id}
               >
-                <div className="card-menu">
-                  <button className="card-menu-button" type="button">
+                <div
+                  className={`card-menu ${
+                    openMenuId === product.id ? "open" : ""
+                  }`}
+                  ref={(element) => {
+                    menuRefs.current[product.id] = element;
+                  }}
+                >
+                  <button
+                    className="card-menu-button"
+                    type="button"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      setOpenMenuId((currentId) =>
+                        currentId === product.id ? null : product.id
+                      );
+                    }}
+                    aria-label={text("Aktionen", "خيارات", "Actions")}
+                    aria-expanded={openMenuId === product.id}
+                  >
                     ⋯
                   </button>
 
                   <div className="card-menu-list">
-                    <Link to={`/products/${product.id}`}>
+                    <Link
+                      to={`/products/${product.id}`}
+                      onClick={() => setOpenMenuId(null)}
+                    >
                       {text("Ansehen", "عرض", "View")}
                     </Link>
 
-                    <button type="button">
+                    <Link
+                      to={`/edit-product/${product.id}`}
+                      onClick={() => setOpenMenuId(null)}
+                    >
                       {text("Bearbeiten", "تعديل", "Edit")}
-                    </button>
+                    </Link>
 
                     <button
                       type="button"
-                      onClick={() => handleMarkAsSold(product.id)}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        setOpenMenuId(null);
+                        handleMarkAsSold(product.id);
+                      }}
                       disabled={product.productStatus === "SOLD"}
                     >
                       {text(
@@ -277,7 +325,12 @@ function MyProducts() {
                     <button
                       className="danger"
                       type="button"
-                      onClick={() => handleDelete(product.id)}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        setOpenMenuId(null);
+                        handleDelete(product.id);
+                      }}
                     >
                       {text("Löschen", "حذف", "Delete")}
                     </button>

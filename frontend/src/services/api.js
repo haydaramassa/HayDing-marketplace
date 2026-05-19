@@ -112,3 +112,12 @@ export function removeFavorite(productId) {
     headers: getAuthHeaders(),
   });
 }
+
+export function updateProduct(productId, productData) {
+    return request(`/products/${productId}`, {
+      method: "PUT",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(productData),
+    });
+  }
+  

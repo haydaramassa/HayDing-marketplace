@@ -1,6 +1,5 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { LanguageProvider } from "./context/LanguageContext";
-
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -9,6 +8,7 @@ import MyProducts from "./pages/MyProducts";
 import Products from "./pages/Products";
 import ProductDetails from "./pages/ProductDetails";
 import Favorites from "./pages/Favorites";
+import EditProduct from "./pages/EditProduct";
 
 function App() {
   return (
@@ -23,6 +23,7 @@ function App() {
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/products" element={<Products />} />
           <Route path="/products/:productId" element={<ProductDetails />} />
+          <Route path="/edit-product/:productId" element={<EditProduct />} />
         </Routes>
       </BrowserRouter>
     </LanguageProvider>
