@@ -86,16 +86,17 @@ function EditProduct() {
     setIsSaving(true);
 
     try {
-      await updateProduct(productId, {
-        title: formData.title,
-        description: formData.description,
-        price: Number(formData.price),
-        city: formData.city,
-        conditionStatus: formData.conditionStatus,
-        productStatus: formData.productStatus,
-        categoryId: Number(formData.categoryId),
-        imageUrls: [],
-      });
+        await updateProduct(productId, {
+            title: formData.title,
+            description: formData.description,
+            price: Number(formData.price),
+            city: formData.city,
+            conditionStatus: formData.conditionStatus,
+            productStatus: formData.productStatus,
+            categoryId: Number(formData.categoryId),
+          });
+       
+      
 
       setSuccessMessage(
         text(
@@ -195,7 +196,7 @@ function EditProduct() {
           )}
 
           {!isLoading && (
-            <form className="listing-form" onSubmit={handleSubmit}>
+            <form id="edit-product-form" className="listing-form" onSubmit={handleSubmit}>
               <section className="form-section">
                 <div className="form-section-header">
                   <span>1</span>
@@ -320,7 +321,12 @@ function EditProduct() {
                   {text("Abbrechen", "إلغاء", "Cancel")}
                 </Link>
 
-                <button className="btn btn-primary" type="submit" disabled={isSaving}>
+                <button
+                    className="btn btn-primary"
+                    type="submit"
+                    form="edit-product-form"
+                    disabled={isSaving}
+                    >
                   {isSaving
                     ? text("Wird gespeichert...", "جارٍ الحفظ...", "Saving...")
                     : text("Änderungen speichern", "حفظ التعديلات", "Save changes")}
