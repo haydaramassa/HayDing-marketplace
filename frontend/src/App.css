@@ -1698,3 +1698,95 @@ font-size: 1.05rem;
 .card-menu-list .danger:hover {
   background: rgba(184, 74, 61, 0.08);
 }
+
+/* Keep product cards clean with long text */
+.product-info h3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  min-height: 2.5em;
+}
+
+.product-info p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.my-management-card .product-info strong,
+.product-info strong {
+  display: block;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+
+/* Fix long text overflow in cards and product details */
+.product-info h3,
+.product-details-info h1,
+.details-section p {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.product-details-info h1 {
+  max-width: 100%;
+}
+
+.details-section p {
+  max-width: 100%;
+  white-space: pre-wrap;
+}
+
+.product-details-info {
+  overflow: hidden;
+}
+
+.product-details-layout {
+  overflow: hidden;
+}
+
+.details-meta strong {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Product details description scroll box */
+.details-section p {
+  max-height: 7.2em;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(248, 245, 239, 0.65);
+  line-height: 1.8;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.details-section p::-webkit-scrollbar {
+  width: 8px;
+}
+
+.details-section p::-webkit-scrollbar-track {
+  background: rgba(230, 222, 209, 0.55);
+  border-radius: 999px;
+}
+
+.details-section p::-webkit-scrollbar-thumb {
+  background: rgba(32, 38, 36, 0.28);
+  border-radius: 999px;
+}
+
+.details-section p::-webkit-scrollbar-thumb:hover {
+  background: rgba(32, 38, 36, 0.42);
+}
+
+.product-details-info h1,
+.details-meta strong {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
