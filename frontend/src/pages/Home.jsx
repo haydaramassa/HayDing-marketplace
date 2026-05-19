@@ -1,17 +1,37 @@
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import "../App.css";
 
 function Home() {
-    const { language, setLanguage, isArabic } = useLanguage();
-    const navigate = useNavigate();
-    const isLoggedIn = Boolean(localStorage.getItem("hayding-token"));
+  const { language, setLanguage, isArabic } = useLanguage();
+  const navigate = useNavigate();
+  const isLoggedIn = Boolean(localStorage.getItem("hayding-token"));
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+  const accountMenuRef = useRef(null);
 
-function handleLogout() {
-  localStorage.removeItem("hayding-token");
-  localStorage.removeItem("hayding-user");
-  navigate("/");
-}
+    useEffect(() => {
+  function handleClickOutside(event) {
+    if (
+      accountMenuRef.current &&
+      !accountMenuRef.current.contains(event.target)
+    ) {
+      setIsAccountMenuOpen(false);
+    }
+  }
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+    }, []);
+
+  function handleLogout() {
+    localStorage.removeItem("hayding-token");
+    localStorage.removeItem("hayding-user");
+    navigate("/");
+  }
 
   const content = {
     DE: {
@@ -32,7 +52,7 @@ function handleLogout() {
       statMarketTitle: "Deutschland",
       statMarketText: "Startmarkt",
       statLanguagesTitle: "3 Sprachen",
-      statLanguagesText: "DE · AR · EN",
+      statLanguagesText: "DE · EN · AR",
       statAccountTitle: "Ein Konto",
       statAccountText: "Kaufen & verkaufen",
       newAd: "Neue Anzeige",
@@ -103,7 +123,7 @@ function handleLogout() {
       statMarketTitle: "ألمانيا",
       statMarketText: "السوق الأول",
       statLanguagesTitle: "3 لغات",
-      statLanguagesText: "DE · AR · EN",
+      statLanguagesText: "DE · EN · AR",
       statAccountTitle: "حساب واحد",
       statAccountText: "للبيع والشراء",
       newAd: "إعلان جديد",
@@ -170,7 +190,7 @@ function handleLogout() {
       statMarketTitle: "Germany",
       statMarketText: "First market",
       statLanguagesTitle: "3 languages",
-      statLanguagesText: "DE · AR · EN",
+      statLanguagesText: "DE · EN · AR",
       statAccountTitle: "One account",
       statAccountText: "Buy & sell",
       newAd: "New listing",
@@ -238,7 +258,7 @@ function handleLogout() {
 
         <div className="nav-actions">
           <div className="language-switcher" aria-label="Language switcher">
-            {["DE", "AR", "EN"].map((lang) => (
+            {["DE", "EN", "AR"].map((lang) => (
               <button
                 className={`language-btn ${language === lang ? "active" : ""}`}
                 type="button"
@@ -252,46 +272,78 @@ function handleLogout() {
           </div>
 
           {isLoggedIn ? (
- <>
- <Link className="btn btn-secondary" to="/my-products">
-   {isArabic
-     ? "إعلاناتي"
-     : language === "EN"
-       ? "My listings"
-       : "Meine Anzeigen"}
- </Link>
+            <>
+              <Link className="btn btn-primary nav-create-btn" to="/create-product">
+                {t.createAd}
+              </Link>
 
- <Link className="btn btn-secondary" to="/favorites">
-   {isArabic
-     ? "المفضلة"
-     : language === "EN"
-       ? "Favorites"
-       : "Favoriten"}
- </Link>
+              <div
+  className={`account-menu ${isAccountMenuOpen ? "open" : ""}`}
+  ref={accountMenuRef}
+>
+  <button
+    className="account-menu-button"
+    type="button"
+    onClick={() => setIsAccountMenuOpen((current) => !current)}
+    aria-expanded={isAccountMenuOpen}
+  >
+    <span>
+      {isArabic
+        ? "حسابي"
+        : language === "EN"
+          ? "My account"
+          : "Mein Konto"}
+    </span>
 
- <Link className="btn btn-primary" to="/create-product">
-   {t.createAd}
- </Link>
+    <span className="account-menu-chevron" aria-hidden="true">
+      ▾
+    </span>
+  </button>
 
- <button className="btn btn-secondary logout-btn" type="button" onClick={handleLogout}>
-   {isArabic
-     ? "تسجيل الخروج"
-     : language === "EN"
-       ? "Logout"
-       : "Logout"}
- </button>
-</>
-) : (
-  <>
-    <Link className="btn btn-secondary" to="/login">
-      {t.login}
+  <div className="account-menu-list">
+    <Link to="/my-products" onClick={() => setIsAccountMenuOpen(false)}>
+      {isArabic
+        ? "إعلاناتي"
+        : language === "EN"
+          ? "My listings"
+          : "Meine Anzeigen"}
     </Link>
 
-    <Link className="btn btn-primary" to="/register">
-      {t.createAd}
+    <Link to="/favorites" onClick={() => setIsAccountMenuOpen(false)}>
+      {isArabic
+        ? "المفضلة"
+        : language === "EN"
+          ? "Favorites"
+          : "Favoriten"}
     </Link>
-  </>
-)}
+
+    <button
+      type="button"
+      onClick={() => {
+        setIsAccountMenuOpen(false);
+        handleLogout();
+      }}
+    >
+      {isArabic
+        ? "تسجيل الخروج"
+        : language === "EN"
+          ? "Logout"
+          : "Logout"}
+    </button>
+  </div>
+</div>
+            </>
+          ) : (
+            <>
+              <Link className="btn btn-secondary" to="/login">
+                {t.login}
+              </Link>
+
+              <Link className="btn btn-primary nav-create-btn" to="/register">
+                {t.createAd}
+              </Link>
+            </>
+          )}
         </div>
       </header>
 
@@ -329,10 +381,12 @@ function handleLogout() {
                 <strong>{t.statMarketTitle}</strong>
                 <span>{t.statMarketText}</span>
               </div>
+
               <div>
                 <strong>{t.statLanguagesTitle}</strong>
                 <span>{t.statLanguagesText}</span>
               </div>
+
               <div>
                 <strong>{t.statAccountTitle}</strong>
                 <span>{t.statAccountText}</span>
@@ -381,6 +435,7 @@ function handleLogout() {
             {t.products.map((product) => (
               <article className="product-card" key={product.title}>
                 <div className="product-image"></div>
+
                 <div className="product-info">
                   <span className="product-tag">{product.tag}</span>
                   <h3>{product.title}</h3>
