@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { getFavorites, removeFavorite } from "../services/api";
+import { getPrimaryProductImage } from "../utils/productImages";
 import "../App.css";
 
 function Favorites() {
@@ -98,7 +99,7 @@ function Favorites() {
 
         <div className="create-header-actions">
           <div className="language-switcher" aria-label="Language switcher">
-            {["DE", "AR", "EN"].map((lang) => (
+            {["DE", "EN", "AR"].map((lang) => (
               <button
                 className={`language-btn ${language === lang ? "active" : ""}`}
                 type="button"
@@ -190,47 +191,59 @@ function Favorites() {
 
         {!isLoading && !error && favorites.length > 0 && (
           <div className="my-products-grid">
-            {favorites.map((product) => (
-              <Link
-                className="product-card my-product-card product-card-link"
-                key={product.id}
-                to={`/products/${product.id}`}
-              >
-                <div className="product-image my-product-image">
-                  <button
-                    className="favorite-btn active"
-                    type="button"
-                    onClick={(event) =>
-                      handleRemoveFavorite(event, product.id)
-                    }
-                    disabled={removingId === product.id}
-                    aria-label={text(
-                      "Aus Favoriten entfernen",
-                      "إزالة من المفضلة",
-                      "Remove from favorites"
+            {favorites.map((product) => {
+              const imageUrl = getPrimaryProductImage(product);
+
+              return (
+                <Link
+                  className="product-card my-product-card product-card-link"
+                  key={product.id}
+                  to={`/products/${product.id}`}
+                >
+                  <div className="product-image my-product-image">
+                    {imageUrl && (
+                      <img
+                        className="product-real-image"
+                        src={imageUrl}
+                        alt={product.title}
+                      />
                     )}
-                  >
-                    ♥
-                  </button>
 
-                  <span className="image-counter">1/1</span>
-                </div>
+                    <button
+                      className="favorite-btn active"
+                      type="button"
+                      onClick={(event) =>
+                        handleRemoveFavorite(event, product.id)
+                      }
+                      disabled={removingId === product.id}
+                      aria-label={text(
+                        "Aus Favoriten entfernen",
+                        "إزالة من المفضلة",
+                        "Remove from favorites"
+                      )}
+                    >
+                      ♥
+                    </button>
 
-                <div className="product-info">
-                  <span className="product-tag">
-                    {product.conditionStatus ||
-                      product.condition ||
-                      text("Aktiv", "نشط", "Active")}
-                  </span>
+                    <span className="image-counter">1/1</span>
+                  </div>
 
-                  <h3>{product.title}</h3>
+                  <div className="product-info">
+                    <span className="product-tag">
+                      {product.conditionStatus ||
+                        product.condition ||
+                        text("Aktiv", "نشط", "Active")}
+                    </span>
 
-                  <p>{product.city}</p>
+                    <h3>{product.title}</h3>
 
-                  <strong>{product.price} €</strong>
-                </div>
-              </Link>
-            ))}
+                    <p>{product.city}</p>
+
+                    <strong>{product.price} €</strong>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         )}
       </main>
