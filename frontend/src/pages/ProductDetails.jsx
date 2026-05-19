@@ -8,6 +8,7 @@ import {
   getProductById,
   removeFavorite,
 } from "../services/api";
+import { getProductImages } from "../utils/productImages";
 import "../App.css";
 
 function ProductDetails() {
@@ -18,6 +19,7 @@ function ProductDetails() {
   const [product, setProduct] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
   const [error, setError] = useState("");
@@ -130,6 +132,9 @@ function ProductDetails() {
     }
   }
 
+  const productImages = getProductImages(product);
+  const selectedImage = productImages[selectedImageIndex] || "";
+
   return (
     <div
       className={`create-page ${isArabic ? "rtl" : ""}`}
@@ -207,19 +212,44 @@ function ProductDetails() {
                   {isFavorite ? "♥" : "♡"}
                 </button>
 
-                <span>📦</span>
+                {selectedImage ? (
+                  <img
+                    className="product-details-real-image"
+                    src={selectedImage}
+                    alt={product.title}
+                  />
+                ) : (
+                  <span>📦</span>
+                )}
               </div>
 
               <div className="product-thumbnails">
-                <button type="button" className="thumbnail active">
-                  📦
-                </button>
-                <button type="button" className="thumbnail">
-                  ＋
-                </button>
-                <button type="button" className="thumbnail">
-                  ＋
-                </button>
+                {productImages.length > 0 ? (
+                  productImages.slice(0, 3).map((imageUrl, index) => (
+                    <button
+                      type="button"
+                      className={`thumbnail ${
+                        selectedImageIndex === index ? "active" : ""
+                      }`}
+                      key={imageUrl}
+                      onClick={() => setSelectedImageIndex(index)}
+                    >
+                      <img src={imageUrl} alt={`${product.title} ${index + 1}`} />
+                    </button>
+                  ))
+                ) : (
+                  <>
+                    <button type="button" className="thumbnail active">
+                      📦
+                    </button>
+                    <button type="button" className="thumbnail">
+                      ＋
+                    </button>
+                    <button type="button" className="thumbnail">
+                      ＋
+                    </button>
+                  </>
+                )}
               </div>
             </section>
 

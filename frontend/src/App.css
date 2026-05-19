@@ -2190,3 +2190,31 @@ font-size: 1.05rem;
 .my-product-image .image-counter {
   z-index: 5;
 }
+
+/* Real product image in details page */
+.product-details-image {
+  position: relative;
+  overflow: hidden;
+}
+
+.product-details-real-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.thumbnail {
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
