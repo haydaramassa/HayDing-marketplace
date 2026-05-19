@@ -4,6 +4,7 @@ import { useLanguage } from "../context/LanguageContext";
 import {
   addFavorite,
   getFavorites,
+  getMyProducts,
   getProductById,
   removeFavorite,
 } from "../services/api";
@@ -16,6 +17,7 @@ function ProductDetails() {
 
   const [product, setProduct] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
   const [error, setError] = useState("");
@@ -69,6 +71,17 @@ function ProductDetails() {
             : [];
 
           setIsFavorite(favoriteIds.includes(normalizeId(productId)));
+
+          const myProductsData = await getMyProducts();
+          const myProducts = myProductsData?.data || myProductsData || [];
+
+          const ownsThisProduct = Array.isArray(myProducts)
+            ? myProducts.some(
+                (item) => normalizeId(item.id) === normalizeId(productId)
+              )
+            : false;
+
+          setIsOwner(ownsThisProduct);
         }
       } catch (err) {
         setError(
@@ -129,19 +142,19 @@ function ProductDetails() {
         </Link>
 
         <div className="create-header-actions">
-            <div className="language-switcher" aria-label="Language switcher">
-                {["DE", "EN", "AR"].map((lang) => (
-                    <button
-                    className={`language-btn ${language === lang ? "active" : ""}`}
-                    type="button"
-                    key={lang}
-                    onClick={() => setLanguage(lang)}
-                    aria-pressed={language === lang}
-                    >
-                    {lang}
-                    </button>
-                ))}
-             </div>
+          <div className="language-switcher" aria-label="Language switcher">
+            {["DE", "EN", "AR"].map((lang) => (
+              <button
+                className={`language-btn ${language === lang ? "active" : ""}`}
+                type="button"
+                key={lang}
+                onClick={() => setLanguage(lang)}
+                aria-pressed={language === lang}
+              >
+                {lang}
+              </button>
+            ))}
+          </div>
 
           <button
             className="btn btn-secondary"
@@ -259,6 +272,15 @@ function ProductDetails() {
                 <button className="btn btn-primary" type="button">
                   {text("Nachricht senden", "إرسال رسالة", "Send message")}
                 </button>
+
+                {isOwner && (
+                  <Link
+                    className="btn btn-secondary"
+                    to={`/edit-product/${product.id}`}
+                  >
+                    {text("Anzeige bearbeiten", "تعديل الإعلان", "Edit listing")}
+                  </Link>
+                )}
               </div>
             </section>
           </div>
