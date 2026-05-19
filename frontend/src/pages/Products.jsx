@@ -7,6 +7,7 @@ import {
   getProducts,
   removeFavorite,
 } from "../services/api";
+import { getPrimaryProductImage } from "../utils/productImages";
 import "../App.css";
 
 function Products() {
@@ -41,7 +42,7 @@ function Products() {
           const favorites = favoritesData?.data || favoritesData || [];
 
           const ids = Array.isArray(favorites)
-            ? favorites.map((item) => item.productId || item.id)
+            ? favorites.map((item) => item.productId || item.product?.id || item.id)
             : [];
 
           setFavoriteIds(ids);
@@ -113,7 +114,7 @@ function Products() {
 
         <div className="create-header-actions">
           <div className="language-switcher" aria-label="Language switcher">
-            {["DE", "AR", "EN"].map((lang) => (
+            {["DE", "EN", "AR"].map((lang) => (
               <button
                 className={`language-btn ${language === lang ? "active" : ""}`}
                 type="button"
@@ -194,6 +195,7 @@ function Products() {
             {products.map((product) => {
               const isFavorite = favoriteIds.includes(product.id);
               const isFavoriteLoading = favoriteLoadingId === product.id;
+              const imageUrl = getPrimaryProductImage(product);
 
               return (
                 <Link
@@ -202,10 +204,16 @@ function Products() {
                   to={`/products/${product.id}`}
                 >
                   <div className="product-image my-product-image">
+                    {imageUrl && (
+                      <img
+                        className="product-real-image"
+                        src={imageUrl}
+                        alt={product.title}
+                      />
+                    )}
+
                     <button
-                      className={`favorite-btn ${
-                        isFavorite ? "active" : ""
-                      }`}
+                      className={`favorite-btn ${isFavorite ? "active" : ""}`}
                       type="button"
                       onClick={(event) =>
                         handleFavoriteClick(event, product.id)
@@ -228,23 +236,7 @@ function Products() {
                       {isFavorite ? "♥" : "♡"}
                     </button>
 
-                    <button
-                      className="image-arrow image-arrow-left"
-                      type="button"
-                      aria-label="Previous image"
-                    >
-                      ‹
-                    </button>
-
                     <span className="image-counter">1/1</span>
-
-                    <button
-                      className="image-arrow image-arrow-right"
-                      type="button"
-                      aria-label="Next image"
-                    >
-                      ›
-                    </button>
                   </div>
 
                   <div className="product-info">

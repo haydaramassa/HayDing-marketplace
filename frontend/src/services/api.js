@@ -120,4 +120,37 @@ export function updateProduct(productId, productData) {
       body: JSON.stringify(productData),
     });
   }
+
+  export async function uploadProductImage(file) {
+    const token = localStorage.getItem("hayding-token");
   
+    const formData = new FormData();
+    formData.append("file", file);
+  
+    const response = await fetch(`${API_BASE_URL}/product-images/upload`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+  
+    let data = null;
+  
+    try {
+      data = await response.json();
+    } catch {
+      data = null;
+    }
+  
+    if (!response.ok) {
+      const message =
+        data?.message ||
+        data?.error ||
+        "Image upload failed. Please try again.";
+  
+      throw new Error(message);
+    }
+  
+    return data?.data || data;
+  }

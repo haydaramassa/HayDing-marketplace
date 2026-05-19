@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
-import { createProduct } from "../services/api";
+import { createProduct, uploadProductImage } from "../services/api";
 import "../App.css";
 
 function CreateProduct() {
@@ -18,7 +18,10 @@ function CreateProduct() {
     deliveryOption: "",
   });
 
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImagePreview, setSelectedImagePreview] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
@@ -57,6 +60,43 @@ function CreateProduct() {
     }));
   }
 
+  function handleImageChange(event) {
+    const file = event.target.files?.[0];
+
+    setError("");
+
+    if (!file) {
+      return;
+    }
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+    if (!allowedTypes.includes(file.type)) {
+      setError(
+        text(
+          "Bitte wähle ein JPG-, PNG- oder WEBP-Bild.",
+          "يرجى اختيار صورة JPG أو PNG أو WEBP.",
+          "Please choose a JPG, PNG or WEBP image."
+        )
+      );
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError(
+        text(
+          "Das Bild darf maximal 5MB groß sein.",
+          "يجب ألا يتجاوز حجم الصورة 5MB.",
+          "The image must be 5MB or smaller."
+        )
+      );
+      return;
+    }
+
+    setSelectedImage(file);
+    setSelectedImagePreview(URL.createObjectURL(file));
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
 
@@ -65,6 +105,14 @@ function CreateProduct() {
     setIsLoading(true);
 
     try {
+      let uploadedImageUrl = "";
+
+      if (selectedImage) {
+        setIsUploadingImage(true);
+        uploadedImageUrl = await uploadProductImage(selectedImage);
+        setIsUploadingImage(false);
+      }
+
       await createProduct({
         title: formData.title,
         description: formData.description,
@@ -72,7 +120,7 @@ function CreateProduct() {
         city: formData.city,
         conditionStatus: formData.conditionStatus,
         categoryId: Number(formData.categoryId),
-        imageUrls: [],
+        imageUrls: uploadedImageUrl ? [uploadedImageUrl] : [],
       });
 
       setMessage(
@@ -84,7 +132,7 @@ function CreateProduct() {
       );
 
       setTimeout(() => {
-        navigate("/");
+        navigate("/my-products");
       }, 900);
     } catch (err) {
       setError(
@@ -96,6 +144,7 @@ function CreateProduct() {
           )
       );
     } finally {
+      setIsUploadingImage(false);
       setIsLoading(false);
     }
   }
@@ -113,7 +162,7 @@ function CreateProduct() {
 
         <div className="create-header-actions">
           <div className="language-switcher" aria-label="Language switcher">
-            {["DE", "AR", "EN"].map((lang) => (
+            {["DE", "EN", "AR"].map((lang) => (
               <button
                 className={`language-btn ${language === lang ? "active" : ""}`}
                 type="button"
@@ -164,25 +213,51 @@ function CreateProduct() {
                   <h2>{text("Fotos", "الصور", "Photos")}</h2>
                   <p>
                     {text(
-                      "Zeige deinen Artikel von mehreren Seiten.",
-                      "اعرض الغرض من أكثر من زاوية.",
-                      "Show your item from multiple angles."
+                      "Zeige deinen Artikel mit einem echten Foto.",
+                      "اعرض الغرض بصورة حقيقية.",
+                      "Show your item with a real photo."
                     )}
                   </p>
                 </div>
               </div>
 
-              <div className="upload-box">
-                <div className="upload-icon">＋</div>
-                <h3>{text("Fotos hinzufügen", "إضافة صور", "Add photos")}</h3>
-                <p>
-                  {text(
-                    "Später verbinden wir dieses Feld mit echtem Upload.",
-                    "لاحقًا سنربط هذا المكان برفع صور فعلي.",
-                    "Later we will connect this area to real image upload."
-                  )}
+              <label className="upload-box upload-box-clickable">
+                {selectedImagePreview ? (
+                  <img
+                    className="upload-preview-image"
+                    src={selectedImagePreview}
+                    alt={text("Vorschau", "معاينة", "Preview")}
+                  />
+                ) : (
+                  <>
+                    <div className="upload-icon">＋</div>
+                    <h3>
+                      {text("Foto hinzufügen", "إضافة صورة", "Add photo")}
+                    </h3>
+                    <p>
+                      {text(
+                        "JPG, PNG oder WEBP bis maximal 5MB.",
+                        "JPG أو PNG أو WEBP حتى 5MB كحد أقصى.",
+                        "JPG, PNG or WEBP up to 5MB."
+                      )}
+                    </p>
+                  </>
+                )}
+
+                <input
+                  className="upload-input"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleImageChange}
+                />
+              </label>
+
+              {selectedImage && (
+                <p className="upload-file-name">
+                  {text("Ausgewählt:", "تم الاختيار:", "Selected:")}{" "}
+                  {selectedImage.name}
                 </p>
-              </div>
+              )}
             </section>
 
             <section className="form-section">
@@ -349,7 +424,11 @@ function CreateProduct() {
                       {text("Abholung", "استلام شخصي", "Pickup")}
                     </option>
                     <option value="shipping">
-                      {text("Versand möglich", "الشحن ممكن", "Shipping possible")}
+                      {text(
+                        "Versand möglich",
+                        "الشحن ممكن",
+                        "Shipping possible"
+                      )}
                     </option>
                     <option value="both">
                       {text("Beides möglich", "كلاهما ممكن", "Both possible")}
@@ -367,18 +446,24 @@ function CreateProduct() {
                 {text("Entwurf speichern", "حفظ كمسودة", "Save draft")}
               </button>
 
-              <button className="btn btn-primary" type="submit" disabled={isLoading}>
-                {isLoading
-                  ? text(
-                      "Wird veröffentlicht...",
-                      "جارٍ نشر الإعلان...",
-                      "Publishing..."
-                    )
-                  : text(
-                      "Anzeige veröffentlichen",
-                      "نشر الإعلان",
-                      "Publish listing"
-                    )}
+              <button
+                className="btn btn-primary"
+                type="submit"
+                disabled={isLoading}
+              >
+                {isUploadingImage
+                  ? text("Bild wird hochgeladen...", "جارٍ رفع الصورة...", "Uploading image...")
+                  : isLoading
+                    ? text(
+                        "Wird veröffentlicht...",
+                        "جارٍ نشر الإعلان...",
+                        "Publishing..."
+                      )
+                    : text(
+                        "Anzeige veröffentlichen",
+                        "نشر الإعلان",
+                        "Publish listing"
+                      )}
               </button>
             </div>
           </form>
@@ -388,7 +473,16 @@ function CreateProduct() {
           <p className="eyebrow">{text("Vorschau", "معاينة", "Preview")}</p>
 
           <div className="listing-preview-card">
-            <div className="listing-preview-image">📦</div>
+            <div className="listing-preview-image">
+              {selectedImagePreview ? (
+                <img
+                  src={selectedImagePreview}
+                  alt={text("Vorschau", "معاينة", "Preview")}
+                />
+              ) : (
+                "📦"
+              )}
+            </div>
 
             <div className="listing-preview-content">
               <span className="product-tag">
@@ -404,7 +498,9 @@ function CreateProduct() {
                   )}
               </h3>
 
-              <p>{formData.city || text("Deine Stadt", "مدينتك", "Your city")}</p>
+              <p>
+                {formData.city || text("Deine Stadt", "مدينتك", "Your city")}
+              </p>
 
               <strong>{formData.price ? `${formData.price} €` : "0 €"}</strong>
             </div>

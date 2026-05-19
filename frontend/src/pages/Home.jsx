@@ -278,60 +278,60 @@ function Home() {
               </Link>
 
               <div
-  className={`account-menu ${isAccountMenuOpen ? "open" : ""}`}
-  ref={accountMenuRef}
->
-  <button
-    className="account-menu-button"
-    type="button"
-    onClick={() => setIsAccountMenuOpen((current) => !current)}
-    aria-expanded={isAccountMenuOpen}
-  >
-    <span>
-      {isArabic
-        ? "حسابي"
-        : language === "EN"
-          ? "My account"
-          : "Mein Konto"}
-    </span>
+                className={`account-menu ${isAccountMenuOpen ? "open" : ""}`}
+                ref={accountMenuRef}
+                >
+                <button
+                    className="account-menu-button"
+                    type="button"
+                    onClick={() => setIsAccountMenuOpen((current) => !current)}
+                    aria-expanded={isAccountMenuOpen}
+                >
+                    <span>
+                    {isArabic
+                        ? "حسابي"
+                        : language === "EN"
+                        ? "My account"
+                        : "Mein Konto"}
+                    </span>
 
-    <span className="account-menu-chevron" aria-hidden="true">
-      ▾
-    </span>
-  </button>
+                    <span className="account-menu-chevron" aria-hidden="true">
+                    ▾
+                    </span>
+                </button>
 
-  <div className="account-menu-list">
-    <Link to="/my-products" onClick={() => setIsAccountMenuOpen(false)}>
-      {isArabic
-        ? "إعلاناتي"
-        : language === "EN"
-          ? "My listings"
-          : "Meine Anzeigen"}
-    </Link>
+                <div className="account-menu-list">
+                    <Link to="/my-products" onClick={() => setIsAccountMenuOpen(false)}>
+                    {isArabic
+                        ? "إعلاناتي"
+                        : language === "EN"
+                        ? "My listings"
+                        : "Meine Anzeigen"}
+                    </Link>
 
-    <Link to="/favorites" onClick={() => setIsAccountMenuOpen(false)}>
-      {isArabic
-        ? "المفضلة"
-        : language === "EN"
-          ? "Favorites"
-          : "Favoriten"}
-    </Link>
+                    <Link to="/favorites" onClick={() => setIsAccountMenuOpen(false)}>
+                    {isArabic
+                        ? "المفضلة"
+                        : language === "EN"
+                        ? "Favorites"
+                        : "Favoriten"}
+                    </Link>
 
-    <button
-      type="button"
-      onClick={() => {
-        setIsAccountMenuOpen(false);
-        handleLogout();
-      }}
-    >
-      {isArabic
-        ? "تسجيل الخروج"
-        : language === "EN"
-          ? "Logout"
-          : "Logout"}
-    </button>
-  </div>
-</div>
+                    <button
+                    type="button"
+                    onClick={() => {
+                        setIsAccountMenuOpen(false);
+                        handleLogout();
+                    }}
+                    >
+                    {isArabic
+                        ? "تسجيل الخروج"
+                        : language === "EN"
+                        ? "Logout"
+                        : "Logout"}
+                    </button>
+                </div>
+            </div>
             </>
           ) : (
             <>
