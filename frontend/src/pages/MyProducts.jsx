@@ -6,7 +6,10 @@ import {
   getMyProducts,
   markProductAsSold,
 } from "../services/api";
-import { getPrimaryProductImage } from "../utils/productImages";
+import {
+  getPrimaryProductImage,
+  getProductImages,
+} from "../utils/productImages";
 import "../App.css";
 
 function MyProducts() {
@@ -264,6 +267,7 @@ function MyProducts() {
           <div className="my-products-grid">
             {products.map((product) => {
               const imageUrl = getPrimaryProductImage(product);
+              const imageCount = getProductImages(product).length;
 
               return (
                 <article
@@ -354,7 +358,11 @@ function MyProducts() {
                         />
                       )}
 
-                      <span className="image-counter">1/1</span>
+                      {imageCount > 0 && (
+                        <span className="image-counter">
+                          1/{imageCount}
+                        </span>
+                      )}
                     </div>
 
                     <div className="product-info">

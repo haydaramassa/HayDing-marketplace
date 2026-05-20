@@ -7,7 +7,10 @@ import {
   getProducts,
   removeFavorite,
 } from "../services/api";
-import { getPrimaryProductImage } from "../utils/productImages";
+import {
+  getPrimaryProductImage,
+  getProductImages,
+} from "../utils/productImages";
 import "../App.css";
 
 function Products() {
@@ -42,7 +45,9 @@ function Products() {
           const favorites = favoritesData?.data || favoritesData || [];
 
           const ids = Array.isArray(favorites)
-            ? favorites.map((item) => item.productId || item.product?.id || item.id)
+            ? favorites.map(
+                (item) => item.productId || item.product?.id || item.id
+              )
             : [];
 
           setFavoriteIds(ids);
@@ -196,6 +201,7 @@ function Products() {
               const isFavorite = favoriteIds.includes(product.id);
               const isFavoriteLoading = favoriteLoadingId === product.id;
               const imageUrl = getPrimaryProductImage(product);
+              const imageCount = getProductImages(product).length;
 
               return (
                 <Link
@@ -236,7 +242,9 @@ function Products() {
                       {isFavorite ? "♥" : "♡"}
                     </button>
 
-                    <span className="image-counter">1/1</span>
+                    {imageCount > 0 && (
+                      <span className="image-counter">1/{imageCount}</span>
+                    )}
                   </div>
 
                   <div className="product-info">
