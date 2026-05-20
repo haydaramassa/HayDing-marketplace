@@ -6,10 +6,7 @@ import {
   getMyProducts,
   markProductAsSold,
 } from "../services/api";
-import {
-  getPrimaryProductImage,
-  getProductImages,
-} from "../utils/productImages";
+import ProductCardImage from "../components/ProductCardImage";
 import "../App.css";
 
 function MyProducts() {
@@ -265,133 +262,114 @@ function MyProducts() {
 
         {!isLoading && !error && products.length > 0 && (
           <div className="my-products-grid">
-            {products.map((product) => {
-              const imageUrl = getPrimaryProductImage(product);
-              const imageCount = getProductImages(product).length;
-
-              return (
-                <article
-                  className="product-card my-product-card my-management-card"
-                  key={product.id}
+            {products.map((product) => (
+              <article
+                className="product-card my-product-card my-management-card"
+                key={product.id}
+              >
+                <div
+                  className={`card-menu ${
+                    openMenuId === product.id ? "open" : ""
+                  }`}
+                  ref={(element) => {
+                    menuRefs.current[product.id] = element;
+                  }}
                 >
-                  <div
-                    className={`card-menu ${
-                      openMenuId === product.id ? "open" : ""
-                    }`}
-                    ref={(element) => {
-                      menuRefs.current[product.id] = element;
+                  <button
+                    className="card-menu-button"
+                    type="button"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      setOpenMenuId((currentId) =>
+                        currentId === product.id ? null : product.id
+                      );
                     }}
+                    aria-label={text("Aktionen", "خيارات", "Actions")}
+                    aria-expanded={openMenuId === product.id}
                   >
+                    ⋯
+                  </button>
+
+                  <div className="card-menu-list">
+                    <Link
+                      to={`/products/${product.id}`}
+                      onClick={() => setOpenMenuId(null)}
+                    >
+                      {text("Ansehen", "عرض", "View")}
+                    </Link>
+
+                    <Link
+                      to={`/edit-product/${product.id}`}
+                      onClick={() => setOpenMenuId(null)}
+                    >
+                      {text("Bearbeiten", "تعديل", "Edit")}
+                    </Link>
+
                     <button
-                      className="card-menu-button"
                       type="button"
                       onClick={(event) => {
                         event.preventDefault();
                         event.stopPropagation();
-                        setOpenMenuId((currentId) =>
-                          currentId === product.id ? null : product.id
-                        );
+                        setOpenMenuId(null);
+                        handleMarkAsSold(product.id);
                       }}
-                      aria-label={text("Aktionen", "خيارات", "Actions")}
-                      aria-expanded={openMenuId === product.id}
+                      disabled={product.productStatus === "SOLD"}
                     >
-                      ⋯
+                      {text(
+                        "Als verkauft markieren",
+                        "تحديد كمباع",
+                        "Mark as sold"
+                      )}
                     </button>
 
-                    <div className="card-menu-list">
-                      <Link
-                        to={`/products/${product.id}`}
-                        onClick={() => setOpenMenuId(null)}
-                      >
-                        {text("Ansehen", "عرض", "View")}
-                      </Link>
-
-                      <Link
-                        to={`/edit-product/${product.id}`}
-                        onClick={() => setOpenMenuId(null)}
-                      >
-                        {text("Bearbeiten", "تعديل", "Edit")}
-                      </Link>
-
-                      <button
-                        type="button"
-                        onClick={(event) => {
-                          event.preventDefault();
-                          event.stopPropagation();
-                          setOpenMenuId(null);
-                          handleMarkAsSold(product.id);
-                        }}
-                        disabled={product.productStatus === "SOLD"}
-                      >
-                        {text(
-                          "Als verkauft markieren",
-                          "تحديد كمباع",
-                          "Mark as sold"
-                        )}
-                      </button>
-
-                      <button
-                        className="danger"
-                        type="button"
-                        onClick={(event) => {
-                          event.preventDefault();
-                          event.stopPropagation();
-                          setOpenMenuId(null);
-                          handleDelete(product.id);
-                        }}
-                      >
-                        {text("Löschen", "حذف", "Delete")}
-                      </button>
-                    </div>
+                    <button
+                      className="danger"
+                      type="button"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        setOpenMenuId(null);
+                        handleDelete(product.id);
+                      }}
+                    >
+                      {text("Löschen", "حذف", "Delete")}
+                    </button>
                   </div>
+                </div>
 
-                  <Link
-                    className="product-card-link"
-                    to={`/products/${product.id}`}
-                  >
-                    <div className="product-image my-product-image">
-                      {imageUrl && (
-                        <img
-                          className="product-real-image"
-                          src={imageUrl}
-                          alt={product.title}
-                        />
-                      )}
+                <Link
+                  className="product-card-link"
+                  to={`/products/${product.id}`}
+                >
+                  <ProductCardImage product={product} />
 
-                      {imageCount > 0 && (
-                        <span className="image-counter">
-                          1/{imageCount}
-                        </span>
-                      )}
+                  <div className="product-info">
+                    <div className="product-card-tags">
+                      <span className="product-tag">
+                        {getConditionLabel(
+                          product.conditionStatus || product.condition
+                        )}
+                      </span>
+
+                      <span
+                        className={`status-pill status-${(
+                          product.productStatus || "ACTIVE"
+                        ).toLowerCase()}`}
+                      >
+                        {getStatusLabel(product.productStatus)}
+                      </span>
                     </div>
 
-                    <div className="product-info">
-                      <div className="product-card-tags">
-                        <span className="product-tag">
-                          {getConditionLabel(
-                            product.conditionStatus || product.condition
-                          )}
-                        </span>
+                    <h3>{product.title}</h3>
 
-                        <span
-                          className={`status-pill status-${(
-                            product.productStatus || "ACTIVE"
-                          ).toLowerCase()}`}
-                        >
-                          {getStatusLabel(product.productStatus)}
-                        </span>
-                      </div>
+                    <p>{product.city}</p>
 
-                      <h3>{product.title}</h3>
-
-                      <p>{product.city}</p>
-
-                      <strong>{product.price} €</strong>
-                    </div>
-                  </Link>
-                </article>
-              );
-            })}
+                    <strong>{product.price} €</strong>
+                  </div>
+                </Link>
+              </article>
+            ))}
           </div>
         )}
       </main>
