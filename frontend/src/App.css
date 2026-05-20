@@ -2398,3 +2398,60 @@ font-size: 1.05rem;
   }
 }
 
+/* Card image carousel arrows */
+.card-image-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 6;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.84);
+  color: var(--primary);
+  display: grid;
+  place-items: center;
+  font-size: 1.6rem;
+  line-height: 1;
+  transform: translateY(-50%);
+  box-shadow: 0 12px 28px rgba(32, 38, 36, 0.16);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.product-card:hover .card-image-arrow {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.card-image-arrow:hover {
+  background: #ffffff;
+  transform: translateY(-50%) scale(1.04);
+  box-shadow: 0 16px 36px rgba(32, 38, 36, 0.22);
+}
+
+.card-image-arrow-left {
+  left: 12px;
+}
+
+.card-image-arrow-right {
+  right: 12px;
+}
+
+.rtl .card-image-arrow-left {
+  left: auto;
+  right: 12px;
+}
+
+.rtl .card-image-arrow-right {
+  right: auto;
+  left: 12px;
+}
+
