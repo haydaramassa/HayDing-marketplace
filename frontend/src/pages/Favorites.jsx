@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { getFavorites, removeFavorite } from "../services/api";
-import { getPrimaryProductImage } from "../utils/productImages";
+import ProductCardImage from "../components/ProductCardImage";
 import "../App.css";
 
 function Favorites() {
@@ -191,59 +191,45 @@ function Favorites() {
 
         {!isLoading && !error && favorites.length > 0 && (
           <div className="my-products-grid">
-            {favorites.map((product) => {
-              const imageUrl = getPrimaryProductImage(product);
-
-              return (
-                <Link
-                  className="product-card my-product-card product-card-link"
-                  key={product.id}
-                  to={`/products/${product.id}`}
-                >
-                  <div className="product-image my-product-image">
-                    {imageUrl && (
-                      <img
-                        className="product-real-image"
-                        src={imageUrl}
-                        alt={product.title}
-                      />
+            {favorites.map((product) => (
+              <Link
+                className="product-card my-product-card product-card-link"
+                key={product.id}
+                to={`/products/${product.id}`}
+              >
+                <ProductCardImage product={product}>
+                  <button
+                    className="favorite-btn active"
+                    type="button"
+                    onClick={(event) =>
+                      handleRemoveFavorite(event, product.id)
+                    }
+                    disabled={removingId === product.id}
+                    aria-label={text(
+                      "Aus Favoriten entfernen",
+                      "إزالة من المفضلة",
+                      "Remove from favorites"
                     )}
+                  >
+                    ♥
+                  </button>
+                </ProductCardImage>
 
-                    <button
-                      className="favorite-btn active"
-                      type="button"
-                      onClick={(event) =>
-                        handleRemoveFavorite(event, product.id)
-                      }
-                      disabled={removingId === product.id}
-                      aria-label={text(
-                        "Aus Favoriten entfernen",
-                        "إزالة من المفضلة",
-                        "Remove from favorites"
-                      )}
-                    >
-                      ♥
-                    </button>
+                <div className="product-info">
+                  <span className="product-tag">
+                    {product.conditionStatus ||
+                      product.condition ||
+                      text("Aktiv", "نشط", "Active")}
+                  </span>
 
-                    <span className="image-counter">1/1</span>
-                  </div>
+                  <h3>{product.title}</h3>
 
-                  <div className="product-info">
-                    <span className="product-tag">
-                      {product.conditionStatus ||
-                        product.condition ||
-                        text("Aktiv", "نشط", "Active")}
-                    </span>
+                  <p>{product.city}</p>
 
-                    <h3>{product.title}</h3>
-
-                    <p>{product.city}</p>
-
-                    <strong>{product.price} €</strong>
-                  </div>
-                </Link>
-              );
-            })}
+                  <strong>{product.price} €</strong>
+                </div>
+              </Link>
+            ))}
           </div>
         )}
       </main>
