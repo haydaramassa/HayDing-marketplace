@@ -1,6 +1,6 @@
 const API_ORIGIN = "http://localhost:8080";
 
-export function getProductImages(product) {
+export function getProductImagePaths(product) {
   const rawImages = product?.images || product?.imageUrls || [];
 
   if (!Array.isArray(rawImages)) {
@@ -15,14 +15,17 @@ export function getProductImages(product) {
 
       return image?.imageUrl || image?.url || "";
     })
-    .filter(Boolean)
-    .map((url) => {
-      if (url.startsWith("http")) {
-        return url;
-      }
+    .filter(Boolean);
+}
 
-      return `${API_ORIGIN}${url}`;
-    });
+export function getProductImages(product) {
+  return getProductImagePaths(product).map((url) => {
+    if (url.startsWith("http")) {
+      return url;
+    }
+
+    return `${API_ORIGIN}${url}`;
+  });
 }
 
 export function getPrimaryProductImage(product) {
