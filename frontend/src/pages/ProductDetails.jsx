@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import {
   addFavorite,
+  createOrGetConversation,
   getFavorites,
   getMyProducts,
   getProductById,
@@ -23,6 +24,7 @@ function ProductDetails() {
   const [isLoading, setIsLoading] = useState(true);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isStartingConversation, setIsStartingConversation] = useState(false);
 
   function text(de, ar, en) {
     if (isArabic) return ar;
@@ -129,6 +131,44 @@ function ProductDetails() {
       );
     } finally {
       setFavoriteLoading(false);
+    }
+  }
+
+  async function handleStartConversation() {
+    if (!isLoggedIn()) {
+      navigate("/login");
+      return;
+    }
+  
+    try {
+      setIsStartingConversation(true);
+  
+      const data = await createOrGetConversation(productId);
+      const conversation = data?.data || data;
+      const conversationId = conversation?.id || conversation?.conversationId;
+  
+      if (!conversationId) {
+        throw new Error(
+          text(
+            "Konversation konnte nicht gestartet werden.",
+            "تعذر بدء المحادثة.",
+            "Could not start conversation."
+          )
+        );
+      }
+  
+      navigate(`/conversations/${conversationId}`);
+    } catch (err) {
+      setError(
+        err.message ||
+          text(
+            "Konversation konnte nicht gestartet werden.",
+            "تعذر بدء المحادثة.",
+            "Could not start conversation."
+          )
+      );
+    } finally {
+      setIsStartingConversation(false);
     }
   }
 
@@ -353,9 +393,18 @@ function ProductDetails() {
               </div>
 
               <div className="details-actions">
-                <button className="btn btn-primary" type="button">
-                  {text("Nachricht senden", "إرسال رسالة", "Send message")}
+              {!isOwner && (
+                <button
+                  className="btn btn-primary"
+                  type="button"
+                  onClick={handleStartConversation}
+                  disabled={isStartingConversation}
+                >
+                  {isStartingConversation
+                    ? text("Wird geöffnet...", "جارٍ الفتح...", "Opening...")
+                    : text("Nachricht senden", "إرسال رسالة", "Send message")}
                 </button>
+              )}
 
                 {isOwner && (
                   <Link

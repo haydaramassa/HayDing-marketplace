@@ -9,6 +9,7 @@ import Products from "./pages/Products";
 import ProductDetails from "./pages/ProductDetails";
 import Favorites from "./pages/Favorites";
 import EditProduct from "./pages/EditProduct";
+import ConversationDetails from "./pages/ConversationDetails";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route path="/products" element={<Products />} />
           <Route path="/products/:productId" element={<ProductDetails />} />
           <Route path="/edit-product/:productId" element={<EditProduct />} />
+          <Route path="/conversations/:conversationId" element={<ConversationDetails />} />
         </Routes>
       </BrowserRouter>
     </LanguageProvider>

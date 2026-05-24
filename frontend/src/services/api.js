@@ -154,3 +154,36 @@ export function updateProduct(productId, productData) {
   
     return data?.data || data;
   }
+  export function createOrGetConversation(productId) {
+    return request("/conversations", {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({
+        productId: Number(productId),
+      }),
+    });
+  }
+  
+  export function getConversations() {
+    return request("/conversations", {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+  }
+  
+  export function getConversationMessages(conversationId) {
+    return request(`/conversations/${conversationId}/messages`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+  }
+  
+  export function sendConversationMessage(conversationId, content) {
+    return request(`/conversations/${conversationId}/messages`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({
+        content,
+      }),
+    });
+  }
