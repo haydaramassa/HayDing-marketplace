@@ -23,8 +23,8 @@ function ProductDetails() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
-  const [error, setError] = useState("");
   const [isStartingConversation, setIsStartingConversation] = useState(false);
+  const [error, setError] = useState("");
 
   function text(de, ar, en) {
     if (isArabic) return ar;
@@ -53,6 +53,20 @@ function ProductDetails() {
       labels[conditionStatus] ||
       conditionStatus ||
       text("Nicht angegeben", "غير محدد", "Not specified")
+    );
+  }
+
+  function getSellerInitials(seller) {
+    const name = seller?.fullName || seller?.email || "?";
+
+    return (
+      name
+        .trim()
+        .split(" ")
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0]?.toUpperCase())
+        .join("") || "?"
     );
   }
 
@@ -139,14 +153,14 @@ function ProductDetails() {
       navigate("/login");
       return;
     }
-  
+
     try {
       setIsStartingConversation(true);
-  
+
       const data = await createOrGetConversation(productId);
       const conversation = data?.data || data;
       const conversationId = conversation?.id || conversation?.conversationId;
-  
+
       if (!conversationId) {
         throw new Error(
           text(
@@ -156,7 +170,7 @@ function ProductDetails() {
           )
         );
       }
-  
+
       navigate(`/conversations/${conversationId}`);
     } catch (err) {
       setError(
@@ -175,6 +189,7 @@ function ProductDetails() {
   const productImages = getProductImages(product);
   const selectedImage = productImages[selectedImageIndex] || "";
   const hasMultipleImages = productImages.length > 1;
+  const seller = product?.seller;
 
   function goToPreviousImage() {
     if (!hasMultipleImages) return;
@@ -380,6 +395,30 @@ function ProductDetails() {
                 </div>
               </div>
 
+              {seller && (
+                <div className="seller-card">
+                  <div className="seller-avatar">
+                    {getSellerInitials(seller)}
+                  </div>
+
+                  <div>
+                    <span>{text("Verkäufer", "البائع", "Seller")}</span>
+                    <strong>
+                      {seller.fullName ||
+                        text("Unbekannt", "غير معروف", "Unknown")}
+                    </strong>
+                    <p>
+                      {seller.city ||
+                        text(
+                          "Ort nicht angegeben",
+                          "المدينة غير محددة",
+                          "City not specified"
+                        )}
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <div className="details-section">
                 <h2>{text("Beschreibung", "الوصف", "Description")}</h2>
                 <p>
@@ -393,18 +432,18 @@ function ProductDetails() {
               </div>
 
               <div className="details-actions">
-              {!isOwner && (
-                <button
-                  className="btn btn-primary"
-                  type="button"
-                  onClick={handleStartConversation}
-                  disabled={isStartingConversation}
-                >
-                  {isStartingConversation
-                    ? text("Wird geöffnet...", "جارٍ الفتح...", "Opening...")
-                    : text("Nachricht senden", "إرسال رسالة", "Send message")}
-                </button>
-              )}
+                {!isOwner && (
+                  <button
+                    className="btn btn-primary"
+                    type="button"
+                    onClick={handleStartConversation}
+                    disabled={isStartingConversation}
+                  >
+                    {isStartingConversation
+                      ? text("Wird geöffnet...", "جارٍ الفتح...", "Opening...")
+                      : text("Nachricht senden", "إرسال رسالة", "Send message")}
+                  </button>
+                )}
 
                 {isOwner && (
                   <Link

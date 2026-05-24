@@ -30,6 +30,20 @@ function Products() {
     return Boolean(localStorage.getItem("hayding-token"));
   }
 
+  function getSellerInitials(seller) {
+    const name = seller?.fullName || seller?.email || "?";
+
+    return (
+      name
+        .trim()
+        .split(" ")
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part.charAt(0).toUpperCase())
+        .join("") || "?"
+    );
+  }
+
   useEffect(() => {
     async function loadProducts() {
       try {
@@ -175,6 +189,7 @@ function Products() {
         {!isLoading && !error && products.length === 0 && (
           <div className="empty-state">
             <div className="empty-icon">🔎</div>
+
             <h2>
               {text(
                 "Noch keine Anzeigen gefunden.",
@@ -182,6 +197,7 @@ function Products() {
                 "No listings found yet."
               )}
             </h2>
+
             <p>
               {text(
                 "Sobald neue Anzeigen veröffentlicht werden, erscheinen sie hier.",
@@ -242,6 +258,20 @@ function Products() {
                     <p>{product.city}</p>
 
                     <strong>{product.price} €</strong>
+
+                    {product.seller && (
+                      <div className="product-seller-mini">
+                        <div className="product-seller-mini-avatar">
+                          {getSellerInitials(product.seller)}
+                        </div>
+
+                        <span>
+                          {product.seller.fullName ||
+                            product.seller.email ||
+                            text("Unbekannt", "غير معروف", "Unknown")}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </Link>
               );
