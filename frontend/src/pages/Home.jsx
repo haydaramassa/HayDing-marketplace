@@ -7,25 +7,26 @@ function Home() {
   const { language, setLanguage, isArabic } = useLanguage();
   const navigate = useNavigate();
   const isLoggedIn = Boolean(localStorage.getItem("hayding-token"));
+
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const accountMenuRef = useRef(null);
 
-    useEffect(() => {
-  function handleClickOutside(event) {
-    if (
-      accountMenuRef.current &&
-      !accountMenuRef.current.contains(event.target)
-    ) {
-      setIsAccountMenuOpen(false);
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        accountMenuRef.current &&
+        !accountMenuRef.current.contains(event.target)
+      ) {
+        setIsAccountMenuOpen(false);
+      }
     }
-  }
 
-  document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
 
-  return () => {
-    document.removeEventListener("mousedown", handleClickOutside);
-  };
-    }, []);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   function handleLogout() {
     localStorage.removeItem("hayding-token");
@@ -280,58 +281,77 @@ function Home() {
               <div
                 className={`account-menu ${isAccountMenuOpen ? "open" : ""}`}
                 ref={accountMenuRef}
-                >
+              >
                 <button
-                    className="account-menu-button"
-                    type="button"
-                    onClick={() => setIsAccountMenuOpen((current) => !current)}
-                    aria-expanded={isAccountMenuOpen}
+                  className="account-menu-button"
+                  type="button"
+                  onClick={() =>
+                    setIsAccountMenuOpen((current) => !current)
+                  }
+                  aria-expanded={isAccountMenuOpen}
                 >
-                    <span>
+                  <span>
                     {isArabic
-                        ? "حسابي"
-                        : language === "EN"
+                      ? "حسابي"
+                      : language === "EN"
                         ? "My account"
                         : "Mein Konto"}
-                    </span>
+                  </span>
 
-                    <span className="account-menu-chevron" aria-hidden="true">
+                  <span className="account-menu-chevron" aria-hidden="true">
                     ▾
-                    </span>
+                  </span>
                 </button>
 
                 <div className="account-menu-list">
-                    <Link to="/my-products" onClick={() => setIsAccountMenuOpen(false)}>
+                  <Link
+                    to="/account"
+                    onClick={() => setIsAccountMenuOpen(false)}
+                  >
                     {isArabic
-                        ? "إعلاناتي"
-                        : language === "EN"
+                      ? "حسابي"
+                      : language === "EN"
+                        ? "Account"
+                        : "Konto"}
+                  </Link>
+
+                  <Link
+                    to="/my-products"
+                    onClick={() => setIsAccountMenuOpen(false)}
+                  >
+                    {isArabic
+                      ? "إعلاناتي"
+                      : language === "EN"
                         ? "My listings"
                         : "Meine Anzeigen"}
-                    </Link>
+                  </Link>
 
-                    <Link to="/favorites" onClick={() => setIsAccountMenuOpen(false)}>
+                  <Link
+                    to="/favorites"
+                    onClick={() => setIsAccountMenuOpen(false)}
+                  >
                     {isArabic
-                        ? "المفضلة"
-                        : language === "EN"
+                      ? "المفضلة"
+                      : language === "EN"
                         ? "Favorites"
                         : "Favoriten"}
-                    </Link>
+                  </Link>
 
-                    <button
+                  <button
                     type="button"
                     onClick={() => {
-                        setIsAccountMenuOpen(false);
-                        handleLogout();
+                      setIsAccountMenuOpen(false);
+                      handleLogout();
                     }}
-                    >
+                  >
                     {isArabic
-                        ? "تسجيل الخروج"
-                        : language === "EN"
+                      ? "تسجيل الخروج"
+                      : language === "EN"
                         ? "Logout"
                         : "Logout"}
-                    </button>
+                  </button>
                 </div>
-            </div>
+              </div>
             </>
           ) : (
             <>

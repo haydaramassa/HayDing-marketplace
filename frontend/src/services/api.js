@@ -187,3 +187,18 @@ export function updateProduct(productId, productData) {
       }),
     });
   }
+
+  export function getCurrentUserProfile() {
+    return request("/users/me", {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+  }
+  
+  export function updateCurrentUserProfile(profileData) {
+    return request("/users/me", {
+      method: "PUT",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(profileData),
+    });
+  }
