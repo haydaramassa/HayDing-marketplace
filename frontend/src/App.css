@@ -3395,3 +3395,57 @@ font-size: 1.05rem;
 .account-card .btn {
   padding: 11px 16px;
 }
+
+/* Global layout alignment polish */
+.navbar,
+.my-products-page,
+.product-details-page,
+.create-layout,
+.account-page,
+.conversations-page,
+.conversation-page {
+  width: min(1180px, calc(100% - 32px));
+}
+
+/* Make navbar align with page cards */
+.navbar {
+  max-width: 1180px;
+}
+
+/* Remove underline from HayDing logo link */
+.navbar .logo,
+.create-header .logo,
+.footer .logo {
+  text-decoration: none;
+}
+
+/* Keep page content visually aligned under navbar */
+.my-products-page,
+.product-details-page,
+.account-page,
+.conversations-page,
+.conversation-page {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Make account and conversations pages consistent with the rest */
+.account-page {
+  padding-top: 24px;
+}
+
+.conversations-page {
+  max-width: 1180px;
+}
+
+/* Slightly softer page header cards */
+.my-products-header,
+.account-hero,
+.create-title-block {
+  border-radius: 28px;
+}
+
+/* Better spacing between shared navbar and content */
+.create-page > .navbar {
+  margin-bottom: 24px;
+}
