@@ -11,6 +11,7 @@ import Favorites from "./pages/Favorites";
 import EditProduct from "./pages/EditProduct";
 import ConversationDetails from "./pages/ConversationDetails";
 import Account from "./pages/Account";
+import PublicUserProfile from "./pages/PublicUserProfile";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route path="/edit-product/:productId" element={<EditProduct />} />
           <Route path="/conversations/:conversationId" element={<ConversationDetails />} />
           <Route path="/account" element={<Account />} />
+          <Route path="/users/:userId" element={<PublicUserProfile />} />
         </Routes>
       </BrowserRouter>
     </LanguageProvider>

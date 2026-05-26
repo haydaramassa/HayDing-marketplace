@@ -202,3 +202,11 @@ export function updateProduct(productId, productData) {
       body: JSON.stringify(profileData),
     });
   }
+
+  export function getPublicUserProfile(userId) {
+    return request(`/public/users/${userId}`, {
+      method: "GET",
+    });
+  }
+
+  

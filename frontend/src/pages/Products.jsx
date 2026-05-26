@@ -259,8 +259,16 @@ function Products() {
 
                     <strong>{product.price} €</strong>
 
-                    {product.seller && (
-                      <div className="product-seller-mini">
+                    {product.seller?.id && (
+                      <button
+                        className="product-seller-mini product-seller-mini-button"
+                        type="button"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          navigate(`/users/${product.seller.id}`);
+                        }}
+                      >
                         <div className="product-seller-mini-avatar">
                           {getSellerInitials(product.seller)}
                         </div>
@@ -270,7 +278,7 @@ function Products() {
                             product.seller.email ||
                             text("Unbekannt", "غير معروف", "Unknown")}
                         </span>
-                      </div>
+                      </button>
                     )}
                   </div>
                 </Link>
