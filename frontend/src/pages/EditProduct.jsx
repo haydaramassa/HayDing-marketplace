@@ -10,12 +10,13 @@ import {
   getProductImagePaths,
   getProductImages,
 } from "../utils/productImages";
+import Navbar from "../components/Navbar";
 import "../App.css";
 
 function EditProduct() {
   const { productId } = useParams();
   const navigate = useNavigate();
-  const { isArabic, language, setLanguage } = useLanguage();
+  const { isArabic, language } = useLanguage();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -281,32 +282,7 @@ function EditProduct() {
       className={`create-page ${isArabic ? "rtl" : ""}`}
       dir={isArabic ? "rtl" : "ltr"}
     >
-      <header className="create-header">
-        <Link className="logo" to="/">
-          <span className="logo-mark">H</span>
-          <span>HayDing</span>
-        </Link>
-
-        <div className="create-header-actions">
-          <div className="language-switcher" aria-label="Language switcher">
-            {["DE", "EN", "AR"].map((lang) => (
-              <button
-                className={`language-btn ${language === lang ? "active" : ""}`}
-                type="button"
-                key={lang}
-                onClick={() => setLanguage(lang)}
-                aria-pressed={language === lang}
-              >
-                {lang}
-              </button>
-            ))}
-          </div>
-
-          <Link className="btn btn-secondary" to="/my-products">
-            {text("Meine Anzeigen", "إعلاناتي", "My listings")}
-          </Link>
-        </div>
-      </header>
+      <Navbar variant="app" />
 
       <main className="create-layout">
         <section className="create-main">
