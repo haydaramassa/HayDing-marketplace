@@ -3,10 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { getFavorites, removeFavorite } from "../services/api";
 import ProductCardImage from "../components/ProductCardImage";
+import Navbar from "../components/Navbar";
 import "../App.css";
 
 function Favorites() {
-  const { isArabic, language, setLanguage } = useLanguage();
+  const { isArabic, language } = useLanguage();
   const navigate = useNavigate();
 
   const [favorites, setFavorites] = useState([]);
@@ -91,36 +92,7 @@ function Favorites() {
       className={`create-page ${isArabic ? "rtl" : ""}`}
       dir={isArabic ? "rtl" : "ltr"}
     >
-      <header className="create-header">
-        <Link className="logo" to="/">
-          <span className="logo-mark">H</span>
-          <span>HayDing</span>
-        </Link>
-
-        <div className="create-header-actions">
-          <div className="language-switcher" aria-label="Language switcher">
-            {["DE", "EN", "AR"].map((lang) => (
-              <button
-                className={`language-btn ${language === lang ? "active" : ""}`}
-                type="button"
-                key={lang}
-                onClick={() => setLanguage(lang)}
-                aria-pressed={language === lang}
-              >
-                {lang}
-              </button>
-            ))}
-          </div>
-
-          <Link className="btn btn-secondary" to="/products">
-            {text("Entdecken", "استكشف", "Explore")}
-          </Link>
-
-          <Link className="btn btn-secondary" to="/">
-            {text("Zurück", "رجوع", "Back")}
-          </Link>
-        </div>
-      </header>
+      <Navbar variant="app" />
 
       <main className="my-products-page">
         <div className="my-products-header">
