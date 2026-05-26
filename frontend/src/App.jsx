@@ -9,6 +9,7 @@ import Products from "./pages/Products";
 import ProductDetails from "./pages/ProductDetails";
 import Favorites from "./pages/Favorites";
 import EditProduct from "./pages/EditProduct";
+import Conversations from "./pages/Conversations";
 import ConversationDetails from "./pages/ConversationDetails";
 import Account from "./pages/Account";
 import PublicUserProfile from "./pages/PublicUserProfile";
@@ -27,6 +28,7 @@ function App() {
           <Route path="/products" element={<Products />} />
           <Route path="/products/:productId" element={<ProductDetails />} />
           <Route path="/edit-product/:productId" element={<EditProduct />} />
+          <Route path="/conversations" element={<Conversations />} />
           <Route path="/conversations/:conversationId" element={<ConversationDetails />} />
           <Route path="/account" element={<Account />} />
           <Route path="/users/:userId" element={<PublicUserProfile />} />

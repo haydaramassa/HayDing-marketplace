@@ -316,6 +316,17 @@ function Home() {
                   </Link>
 
                   <Link
+                    to="/conversations"
+                    onClick={() => setIsAccountMenuOpen(false)}
+                  >
+                    {isArabic
+                      ? "الرسائل"
+                      : language === "EN"
+                        ? "Messages"
+                        : "Nachrichten"}
+                  </Link>
+
+                  <Link
                     to="/my-products"
                     onClick={() => setIsAccountMenuOpen(false)}
                   >
@@ -351,6 +362,8 @@ function Home() {
                         : "Logout"}
                   </button>
                 </div>
+
+
               </div>
             </>
           ) : (
