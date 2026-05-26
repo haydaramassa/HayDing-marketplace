@@ -396,28 +396,28 @@ function ProductDetails() {
               </div>
 
               {seller && (
-                <div className="seller-card">
-                  <div className="seller-avatar">
-                    {getSellerInitials(seller)}
-                  </div>
+                  <Link className="seller-card seller-card-link" to={`/users/${seller.id}`}>
+                    <div className="seller-avatar">
+                      {getSellerInitials(seller)}
+                    </div>
 
-                  <div>
-                    <span>{text("Verkäufer", "البائع", "Seller")}</span>
-                    <strong>
-                      {seller.fullName ||
-                        text("Unbekannt", "غير معروف", "Unknown")}
-                    </strong>
-                    <p>
-                      {seller.city ||
-                        text(
-                          "Ort nicht angegeben",
-                          "المدينة غير محددة",
-                          "City not specified"
-                        )}
-                    </p>
-                  </div>
-                </div>
-              )}
+                    <div>
+                      <span>{text("Verkäufer", "البائع", "Seller")}</span>
+                      <strong>
+                        {seller.fullName ||
+                          text("Unbekannt", "غير معروف", "Unknown")}
+                      </strong>
+                      <p>
+                        {seller.city ||
+                          text(
+                            "Ort nicht angegeben",
+                            "المدينة غير محددة",
+                            "City not specified"
+                          )}
+                      </p>
+                    </div>
+                  </Link>
+                )}
 
               <div className="details-section">
                 <h2>{text("Beschreibung", "الوصف", "Description")}</h2>
