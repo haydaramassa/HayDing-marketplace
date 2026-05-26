@@ -10,11 +10,12 @@ import {
   removeFavorite,
 } from "../services/api";
 import { getProductImages } from "../utils/productImages";
+import Navbar from "../components/Navbar";
 import "../App.css";
 
 function ProductDetails() {
   const { productId } = useParams();
-  const { isArabic, language, setLanguage } = useLanguage();
+  const { isArabic, language } = useLanguage();
   const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
@@ -212,36 +213,7 @@ function ProductDetails() {
       className={`create-page ${isArabic ? "rtl" : ""}`}
       dir={isArabic ? "rtl" : "ltr"}
     >
-      <header className="create-header">
-        <Link className="logo" to="/">
-          <span className="logo-mark">H</span>
-          <span>HayDing</span>
-        </Link>
-
-        <div className="create-header-actions">
-          <div className="language-switcher" aria-label="Language switcher">
-            {["DE", "EN", "AR"].map((lang) => (
-              <button
-                className={`language-btn ${language === lang ? "active" : ""}`}
-                type="button"
-                key={lang}
-                onClick={() => setLanguage(lang)}
-                aria-pressed={language === lang}
-              >
-                {lang}
-              </button>
-            ))}
-          </div>
-
-          <button
-            className="btn btn-secondary"
-            type="button"
-            onClick={() => navigate(-1)}
-          >
-            {text("Zurück", "رجوع", "Back")}
-          </button>
-        </div>
-      </header>
+      <Navbar variant="app" />
 
       <main className="product-details-page">
         {isLoading && (
@@ -396,31 +368,37 @@ function ProductDetails() {
               </div>
 
               {seller && (
-                  <Link className="seller-card seller-card-link" to={`/users/${seller.id}`}>
-                    <div className="seller-avatar">
-                      {getSellerInitials(seller)}
-                    </div>
+                <Link
+                  className="seller-card seller-card-link"
+                  to={`/users/${seller.id}`}
+                >
+                  <div className="seller-avatar">
+                    {getSellerInitials(seller)}
+                  </div>
 
-                    <div>
-                      <span>{text("Verkäufer", "البائع", "Seller")}</span>
-                      <strong>
-                        {seller.fullName ||
-                          text("Unbekannt", "غير معروف", "Unknown")}
-                      </strong>
-                      <p>
-                        {seller.city ||
-                          text(
-                            "Ort nicht angegeben",
-                            "المدينة غير محددة",
-                            "City not specified"
-                          )}
-                      </p>
-                    </div>
-                  </Link>
-                )}
+                  <div>
+                    <span>{text("Verkäufer", "البائع", "Seller")}</span>
+
+                    <strong>
+                      {seller.fullName ||
+                        text("Unbekannt", "غير معروف", "Unknown")}
+                    </strong>
+
+                    <p>
+                      {seller.city ||
+                        text(
+                          "Ort nicht angegeben",
+                          "المدينة غير محددة",
+                          "City not specified"
+                        )}
+                    </p>
+                  </div>
+                </Link>
+              )}
 
               <div className="details-section">
                 <h2>{text("Beschreibung", "الوصف", "Description")}</h2>
+
                 <p>
                   {product.description ||
                     text(
