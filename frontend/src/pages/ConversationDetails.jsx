@@ -6,12 +6,13 @@ import {
   getConversations,
   sendConversationMessage,
 } from "../services/api";
+import Navbar from "../components/Navbar";
 import "../App.css";
 
 function ConversationDetails() {
   const { conversationId } = useParams();
   const navigate = useNavigate();
-  const { isArabic, language, setLanguage } = useLanguage();
+  const { isArabic, language } = useLanguage();
 
   const [conversation, setConversation] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -215,32 +216,7 @@ function ConversationDetails() {
       className={`create-page ${isArabic ? "rtl" : ""}`}
       dir={isArabic ? "rtl" : "ltr"}
     >
-      <header className="create-header">
-        <Link className="logo" to="/">
-          <span className="logo-mark">H</span>
-          <span>HayDing</span>
-        </Link>
-
-        <div className="create-header-actions">
-          <div className="language-switcher" aria-label="Language switcher">
-            {["DE", "EN", "AR"].map((lang) => (
-              <button
-                className={`language-btn ${language === lang ? "active" : ""}`}
-                type="button"
-                key={lang}
-                onClick={() => setLanguage(lang)}
-                aria-pressed={language === lang}
-              >
-                {lang}
-              </button>
-            ))}
-          </div>
-
-          <Link className="btn btn-secondary" to="/conversations">
-            {text("Zurück", "رجوع", "Back")}
-          </Link>
-        </div>
-      </header>
+      <Navbar variant="app" />
 
       <main className="my-products-page conversation-page">
         <div className="my-products-header">
@@ -389,7 +365,7 @@ function ConversationDetails() {
                     "اكتب رسالة...",
                     "Write a message..."
                   )}
-                  rows="3"
+                  rows="2"
                 />
 
                 <button
