@@ -3339,3 +3339,59 @@ font-size: 1.05rem;
   min-height: 44px;
   padding-inline: 18px;
 }
+
+/* Compact account page */
+.account-page {
+  width: min(1080px, calc(100% - 32px));
+  padding: 24px 0 60px;
+}
+
+.account-hero {
+  padding: 22px 28px;
+  border-radius: 26px;
+  margin-bottom: 18px;
+}
+
+.account-hero h1 {
+  margin: 6px 0 8px;
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  letter-spacing: -0.055em;
+}
+
+.account-hero p {
+  font-size: 0.98rem;
+}
+
+.account-avatar {
+  width: 74px;
+  height: 74px;
+  border-radius: 22px;
+  font-size: 1.75rem;
+}
+
+.account-card {
+  padding: 22px 26px;
+  border-radius: 26px;
+}
+
+.account-card .form-grid {
+  gap: 14px;
+}
+
+.account-card .form-field {
+  gap: 6px;
+}
+
+.account-card .form-field input,
+.account-card .form-field select {
+  padding: 12px 15px;
+  border-radius: 16px;
+}
+
+.account-card .form-actions {
+  padding-top: 0;
+}
+
+.account-card .btn {
+  padding: 11px 16px;
+}

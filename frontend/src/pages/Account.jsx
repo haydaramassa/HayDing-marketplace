@@ -5,10 +5,11 @@ import {
   getCurrentUserProfile,
   updateCurrentUserProfile,
 } from "../services/api";
+import Navbar from "../components/Navbar";
 import "../App.css";
 
 function Account() {
-  const { isArabic, language, setLanguage } = useLanguage();
+  const { isArabic, language } = useLanguage();
   const navigate = useNavigate();
 
   const [profile, setProfile] = useState({
@@ -32,13 +33,15 @@ function Account() {
   function getInitials(nameOrEmail) {
     const source = nameOrEmail || profile.email || "H";
 
-    return source
-      .trim()
-      .split(" ")
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((part) => part[0]?.toUpperCase())
-      .join("") || "H";
+    return (
+      source
+        .trim()
+        .split(" ")
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0]?.toUpperCase())
+        .join("") || "H"
+    );
   }
 
   useEffect(() => {
@@ -151,32 +154,7 @@ function Account() {
       className={`create-page ${isArabic ? "rtl" : ""}`}
       dir={isArabic ? "rtl" : "ltr"}
     >
-      <header className="create-header">
-        <Link className="logo" to="/">
-          <span className="logo-mark">H</span>
-          <span>HayDing</span>
-        </Link>
-
-        <div className="create-header-actions">
-          <div className="language-switcher" aria-label="Language switcher">
-            {["DE", "EN", "AR"].map((lang) => (
-              <button
-                className={`language-btn ${language === lang ? "active" : ""}`}
-                type="button"
-                key={lang}
-                onClick={() => setLanguage(lang)}
-                aria-pressed={language === lang}
-              >
-                {lang}
-              </button>
-            ))}
-          </div>
-
-          <Link className="btn btn-secondary" to="/">
-            {text("Zurück", "رجوع", "Back")}
-          </Link>
-        </div>
-      </header>
+      <Navbar variant="app" />
 
       <main className="account-page">
         <section className="account-hero">
@@ -251,7 +229,11 @@ function Account() {
               </label>
 
               <label className="form-field">
-                {text("Bevorzugte Sprache", "اللغة المفضلة", "Preferred language")}
+                {text(
+                  "Bevorzugte Sprache",
+                  "اللغة المفضلة",
+                  "Preferred language"
+                )}
                 <select
                   name="preferredLanguage"
                   value={profile.preferredLanguage}
@@ -269,10 +251,18 @@ function Account() {
                 {text("Abbrechen", "إلغاء", "Cancel")}
               </Link>
 
-              <button className="btn btn-primary" type="submit" disabled={isSaving}>
+              <button
+                className="btn btn-primary"
+                type="submit"
+                disabled={isSaving}
+              >
                 {isSaving
                   ? text("Wird gespeichert...", "جارٍ الحفظ...", "Saving...")
-                  : text("Änderungen speichern", "حفظ التعديلات", "Save changes")}
+                  : text(
+                      "Änderungen speichern",
+                      "حفظ التعديلات",
+                      "Save changes"
+                    )}
               </button>
             </div>
           </form>
