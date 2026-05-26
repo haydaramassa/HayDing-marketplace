@@ -78,6 +78,26 @@ function ConversationDetails() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }
 
+  async function loadMessagesOnly(showError = false) {
+    try {
+      const messagesData = await getConversationMessages(conversationId);
+      const loadedMessages = messagesData?.data || messagesData || [];
+
+      setMessages(Array.isArray(loadedMessages) ? loadedMessages : []);
+    } catch (err) {
+      if (showError) {
+        setError(
+          err.message ||
+            text(
+              "Nachrichten konnten nicht geladen werden.",
+              "تعذر تحميل الرسائل.",
+              "Could not load messages."
+            )
+        );
+      }
+    }
+  }
+
   useEffect(() => {
     if (!localStorage.getItem("hayding-token")) {
       navigate("/login");
@@ -110,10 +130,7 @@ function ConversationDetails() {
 
         setConversation(selectedConversation);
 
-        const messagesData = await getConversationMessages(conversationId);
-        const loadedMessages = messagesData?.data || messagesData || [];
-
-        setMessages(Array.isArray(loadedMessages) ? loadedMessages : []);
+        await loadMessagesOnly(true);
       } catch (err) {
         setError(
           err.message ||
@@ -130,6 +147,20 @@ function ConversationDetails() {
 
     loadConversation();
   }, [conversationId, navigate]);
+
+  useEffect(() => {
+    if (!localStorage.getItem("hayding-token")) {
+      return;
+    }
+
+    const intervalId = setInterval(() => {
+      loadMessagesOnly(false);
+    }, 5000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [conversationId]);
 
   useEffect(() => {
     scrollToBottom();
@@ -156,6 +187,7 @@ function ConversationDetails() {
       }
 
       setMessageText("");
+      await loadMessagesOnly(false);
     } catch (err) {
       setError(
         err.message ||
@@ -172,6 +204,7 @@ function ConversationDetails() {
 
   const currentUser = getCurrentUser();
   const product = conversation?.product;
+
   const otherUser =
     Number(currentUser?.id) === Number(conversation?.buyer?.id)
       ? conversation?.seller
@@ -203,7 +236,7 @@ function ConversationDetails() {
             ))}
           </div>
 
-          <Link className="btn btn-secondary" to="/products">
+          <Link className="btn btn-secondary" to="/conversations">
             {text("Zurück", "رجوع", "Back")}
           </Link>
         </div>
