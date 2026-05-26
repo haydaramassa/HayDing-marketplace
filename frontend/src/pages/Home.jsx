@@ -1,46 +1,12 @@
-import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
+import Navbar from "../components/Navbar";
 import "../App.css";
 
 function Home() {
-  const { language, setLanguage, isArabic } = useLanguage();
-  const navigate = useNavigate();
-  const isLoggedIn = Boolean(localStorage.getItem("hayding-token"));
-
-  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
-  const accountMenuRef = useRef(null);
-
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (
-        accountMenuRef.current &&
-        !accountMenuRef.current.contains(event.target)
-      ) {
-        setIsAccountMenuOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  function handleLogout() {
-    localStorage.removeItem("hayding-token");
-    localStorage.removeItem("hayding-user");
-    navigate("/");
-  }
+  const { language, isArabic } = useLanguage();
 
   const content = {
     DE: {
-      navCategories: "Kategorien",
-      navHowItWorks: "So funktioniert's",
-      navExplore: "Entdecken",
-      login: "Login",
-      createAd: "Anzeige erstellen",
       eyebrow: "Marketplace für Deutschland",
       titleLine1: "Was du hast,",
       titleLine2: "sucht",
@@ -107,11 +73,6 @@ function Home() {
     },
 
     AR: {
-      navCategories: "الفئات",
-      navHowItWorks: "كيف يعمل",
-      navExplore: "استكشف",
-      login: "تسجيل الدخول",
-      createAd: "إضافة إعلان",
       eyebrow: "سوق إلكتروني في ألمانيا",
       titleLine1: "ما تملكه،",
       titleLine2: "يبحث عنه",
@@ -174,11 +135,6 @@ function Home() {
     },
 
     EN: {
-      navCategories: "Categories",
-      navHowItWorks: "How it works",
-      navExplore: "Explore",
-      login: "Login",
-      createAd: "Create listing",
       eyebrow: "Marketplace for Germany",
       titleLine1: "What you have,",
       titleLine2: "someone",
@@ -244,141 +200,11 @@ function Home() {
   const t = content[language];
 
   return (
-    <div className={`app ${isArabic ? "rtl" : ""}`} dir={isArabic ? "rtl" : "ltr"}>
-      <header className="navbar">
-        <div className="logo">
-          <span className="logo-mark">H</span>
-          <span>HayDing</span>
-        </div>
-
-        <nav className="nav-links">
-          <a href="#categories">{t.navCategories}</a>
-          <a href="#how-it-works">{t.navHowItWorks}</a>
-          <Link to="/products">{t.navExplore}</Link>
-        </nav>
-
-        <div className="nav-actions">
-          <div className="language-switcher" aria-label="Language switcher">
-            {["DE", "EN", "AR"].map((lang) => (
-              <button
-                className={`language-btn ${language === lang ? "active" : ""}`}
-                type="button"
-                key={lang}
-                onClick={() => setLanguage(lang)}
-                aria-pressed={language === lang}
-              >
-                {lang}
-              </button>
-            ))}
-          </div>
-
-          {isLoggedIn ? (
-            <>
-              <Link className="btn btn-primary nav-create-btn" to="/create-product">
-                {t.createAd}
-              </Link>
-
-              <div
-                className={`account-menu ${isAccountMenuOpen ? "open" : ""}`}
-                ref={accountMenuRef}
-              >
-                <button
-                  className="account-menu-button"
-                  type="button"
-                  onClick={() =>
-                    setIsAccountMenuOpen((current) => !current)
-                  }
-                  aria-expanded={isAccountMenuOpen}
-                >
-                  <span>
-                    {isArabic
-                      ? "حسابي"
-                      : language === "EN"
-                        ? "My account"
-                        : "Mein Konto"}
-                  </span>
-
-                  <span className="account-menu-chevron" aria-hidden="true">
-                    ▾
-                  </span>
-                </button>
-
-                <div className="account-menu-list">
-                  <Link
-                    to="/account"
-                    onClick={() => setIsAccountMenuOpen(false)}
-                  >
-                    {isArabic
-                      ? "حسابي"
-                      : language === "EN"
-                        ? "Account"
-                        : "Konto"}
-                  </Link>
-
-                  <Link
-                    to="/conversations"
-                    onClick={() => setIsAccountMenuOpen(false)}
-                  >
-                    {isArabic
-                      ? "الرسائل"
-                      : language === "EN"
-                        ? "Messages"
-                        : "Nachrichten"}
-                  </Link>
-
-                  <Link
-                    to="/my-products"
-                    onClick={() => setIsAccountMenuOpen(false)}
-                  >
-                    {isArabic
-                      ? "إعلاناتي"
-                      : language === "EN"
-                        ? "My listings"
-                        : "Meine Anzeigen"}
-                  </Link>
-
-                  <Link
-                    to="/favorites"
-                    onClick={() => setIsAccountMenuOpen(false)}
-                  >
-                    {isArabic
-                      ? "المفضلة"
-                      : language === "EN"
-                        ? "Favorites"
-                        : "Favoriten"}
-                  </Link>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsAccountMenuOpen(false);
-                      handleLogout();
-                    }}
-                  >
-                    {isArabic
-                      ? "تسجيل الخروج"
-                      : language === "EN"
-                        ? "Logout"
-                        : "Logout"}
-                  </button>
-                </div>
-
-
-              </div>
-            </>
-          ) : (
-            <>
-              <Link className="btn btn-secondary" to="/login">
-                {t.login}
-              </Link>
-
-              <Link className="btn btn-primary nav-create-btn" to="/register">
-                {t.createAd}
-              </Link>
-            </>
-          )}
-        </div>
-      </header>
+    <div
+      className={`app ${isArabic ? "rtl" : ""}`}
+      dir={isArabic ? "rtl" : "ltr"}
+    >
+      <Navbar variant="home" />
 
       <main>
         <section className="hero">
@@ -401,12 +227,14 @@ function Home() {
                 placeholder={t.searchPlaceholder}
                 aria-label="Search products"
               />
+
               <input
                 type="text"
                 placeholder={t.locationPlaceholder}
                 aria-label="Search location"
               />
-              <button>{t.searchButton}</button>
+
+              <button type="button">{t.searchButton}</button>
             </div>
 
             <div className="hero-stats">
@@ -435,6 +263,7 @@ function Home() {
 
             <div className="preview-card">
               <div className="preview-image">📦</div>
+
               <div>
                 <h3>{t.previewTitle}</h3>
                 <p>{t.previewText}</p>
@@ -451,7 +280,7 @@ function Home() {
 
           <div className="categories-grid">
             {t.categories.map((category) => (
-              <button className="category-card" key={category}>
+              <button className="category-card" type="button" key={category}>
                 {category}
               </button>
             ))}
