@@ -7,6 +7,7 @@ import {
   sendConversationMessage,
 } from "../services/api";
 import Navbar from "../components/Navbar";
+import UserAvatar from "../components/UserAvatar";
 import "../App.css";
 
 function ConversationDetails() {
@@ -42,20 +43,6 @@ function ConversationDetails() {
       user?.fullName ||
       user?.email ||
       text("Unbekannt", "غير معروف", "Unknown")
-    );
-  }
-
-  function getInitials(user) {
-    const name = user?.fullName || user?.email || "?";
-
-    return (
-      name
-        .trim()
-        .split(" ")
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((part) => part.charAt(0).toUpperCase())
-        .join("") || "?"
     );
   }
 
@@ -274,9 +261,7 @@ function ConversationDetails() {
                   className="conversation-user-card"
                   to={`/users/${otherUser.id}`}
                 >
-                  <div className="conversation-avatar">
-                    {getInitials(otherUser)}
-                  </div>
+                  <UserAvatar user={otherUser} size="medium" />
 
                   <div>
                     <span className="conversation-label">
