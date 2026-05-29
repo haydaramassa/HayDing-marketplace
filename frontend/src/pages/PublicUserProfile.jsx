@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { getPublicUserProfile } from "../services/api";
+import UserAvatar from "../components/UserAvatar";
 import "../App.css";
 
 function PublicUserProfile() {
@@ -16,20 +17,6 @@ function PublicUserProfile() {
     if (isArabic) return ar;
     if (language === "EN") return en;
     return de;
-  }
-
-  function getInitials(nameOrFallback) {
-    const source = nameOrFallback || "?";
-
-    return (
-      source
-        .trim()
-        .split(" ")
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((part) => part.charAt(0).toUpperCase())
-        .join("") || "?"
-    );
   }
 
   function formatDate(dateValue) {
@@ -116,9 +103,11 @@ function PublicUserProfile() {
 
         {!isLoading && !error && profile && (
           <section className="public-profile-card">
-            <div className="account-avatar public-profile-avatar">
-              {getInitials(profile.fullName)}
-            </div>
+            <UserAvatar
+              user={profile}
+              size="large"
+              className="public-profile-avatar"
+            />
 
             <div className="public-profile-info">
               <p className="eyebrow">
