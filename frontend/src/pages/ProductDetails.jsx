@@ -11,6 +11,7 @@ import {
 } from "../services/api";
 import { getProductImages } from "../utils/productImages";
 import Navbar from "../components/Navbar";
+import UserAvatar from "../components/UserAvatar";
 import "../App.css";
 
 function ProductDetails() {
@@ -54,20 +55,6 @@ function ProductDetails() {
       labels[conditionStatus] ||
       conditionStatus ||
       text("Nicht angegeben", "غير محدد", "Not specified")
-    );
-  }
-
-  function getSellerInitials(seller) {
-    const name = seller?.fullName || seller?.email || "?";
-
-    return (
-      name
-        .trim()
-        .split(" ")
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((part) => part[0]?.toUpperCase())
-        .join("") || "?"
     );
   }
 
@@ -372,9 +359,7 @@ function ProductDetails() {
                   className="seller-card seller-card-link"
                   to={`/users/${seller.id}`}
                 >
-                  <div className="seller-avatar">
-                    {getSellerInitials(seller)}
-                  </div>
+                  <UserAvatar user={seller} size="medium" />
 
                   <div>
                     <span>{text("Verkäufer", "البائع", "Seller")}</span>
