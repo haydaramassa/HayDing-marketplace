@@ -125,7 +125,10 @@ function PublicUserProfile() {
                 {text("Verkäuferprofil", "ملف البائع", "Seller profile")}
               </p>
 
-              <h1>{profile.fullName || text("Unbekannt", "غير معروف", "Unknown")}</h1>
+              <h1>
+                {profile.fullName ||
+                  text("Unbekannt", "غير معروف", "Unknown")}
+              </h1>
 
               <div className="public-profile-meta">
                 <div>
@@ -147,13 +150,20 @@ function PublicUserProfile() {
                 </div>
               </div>
 
-              <p className="public-profile-note">
-                {text(
-                  "Öffentliche Profilinformationen dieses Verkäufers.",
-                  "معلومات عامة عن هذا البائع.",
-                  "Public profile information for this seller."
-                )}
-              </p>
+              {profile.bio ? (
+                <div className="public-profile-bio">
+                  <span>{text("Bio", "نبذة", "Bio")}</span>
+                  <p>{profile.bio}</p>
+                </div>
+              ) : (
+                <p className="public-profile-note">
+                  {text(
+                    "Dieser Nutzer hat noch keine Bio hinzugefügt.",
+                    "لم يضف هذا المستخدم نبذة بعد.",
+                    "This user has not added a bio yet."
+                  )}
+                </p>
+              )}
             </div>
           </section>
         )}

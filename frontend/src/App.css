@@ -3461,3 +3461,30 @@ font-size: 1.05rem;
   min-height: 92px;
   resize: vertical;
 }
+
+.public-profile-bio {
+  margin-top: 22px;
+  max-width: 760px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: rgba(248, 245, 239, 0.72);
+}
+
+.public-profile-bio span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.public-profile-bio p {
+  margin: 0;
+  color: #4f4a45;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
