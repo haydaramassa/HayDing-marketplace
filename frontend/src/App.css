@@ -3488,3 +3488,55 @@ font-size: 1.05rem;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+
+/* Shared user avatar */
+.user-avatar {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.36), transparent 28%),
+    linear-gradient(145deg, var(--primary), #3c4641);
+  color: #ffffff;
+  display: inline-grid;
+  place-items: center;
+  font-weight: 900;
+  overflow: hidden;
+  box-shadow:
+    0 14px 30px rgba(32, 38, 36, 0.16),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Tiny avatar for product cards */
+.user-avatar-small {
+  width: 28px;
+  height: 28px;
+  font-size: 0.72rem;
+}
+
+/* Normal avatar for cards and lists */
+.user-avatar-medium {
+  width: 46px;
+  height: 46px;
+  font-size: 1rem;
+}
+
+/* Larger avatar for profile headers */
+.user-avatar-large {
+  width: 74px;
+  height: 74px;
+  font-size: 1.75rem;
+}
+
+/* Extra-large avatar if needed later */
+.user-avatar-xl {
+  width: 96px;
+  height: 96px;
+  font-size: 2.2rem;
+}
