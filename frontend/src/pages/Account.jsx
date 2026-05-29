@@ -6,6 +6,7 @@ import {
   updateCurrentUserProfile,
 } from "../services/api";
 import Navbar from "../components/Navbar";
+import UserAvatar from "../components/UserAvatar";
 import "../App.css";
 
 function Account() {
@@ -29,20 +30,6 @@ function Account() {
     if (isArabic) return ar;
     if (language === "EN") return en;
     return de;
-  }
-
-  function getInitials(nameOrEmail) {
-    const source = nameOrEmail || profile.email || "H";
-
-    return (
-      source
-        .trim()
-        .split(" ")
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((part) => part[0]?.toUpperCase())
-        .join("") || "H"
-    );
   }
 
   useEffect(() => {
@@ -187,9 +174,7 @@ function Account() {
             </p>
           </div>
 
-          <div className="account-avatar">
-            {getInitials(profile.fullName || profile.email)}
-          </div>
+          <UserAvatar user={profile} size="large" className="account-avatar" />
         </section>
 
         {isLoading && (
@@ -266,9 +251,7 @@ function Account() {
                     "Write a short bio, for example what you sell or what you are looking for."
                   )}
                 />
-                <small className="field-hint">
-                  {bioLength}/500
-                </small>
+                <small className="field-hint">{bioLength}/500</small>
               </label>
             </div>
 
