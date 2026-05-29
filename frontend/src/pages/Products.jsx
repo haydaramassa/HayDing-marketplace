@@ -9,6 +9,7 @@ import {
 } from "../services/api";
 import ProductCardImage from "../components/ProductCardImage";
 import Navbar from "../components/Navbar";
+import UserAvatar from "../components/UserAvatar";
 import "../App.css";
 
 function Products() {
@@ -29,20 +30,6 @@ function Products() {
 
   function isLoggedIn() {
     return Boolean(localStorage.getItem("hayding-token"));
-  }
-
-  function getSellerInitials(seller) {
-    const name = seller?.fullName || seller?.email || "?";
-
-    return (
-      name
-        .trim()
-        .split(" ")
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((part) => part.charAt(0).toUpperCase())
-        .join("") || "?"
-    );
   }
 
   useEffect(() => {
@@ -245,9 +232,7 @@ function Products() {
                           navigate(`/users/${product.seller.id}`);
                         }}
                       >
-                        <div className="product-seller-mini-avatar">
-                          {getSellerInitials(product.seller)}
-                        </div>
+                        <UserAvatar user={product.seller} size="small" />
 
                         <span>
                           {product.seller.fullName ||
