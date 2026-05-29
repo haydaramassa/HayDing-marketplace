@@ -16,6 +16,7 @@ function Account() {
     fullName: "",
     email: "",
     city: "",
+    bio: "",
     preferredLanguage: "DE",
   });
 
@@ -61,6 +62,7 @@ function Account() {
           fullName: user.fullName || "",
           email: user.email || "",
           city: user.city || "",
+          bio: user.bio || "",
           preferredLanguage: user.preferredLanguage || "DE",
         });
       } catch (err) {
@@ -100,6 +102,7 @@ function Account() {
       const data = await updateCurrentUserProfile({
         fullName: profile.fullName,
         city: profile.city,
+        bio: profile.bio,
         preferredLanguage: profile.preferredLanguage,
       });
 
@@ -109,6 +112,7 @@ function Account() {
         ...currentProfile,
         fullName: updatedUser.fullName || currentProfile.fullName,
         city: updatedUser.city || currentProfile.city,
+        bio: updatedUser.bio || currentProfile.bio,
         preferredLanguage:
           updatedUser.preferredLanguage || currentProfile.preferredLanguage,
       }));
@@ -123,6 +127,7 @@ function Account() {
           ...storedUser,
           fullName: updatedUser.fullName || profile.fullName,
           city: updatedUser.city || profile.city,
+          bio: updatedUser.bio || profile.bio,
           preferredLanguage:
             updatedUser.preferredLanguage || profile.preferredLanguage,
         })
@@ -148,6 +153,8 @@ function Account() {
       setIsSaving(false);
     }
   }
+
+  const bioLength = profile.bio.length;
 
   return (
     <div
@@ -243,6 +250,25 @@ function Account() {
                   <option value="EN">English</option>
                   <option value="AR">العربية</option>
                 </select>
+              </label>
+
+              <label className="form-field form-field-full">
+                {text("Kurzbeschreibung", "نبذة قصيرة", "Short bio")}
+                <textarea
+                  name="bio"
+                  value={profile.bio}
+                  onChange={handleChange}
+                  maxLength="500"
+                  rows="4"
+                  placeholder={text(
+                    "Erzähle kurz etwas über dich, z. B. was du verkaufst oder wonach du suchst.",
+                    "اكتب نبذة قصيرة عنك، مثلاً ماذا تبيع أو عمّ تبحث.",
+                    "Write a short bio, for example what you sell or what you are looking for."
+                  )}
+                />
+                <small className="field-hint">
+                  {bioLength}/500
+                </small>
               </label>
             </div>
 

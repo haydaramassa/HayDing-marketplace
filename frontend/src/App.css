@@ -3449,3 +3449,15 @@ font-size: 1.05rem;
 .create-page > .navbar {
   margin-bottom: 24px;
 }
+
+.field-hint {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: end;
+}
+
+.account-card textarea {
+  min-height: 92px;
+  resize: vertical;
+}
