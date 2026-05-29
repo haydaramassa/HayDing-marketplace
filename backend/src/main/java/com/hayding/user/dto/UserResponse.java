@@ -11,6 +11,7 @@ public class UserResponse {
     private String fullName;
     private String email;
     private String city;
+    private String bio;
     private String preferredLanguage;
     private UserRole role;
     private boolean enabled;
@@ -23,6 +24,7 @@ public class UserResponse {
                         String fullName,
                         String email,
                         String city,
+                        String bio,
                         String preferredLanguage,
                         UserRole role,
                         boolean enabled,
@@ -31,6 +33,7 @@ public class UserResponse {
         this.fullName = fullName;
         this.email = email;
         this.city = city;
+        this.bio = bio;
         this.preferredLanguage = preferredLanguage;
         this.role = role;
         this.enabled = enabled;
@@ -47,6 +50,7 @@ public class UserResponse {
                 user.getFullName(),
                 user.getEmail(),
                 user.getCity(),
+                user.getBio(),
                 user.getPreferredLanguage(),
                 user.getRole(),
                 user.isEnabled(),
@@ -68,6 +72,10 @@ public class UserResponse {
 
     public String getCity() {
         return city;
+    }
+
+    public String getBio() {
+        return bio;
     }
 
     public String getPreferredLanguage() {

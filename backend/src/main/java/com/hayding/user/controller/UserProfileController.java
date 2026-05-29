@@ -37,6 +37,7 @@ public class UserProfileController {
 
         user.setFullName(request.fullName());
         user.setCity(request.city());
+        user.setBio(request.bio());
         user.setPreferredLanguage(request.preferredLanguage());
 
         User savedUser = userRepository.save(user);
@@ -60,6 +61,7 @@ public class UserProfileController {
                 user.getFullName(),
                 user.getEmail(),
                 user.getCity(),
+                user.getBio(),
                 user.getPreferredLanguage()
         );
     }

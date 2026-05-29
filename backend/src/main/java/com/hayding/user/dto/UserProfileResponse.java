@@ -5,6 +5,7 @@ public record UserProfileResponse(
         String fullName,
         String email,
         String city,
+        String bio,
         String preferredLanguage
 ) {
 }

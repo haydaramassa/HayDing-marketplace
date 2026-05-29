@@ -42,6 +42,10 @@ public class User {
     @Column(nullable = false, length = 120)
     private String city;
 
+    @Size(max = 500)
+    @Column(length = 500)
+    private String bio;
+
     @NotBlank
     @Size(max = 10)
     @Column(name = "preferred_language", nullable = false, length = 10)
@@ -139,6 +143,14 @@ public class User {
         this.city = city;
     }
 
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
+    }
+
     public String getPreferredLanguage() {
         return preferredLanguage;
     }
@@ -170,5 +182,4 @@ public class User {
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
-
 }
