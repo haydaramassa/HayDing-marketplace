@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { getConversations } from "../services/api";
 import Navbar from "../components/Navbar";
+import UserAvatar from "../components/UserAvatar";
 import "../App.css";
 
 function Conversations() {
@@ -32,20 +33,6 @@ function Conversations() {
       user?.fullName ||
       user?.email ||
       text("Unbekannt", "غير معروف", "Unknown")
-    );
-  }
-
-  function getInitials(user) {
-    const name = user?.fullName || user?.email || "?";
-
-    return (
-      name
-        .trim()
-        .split(" ")
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((part) => part.charAt(0).toUpperCase())
-        .join("") || "?"
     );
   }
 
@@ -190,9 +177,7 @@ function Conversations() {
                   key={conversation.id}
                   to={`/conversations/${conversation.id}`}
                 >
-                  <div className="conversation-list-avatar">
-                    {getInitials(otherUser)}
-                  </div>
+                  <UserAvatar user={otherUser} size="medium" />
 
                   <div className="conversation-list-main">
                     <div className="conversation-list-top">
