@@ -209,4 +209,40 @@ export function updateProduct(productId, productData) {
     });
   }
 
+  export async function uploadProfileImage(file) {
+    const token = localStorage.getItem("hayding-token");
+    const formData = new FormData();
+  
+    formData.append("file", file);
+  
+    const response = await fetch(
+      "http://localhost:8080/api/users/me/profile-image",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      }
+    );
+  
+    let data = null;
+  
+    try {
+      data = await response.json();
+    } catch {
+      data = null;
+    }
+  
+    if (!response.ok) {
+      const message =
+        data?.message ||
+        data?.error ||
+        "Profile image could not be uploaded.";
+  
+      throw new Error(message);
+    }
+  
+    return data;
+  }
   
