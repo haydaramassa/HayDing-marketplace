@@ -3540,3 +3540,57 @@ font-size: 1.05rem;
   height: 96px;
   font-size: 2.2rem;
 }
+
+.profile-image-section {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 22px;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: rgba(248, 245, 239, 0.6);
+}
+
+.profile-image-preview {
+  display: grid;
+  place-items: center;
+}
+
+.profile-image-content h2 {
+  margin: 6px 0;
+  color: var(--primary);
+}
+
+.profile-image-content p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.profile-image-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.profile-image-picker {
+  cursor: pointer;
+}
+
+.profile-image-picker input {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .profile-image-section {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .profile-image-actions {
+    justify-content: center;
+  }
+}
+
