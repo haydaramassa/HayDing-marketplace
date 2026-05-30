@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Cropper from "react-easy-crop";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import {
@@ -8,6 +9,7 @@ import {
 } from "../services/api";
 import Navbar from "../components/Navbar";
 import UserAvatar from "../components/UserAvatar";
+import { getCroppedImageFile } from "../utils/cropImage";
 import "../App.css";
 
 function Account() {
@@ -26,6 +28,11 @@ function Account() {
   const [selectedProfileImage, setSelectedProfileImage] = useState(null);
   const [profileImagePreview, setProfileImagePreview] = useState("");
 
+  const [isCropOpen, setIsCropOpen] = useState(false);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingProfileImage, setIsUploadingProfileImage] = useState(false);
@@ -40,11 +47,7 @@ function Account() {
 
   function buildProfileImageUrl(imageUrl) {
     if (!imageUrl) return "";
-
-    if (imageUrl.startsWith("http")) {
-      return imageUrl;
-    }
-
+    if (imageUrl.startsWith("http") || imageUrl.startsWith("blob:")) return imageUrl;
     return `http://localhost:8080${imageUrl}`;
   }
 
@@ -119,9 +122,7 @@ function Account() {
     setError("");
     setMessage("");
 
-    if (!file) {
-      return;
-    }
+    if (!file) return;
 
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
     const maxSize = 5 * 1024 * 1024;
@@ -152,16 +153,72 @@ function Account() {
       URL.revokeObjectURL(profileImagePreview);
     }
 
-    setSelectedProfileImage(file);
-    setProfileImagePreview(URL.createObjectURL(file));
+    const previewUrl = URL.createObjectURL(file);
+
+    setSelectedProfileImage(null);
+    setProfileImagePreview(previewUrl);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setCroppedAreaPixels(null);
+    setIsCropOpen(true);
 
     event.target.value = "";
   }
 
-  async function handleUploadProfileImage() {
-    if (!selectedProfileImage) {
-      return;
+  function handleCropComplete(_, croppedPixels) {
+    setCroppedAreaPixels(croppedPixels);
+  }
+
+  async function handleApplyCrop() {
+    if (!profileImagePreview || !croppedAreaPixels) return;
+
+    try {
+      const croppedFile = await getCroppedImageFile(
+        profileImagePreview,
+        croppedAreaPixels,
+        "profile-image.webp"
+      );
+
+      if (profileImagePreview) {
+        URL.revokeObjectURL(profileImagePreview);
+      }
+
+      const croppedPreviewUrl = URL.createObjectURL(croppedFile);
+
+      setSelectedProfileImage(croppedFile);
+      setProfileImagePreview(croppedPreviewUrl);
+      setIsCropOpen(false);
+      setMessage(
+        text(
+          "Bild zugeschnitten. Klicke auf Bild speichern.",
+          "تم قص الصورة. اضغط حفظ الصورة.",
+          "Image cropped. Click Save image."
+        )
+      );
+    } catch (err) {
+      setError(
+        err.message ||
+          text(
+            "Bild konnte nicht zugeschnitten werden.",
+            "تعذر قص الصورة.",
+            "Could not crop image."
+          )
+      );
     }
+  }
+
+  function handleCancelCrop() {
+    if (profileImagePreview) {
+      URL.revokeObjectURL(profileImagePreview);
+    }
+
+    setProfileImagePreview("");
+    setSelectedProfileImage(null);
+    setIsCropOpen(false);
+  }
+
+  async function handleUploadProfileImage() {
+    if (!selectedProfileImage) return;
 
     setError("");
     setMessage("");
@@ -262,7 +319,8 @@ function Account() {
 
   const avatarUser = {
     ...profile,
-    profileImageUrl: profileImagePreview || buildProfileImageUrl(profile.profileImageUrl),
+    profileImageUrl:
+      profileImagePreview || buildProfileImageUrl(profile.profileImageUrl),
   };
 
   return (
@@ -334,9 +392,9 @@ function Account() {
 
                 <p>
                   {text(
-                    "JPG, PNG oder WEBP. Maximal 5MB.",
-                    "JPG أو PNG أو WEBP. الحجم الأقصى 5MB.",
-                    "JPG, PNG or WEBP. Maximum 5MB."
+                    "Wähle eine صورة ثم حرّكها داخل الدائرة قبل الحفظ.",
+                    "اختر صورة ثم حرّكها داخل الدائرة قبل الحفظ.",
+                    "Choose an image, then move it inside the circle before saving."
                   )}
                 </p>
 
@@ -449,6 +507,76 @@ function Account() {
           </form>
         )}
       </main>
+
+      {isCropOpen && (
+        <div className="crop-modal" role="dialog" aria-modal="true">
+          <div className="crop-card">
+            <div className="crop-header">
+              <div>
+                <p className="eyebrow">
+                  {text("Profilbild", "صورة الملف الشخصي", "Profile image")}
+                </p>
+                <h2>{text("Bild zuschneiden", "قص الصورة", "Crop image")}</h2>
+              </div>
+
+              <button
+                className="crop-close"
+                type="button"
+                onClick={handleCancelCrop}
+                aria-label={text("Schließen", "إغلاق", "Close")}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="crop-area">
+              <Cropper
+                image={profileImagePreview}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                cropShape="round"
+                showGrid={false}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={handleCropComplete}
+              />
+            </div>
+
+            <div className="crop-controls">
+              <label>
+                {text("Zoom", "تكبير", "Zoom")}
+                <input
+                  type="range"
+                  min="1"
+                  max="3"
+                  step="0.05"
+                  value={zoom}
+                  onChange={(event) => setZoom(Number(event.target.value))}
+                />
+              </label>
+
+              <div className="crop-actions">
+                <button
+                  className="btn btn-secondary"
+                  type="button"
+                  onClick={handleCancelCrop}
+                >
+                  {text("Abbrechen", "إلغاء", "Cancel")}
+                </button>
+
+                <button
+                  className="btn btn-primary"
+                  type="button"
+                  onClick={handleApplyCrop}
+                >
+                  {text("Übernehmen", "اعتماد", "Apply")}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
