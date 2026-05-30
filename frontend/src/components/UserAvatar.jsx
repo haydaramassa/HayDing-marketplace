@@ -2,7 +2,7 @@ import "../App.css";
 
 function UserAvatar({ user, name, email, size = "medium", className = "" }) {
   const displayName = name || user?.fullName || user?.email || email || "H";
-  const imageUrl = user?.profileImageUrl || user?.avatarUrl || "";
+  const rawImageUrl = user?.profileImageUrl || user?.avatarUrl || "";
 
   function getInitials(value) {
     return (
@@ -15,6 +15,22 @@ function UserAvatar({ user, name, email, size = "medium", className = "" }) {
         .join("") || "H"
     );
   }
+
+  function buildImageUrl(imageUrl) {
+    if (!imageUrl) return "";
+
+    if (
+      imageUrl.startsWith("http") ||
+      imageUrl.startsWith("blob:") ||
+      imageUrl.startsWith("data:")
+    ) {
+      return imageUrl;
+    }
+
+    return `http://localhost:8080${imageUrl}`;
+  }
+
+  const imageUrl = buildImageUrl(rawImageUrl);
 
   return (
     <div className={`user-avatar user-avatar-${size} ${className}`}>

@@ -72,10 +72,16 @@ public class UserProfileController {
         String extension = getExtension(originalFilename);
         String filename = UUID.randomUUID() + extension;
 
-        Path uploadDirectory = Path.of("uploads", "profile-images");
+        Path uploadDirectory = Path.of(
+                System.getProperty("user.dir"),
+                "uploads",
+                "profile-images"
+        ).toAbsolutePath().normalize();
+
         Files.createDirectories(uploadDirectory);
 
-        Path targetPath = uploadDirectory.resolve(filename);
+        Path targetPath = uploadDirectory.resolve(filename).normalize();
+
         file.transferTo(targetPath.toFile());
 
         String profileImageUrl = "/uploads/profile-images/" + filename;
@@ -123,7 +129,7 @@ public class UserProfileController {
 
     private String getExtension(String filename) {
         if (filename == null || !filename.contains(".")) {
-            return ".png";
+            return ".webp";
         }
 
         String extension = filename.substring(filename.lastIndexOf(".")).toLowerCase(Locale.ROOT);
@@ -137,7 +143,7 @@ public class UserProfileController {
             return extension;
         }
 
-        return ".png";
+        return ".webp";
     }
 
     private UserProfileResponse toResponse(User user) {
