@@ -46,6 +46,10 @@ public class User {
     @Column(length = 500)
     private String bio;
 
+    @Size(max = 500)
+    @Column(name = "profile_image_url", length = 500)
+    private String profileImageUrl;
+
     @NotBlank
     @Size(max = 10)
     @Column(name = "preferred_language", nullable = false, length = 10)
@@ -149,6 +153,14 @@ public class User {
 
     public void setBio(String bio) {
         this.bio = bio;
+    }
+
+    public String getProfileImageUrl() {
+        return profileImageUrl;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 
     public String getPreferredLanguage() {

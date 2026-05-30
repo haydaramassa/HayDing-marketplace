@@ -9,6 +9,7 @@ public record PublicUserProfileResponse(
         String fullName,
         String city,
         String bio,
+        String profileImageUrl,
         String preferredLanguage,
         LocalDateTime createdAt
 ) {
@@ -22,6 +23,7 @@ public record PublicUserProfileResponse(
                 user.getFullName(),
                 user.getCity(),
                 user.getBio(),
+                user.getProfileImageUrl(),
                 user.getPreferredLanguage(),
                 user.getCreatedAt()
         );

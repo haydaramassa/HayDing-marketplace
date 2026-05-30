@@ -62,6 +62,7 @@ public class UserProfileController {
                 user.getEmail(),
                 user.getCity(),
                 user.getBio(),
+                user.getProfileImageUrl(),
                 user.getPreferredLanguage()
         );
     }
