@@ -1,7 +1,9 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
+import { getProducts } from "../services/api";
 import Navbar from "../components/Navbar";
+import ProductCardImage from "../components/ProductCardImage";
 import "../App.css";
 
 function Home() {
@@ -10,6 +12,9 @@ function Home() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [searchCity, setSearchCity] = useState("");
+  const [latestProducts, setLatestProducts] = useState([]);
+  const [isProductsLoading, setIsProductsLoading] = useState(true);
+  const [productsError, setProductsError] = useState("");
 
   const content = {
     DE: {
@@ -34,8 +39,13 @@ function Home() {
         "Einfach einstellen, lokal entdecken und direkt Kontakt aufnehmen.",
       categoriesEyebrow: "Kategorien",
       categoriesTitle: "Entdecke, was in deiner Nähe angeboten wird",
-      productsEyebrow: "Vorschau",
-      productsTitle: "Aktuelle Angebote",
+      productsEyebrow: "Aktuell",
+      productsTitle: "Neueste Anzeigen",
+      loadingProducts: "Anzeigen werden geladen...",
+      noProductsTitle: "Noch keine Anzeigen vorhanden.",
+      noProductsText:
+        "Sobald neue Anzeigen veröffentlicht werden, erscheinen sie hier.",
+      exploreAll: "Alle Anzeigen entdecken",
       howEyebrow: "So funktioniert's",
       howTitle: "Einfach starten mit HayDing",
       step1Title: "Artikel einstellen",
@@ -55,26 +65,6 @@ function Home() {
         "Haushalt",
         "Bücher",
         "Sport",
-      ],
-      products: [
-        {
-          title: "Vintage Holzstuhl",
-          location: "Berlin",
-          price: "35 €",
-          tag: "Sehr gut",
-        },
-        {
-          title: "iPhone 12 Mini",
-          location: "Hamburg",
-          price: "220 €",
-          tag: "Gebraucht",
-        },
-        {
-          title: "Kinderfahrrad",
-          location: "München",
-          price: "60 €",
-          tag: "Gut",
-        },
       ],
     },
 
@@ -99,8 +89,12 @@ function Home() {
       previewText: "اعرض غرضك بسهولة، ودع المهتمين يتواصلون معك مباشرة.",
       categoriesEyebrow: "الفئات",
       categoriesTitle: "اكتشف ما يُعرض بالقرب منك",
-      productsEyebrow: "معاينة",
-      productsTitle: "عروض حالية",
+      productsEyebrow: "الأحدث",
+      productsTitle: "أحدث الإعلانات",
+      loadingProducts: "جارٍ تحميل الإعلانات...",
+      noProductsTitle: "لا توجد إعلانات بعد.",
+      noProductsText: "عند نشر إعلانات جديدة، ستظهر هنا.",
+      exploreAll: "استكشف كل الإعلانات",
       howEyebrow: "كيف يعمل",
       howTitle: "ابدأ بسهولة مع HayDing",
       step1Title: "أضف المنتج",
@@ -117,26 +111,6 @@ function Home() {
         "منزل",
         "كتب",
         "رياضة",
-      ],
-      products: [
-        {
-          title: "كرسي خشبي كلاسيكي",
-          location: "برلين",
-          price: "35 €",
-          tag: "جيد جدًا",
-        },
-        {
-          title: "iPhone 12 Mini",
-          location: "هامبورغ",
-          price: "220 €",
-          tag: "مستعمل",
-        },
-        {
-          title: "دراجة أطفال",
-          location: "ميونخ",
-          price: "60 €",
-          tag: "جيد",
-        },
       ],
     },
 
@@ -161,8 +135,12 @@ function Home() {
       previewText: "List easily, discover locally and contact directly.",
       categoriesEyebrow: "Categories",
       categoriesTitle: "Discover what is offered near you",
-      productsEyebrow: "Preview",
-      productsTitle: "Current offers",
+      productsEyebrow: "Latest",
+      productsTitle: "Newest listings",
+      loadingProducts: "Loading listings...",
+      noProductsTitle: "No listings yet.",
+      noProductsText: "Once new listings are published, they will appear here.",
+      exploreAll: "Explore all listings",
       howEyebrow: "How it works",
       howTitle: "Start easily with HayDing",
       step1Title: "Create a listing",
@@ -180,30 +158,82 @@ function Home() {
         "Books",
         "Sport",
       ],
-      products: [
-        {
-          title: "Vintage wooden chair",
-          location: "Berlin",
-          price: "35 €",
-          tag: "Very good",
-        },
-        {
-          title: "iPhone 12 Mini",
-          location: "Hamburg",
-          price: "220 €",
-          tag: "Used",
-        },
-        {
-          title: "Kids bicycle",
-          location: "Munich",
-          price: "60 €",
-          tag: "Good",
-        },
-      ],
     },
   };
 
   const t = content[language];
+
+  useEffect(() => {
+    async function loadLatestProducts() {
+      try {
+        setIsProductsLoading(true);
+        setProductsError("");
+
+        const data = await getProducts();
+        const products = data?.data || data || [];
+
+        setLatestProducts(Array.isArray(products) ? products : []);
+      } catch (err) {
+        setProductsError(
+          err.message ||
+            (language === "AR"
+              ? "تعذر تحميل الإعلانات."
+              : language === "EN"
+                ? "Could not load listings."
+                : "Anzeigen konnten nicht geladen werden.")
+        );
+      } finally {
+        setIsProductsLoading(false);
+      }
+    }
+
+    loadLatestProducts();
+  }, [language]);
+
+  const newestProducts = useMemo(() => {
+    return [...latestProducts]
+      .filter((product) => product.productStatus !== "SOLD")
+      .sort((a, b) => {
+        const dateA = new Date(a.updatedAt || a.createdAt || 0).getTime();
+        const dateB = new Date(b.updatedAt || b.createdAt || 0).getTime();
+
+        if (Number.isNaN(dateA) || Number.isNaN(dateB)) {
+          return Number(b.id || 0) - Number(a.id || 0);
+        }
+
+        return dateB - dateA;
+      })
+      .slice(0, 3);
+  }, [latestProducts]);
+
+  function getConditionLabel(conditionStatus) {
+    const labels = {
+      NEW:
+        language === "AR" ? "جديد" : language === "EN" ? "New" : "Neu",
+      LIKE_NEW:
+        language === "AR"
+          ? "شبه جديد"
+          : language === "EN"
+            ? "Like new"
+            : "Wie neu",
+      GOOD:
+        language === "AR" ? "جيد" : language === "EN" ? "Good" : "Gut",
+      ACCEPTABLE:
+        language === "AR"
+          ? "مقبول"
+          : language === "EN"
+            ? "Acceptable"
+            : "Akzeptabel",
+      USED:
+        language === "AR"
+          ? "مستعمل"
+          : language === "EN"
+            ? "Used"
+            : "Gebraucht",
+    };
+
+    return labels[conditionStatus] || conditionStatus;
+  }
 
   function handleSearch(event) {
     event.preventDefault();
@@ -316,25 +346,63 @@ function Home() {
         </section>
 
         <section className="section" id="products">
-          <div className="section-header">
-            <p className="eyebrow">{t.productsEyebrow}</p>
-            <h2>{t.productsTitle}</h2>
+          <div className="section-header section-header-with-action">
+            <div>
+              <p className="eyebrow">{t.productsEyebrow}</p>
+              <h2>{t.productsTitle}</h2>
+            </div>
+
+            <Link className="btn btn-secondary" to="/products">
+              {t.exploreAll}
+            </Link>
           </div>
 
-          <div className="products-grid">
-            {t.products.map((product) => (
-              <article className="product-card" key={product.title}>
-                <div className="product-image"></div>
+          {isProductsLoading && (
+            <p className="auth-message auth-success">{t.loadingProducts}</p>
+          )}
 
-                <div className="product-info">
-                  <span className="product-tag">{product.tag}</span>
-                  <h3>{product.title}</h3>
-                  <p>{product.location}</p>
-                  <strong>{product.price}</strong>
-                </div>
-              </article>
-            ))}
-          </div>
+          {productsError && (
+            <p className="auth-message auth-error">{productsError}</p>
+          )}
+
+          {!isProductsLoading && !productsError && newestProducts.length === 0 && (
+            <div className="empty-state">
+              <div className="empty-icon">📦</div>
+              <h2>{t.noProductsTitle}</h2>
+              <p>{t.noProductsText}</p>
+              <Link className="btn btn-primary" to="/create-product">
+                {t.newAd}
+              </Link>
+            </div>
+          )}
+
+          {!isProductsLoading && !productsError && newestProducts.length > 0 && (
+            <div className="products-grid">
+              {newestProducts.map((product) => (
+                <Link
+                  className="product-card product-card-link"
+                  key={product.id}
+                  to={`/products/${product.id}`}
+                >
+                  <ProductCardImage product={product} />
+
+                  <div className="product-info">
+                    <span className="product-tag">
+                      {getConditionLabel(
+                        product.conditionStatus || product.condition
+                      ) || t.newAd}
+                    </span>
+
+                    <h3>{product.title}</h3>
+
+                    <p>{product.city}</p>
+
+                    <strong>{product.price} €</strong>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </section>
 
         <section className="how-it-works" id="how-it-works">

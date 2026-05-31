@@ -3809,3 +3809,21 @@ font-size: 1.05rem;
   }
 }
 
+.section-header-with-action {
+  align-items: end;
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.section-header-with-action .btn {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 720px) {
+  .section-header-with-action {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
