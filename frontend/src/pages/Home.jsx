@@ -296,22 +296,7 @@ function Home() {
               <button type="submit">{t.searchButton}</button>
             </form>
 
-            <div className="hero-stats">
-              <div>
-                <strong>{t.statMarketTitle}</strong>
-                <span>{t.statMarketText}</span>
-              </div>
-
-              <div>
-                <strong>{t.statLanguagesTitle}</strong>
-                <span>{t.statLanguagesText}</span>
-              </div>
-
-              <div>
-                <strong>{t.statAccountTitle}</strong>
-                <span>{t.statAccountText}</span>
-              </div>
-            </div>
+            
           </div>
 
           <div className="hero-card">
