@@ -3891,3 +3891,51 @@ font-size: 1.05rem;
     width: 100%;
   }
 }
+
+.not-found-page {
+  width: min(760px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 70px 0;
+}
+
+.not-found-card {
+  padding: 42px;
+  border: 1px solid var(--border);
+  border-radius: 32px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 24px 70px rgba(32, 38, 36, 0.08);
+  text-align: center;
+}
+
+.not-found-card h1 {
+  margin: 8px 0 12px;
+  color: var(--primary);
+  font-size: clamp(2.4rem, 5vw, 4.2rem);
+  letter-spacing: -0.06em;
+}
+
+.not-found-card p {
+  margin: 0 auto;
+  max-width: 520px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.not-found-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+@media (max-width: 560px) {
+  .not-found-card {
+    padding: 30px 22px;
+  }
+
+  .not-found-actions .btn {
+    width: 100%;
+  }
+}
+

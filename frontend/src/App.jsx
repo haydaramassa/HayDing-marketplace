@@ -13,6 +13,7 @@ import Conversations from "./pages/Conversations";
 import ConversationDetails from "./pages/ConversationDetails";
 import Account from "./pages/Account";
 import PublicUserProfile from "./pages/PublicUserProfile";
+import NotFound from "./pages/NotFound";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
           <Route path="/conversations/:conversationId" element={<ConversationDetails />} />
           <Route path="/account" element={<Account />} />
           <Route path="/users/:userId" element={<PublicUserProfile />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </LanguageProvider>
