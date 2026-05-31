@@ -3758,3 +3758,11 @@ font-size: 1.05rem;
     width: 100%;
   }
 }
+
+.products-filter-grid-with-sort {
+  grid-template-columns:
+    minmax(0, 1.35fr)
+    minmax(150px, 0.65fr)
+    minmax(170px, 0.75fr)
+    minmax(190px, 0.8fr);
+}

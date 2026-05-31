@@ -30,6 +30,9 @@ function Products() {
   const [conditionFilter, setConditionFilter] = useState(
     searchParams.get("condition") || ""
   );
+  const [sortOption, setSortOption] = useState(
+    searchParams.get("sort") || "newest"
+  );
 
   function text(de, ar, en) {
     if (isArabic) return ar;
@@ -51,6 +54,27 @@ function Products() {
     };
 
     return labels[conditionStatus] || conditionStatus;
+  }
+
+  function getProductDateValue(product) {
+    const dateValue =
+      product.updatedAt || product.createdAt || product.publishedAt;
+
+    if (dateValue) {
+      const time = new Date(dateValue).getTime();
+
+      if (!Number.isNaN(time)) {
+        return time;
+      }
+    }
+
+    return Number(product.id) || 0;
+  }
+
+  function getPriceValue(product) {
+    const value = Number(product.price);
+
+    return Number.isNaN(value) ? 0 : value;
   }
 
   useEffect(() => {
@@ -93,6 +117,7 @@ function Products() {
     setSearchTerm(searchParams.get("search") || "");
     setCityFilter(searchParams.get("city") || "");
     setConditionFilter(searchParams.get("condition") || "");
+    setSortOption(searchParams.get("sort") || "newest");
   }, [searchParams]);
 
   const availableCities = useMemo(() => {
@@ -129,14 +154,31 @@ function Products() {
     });
   }, [products, searchTerm, cityFilter, conditionFilter]);
 
+  const visibleProducts = useMemo(() => {
+    const sortedProducts = [...filteredProducts];
+
+    if (sortOption === "price-asc") {
+      sortedProducts.sort((a, b) => getPriceValue(a) - getPriceValue(b));
+    } else if (sortOption === "price-desc") {
+      sortedProducts.sort((a, b) => getPriceValue(b) - getPriceValue(a));
+    } else {
+      sortedProducts.sort(
+        (a, b) => getProductDateValue(b) - getProductDateValue(a)
+      );
+    }
+
+    return sortedProducts;
+  }, [filteredProducts, sortOption]);
+
   const hasActiveFilters = Boolean(
-    searchTerm.trim() || cityFilter || conditionFilter
+    searchTerm.trim() || cityFilter || conditionFilter || sortOption !== "newest"
   );
 
   function clearFilters() {
     setSearchTerm("");
     setCityFilter("");
     setConditionFilter("");
+    setSortOption("newest");
   }
 
   async function handleFavoriteClick(event, productId) {
@@ -209,7 +251,7 @@ function Products() {
         </div>
 
         <section className="products-filter-card">
-          <div className="products-filter-grid">
+          <div className="products-filter-grid products-filter-grid-with-sort">
             <label className="products-filter-field products-filter-search">
               <span>{text("Suche", "بحث", "Search")}</span>
               <input
@@ -264,14 +306,40 @@ function Products() {
                 </option>
               </select>
             </label>
+
+            <label className="products-filter-field">
+              <span>{text("Sortieren", "ترتيب", "Sort")}</span>
+              <select
+                value={sortOption}
+                onChange={(event) => setSortOption(event.target.value)}
+              >
+                <option value="newest">
+                  {text("Neueste zuerst", "الأحدث أولاً", "Newest first")}
+                </option>
+                <option value="price-asc">
+                  {text(
+                    "Preis aufsteigend",
+                    "السعر من الأقل للأعلى",
+                    "Price low to high"
+                  )}
+                </option>
+                <option value="price-desc">
+                  {text(
+                    "Preis absteigend",
+                    "السعر من الأعلى للأقل",
+                    "Price high to low"
+                  )}
+                </option>
+              </select>
+            </label>
           </div>
 
           <div className="products-filter-footer">
             <p>
               {text(
-                `${filteredProducts.length} von ${products.length} Anzeigen`,
-                `${filteredProducts.length} من ${products.length} إعلان`,
-                `${filteredProducts.length} of ${products.length} listings`
+                `${visibleProducts.length} von ${products.length} Anzeigen`,
+                `${visibleProducts.length} من ${products.length} إعلان`,
+                `${visibleProducts.length} of ${products.length} listings`
               )}
             </p>
 
@@ -299,7 +367,7 @@ function Products() {
 
         {error && <p className="auth-message auth-error">{error}</p>}
 
-        {!isLoading && !error && filteredProducts.length === 0 && (
+        {!isLoading && !error && visibleProducts.length === 0 && (
           <div className="empty-state">
             <div className="empty-icon">🔎</div>
 
@@ -332,16 +400,20 @@ function Products() {
             </p>
 
             {hasActiveFilters && (
-              <button className="btn btn-primary" type="button" onClick={clearFilters}>
+              <button
+                className="btn btn-primary"
+                type="button"
+                onClick={clearFilters}
+              >
                 {text("Filter zurücksetzen", "إزالة الفلاتر", "Clear filters")}
               </button>
             )}
           </div>
         )}
 
-        {!isLoading && !error && filteredProducts.length > 0 && (
+        {!isLoading && !error && visibleProducts.length > 0 && (
           <div className="my-products-grid">
-            {filteredProducts.map((product) => {
+            {visibleProducts.map((product) => {
               const isFavorite = favoriteIds.includes(product.id);
               const isFavoriteLoading = favoriteLoadingId === product.id;
 
