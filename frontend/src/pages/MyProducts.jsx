@@ -18,6 +18,9 @@ function MyProducts() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [openMenuId, setOpenMenuId] = useState(null);
+  const [deleteTargetProduct, setDeleteTargetProduct] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const menuRefs = useRef({});
 
   function text(de, ar, en) {
@@ -89,23 +92,33 @@ function MyProducts() {
     }
   }
 
-  async function handleDelete(productId) {
-    const confirmed = window.confirm(
-      text(
-        "Diese Anzeige wirklich löschen?",
-        "هل تريد حذف هذا الإعلان فعلًا؟",
-        "Do you really want to delete this listing?"
-      )
-    );
+  function openDeleteConfirm(product) {
+    setOpenMenuId(null);
+    setError("");
+    setDeleteTargetProduct(product);
+  }
 
-    if (!confirmed) return;
+  function closeDeleteConfirm() {
+    if (isDeleting) return;
+    setDeleteTargetProduct(null);
+  }
+
+  async function handleConfirmDelete() {
+    if (!deleteTargetProduct?.id) return;
 
     try {
-      await deleteProduct(productId);
+      setIsDeleting(true);
+      setError("");
+
+      await deleteProduct(deleteTargetProduct.id);
 
       setProducts((currentProducts) =>
-        currentProducts.filter((product) => product.id !== productId)
+        currentProducts.filter(
+          (product) => product.id !== deleteTargetProduct.id
+        )
       );
+
+      setDeleteTargetProduct(null);
     } catch (err) {
       setError(
         err.message ||
@@ -115,6 +128,8 @@ function MyProducts() {
             "Could not delete listing."
           )
       );
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -301,8 +316,7 @@ function MyProducts() {
                       onClick={(event) => {
                         event.preventDefault();
                         event.stopPropagation();
-                        setOpenMenuId(null);
-                        handleDelete(product.id);
+                        openDeleteConfirm(product);
                       }}
                     >
                       {text("Löschen", "حذف", "Delete")}
@@ -345,6 +359,52 @@ function MyProducts() {
           </div>
         )}
       </main>
+
+      {deleteTargetProduct && (
+        <div className="delete-confirm-modal" role="dialog" aria-modal="true">
+          <section className="delete-confirm-card">
+            <p className="eyebrow">{text("Achtung", "تنبيه", "Warning")}</p>
+
+            <h2>
+              {text("Anzeige löschen?", "حذف الإعلان؟", "Delete listing?")}
+            </h2>
+
+            <p>
+              {text(
+                "Bist du sicher? Diese Aktion kann nicht rückgängig gemacht werden.",
+                "هل أنت متأكد؟ لا يمكن التراجع عن هذه العملية.",
+                "Are you sure? This action cannot be undone."
+              )}
+            </p>
+
+            <div className="delete-confirm-product">
+              {deleteTargetProduct.title}
+            </div>
+
+            <div className="delete-confirm-actions">
+              <button
+                className="btn btn-secondary"
+                type="button"
+                onClick={closeDeleteConfirm}
+                disabled={isDeleting}
+              >
+                {text("Abbrechen", "إلغاء", "Cancel")}
+              </button>
+
+              <button
+                className="btn btn-danger"
+                type="button"
+                onClick={handleConfirmDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting
+                  ? text("Wird gelöscht...", "جارٍ الحذف...", "Deleting...")
+                  : text("Löschen", "حذف", "Delete")}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 }
