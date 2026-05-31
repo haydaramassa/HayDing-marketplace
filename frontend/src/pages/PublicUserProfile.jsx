@@ -1,10 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
-import {
-  getProducts,
-  getPublicUserProfile,
-} from "../services/api";
+import { getProducts, getPublicUserProfile } from "../services/api";
 import ProductCardImage from "../components/ProductCardImage";
 import UserAvatar from "../components/UserAvatar";
 import "../App.css";
@@ -19,6 +16,7 @@ function PublicUserProfile() {
   const [isProductsLoading, setIsProductsLoading] = useState(true);
   const [error, setError] = useState("");
   const [productsError, setProductsError] = useState("");
+  const [notFound, setNotFound] = useState(false);
 
   function text(de, ar, en) {
     if (isArabic) return ar;
@@ -57,20 +55,40 @@ function PublicUserProfile() {
       try {
         setIsLoading(true);
         setError("");
+        setNotFound(false);
+        setProfile(null);
 
         const data = await getPublicUserProfile(userId);
         const user = data?.data || data;
 
+        if (!user || !user.id) {
+          setNotFound(true);
+          return;
+        }
+
         setProfile(user);
       } catch (err) {
-        setError(
-          err.message ||
-            text(
-              "Profil konnte nicht geladen werden.",
-              "تعذر تحميل الملف الشخصي.",
-              "Could not load profile."
-            )
-        );
+        const message = err.message || "";
+        const isNumericUserId = /^\d+$/.test(String(userId));
+
+        if (
+          isNumericUserId ||
+          message.toLowerCase().includes("not found") ||
+          message.toLowerCase().includes("bad request") ||
+          message.includes("404") ||
+          message.includes("400")
+        ) {
+          setNotFound(true);
+        } else {
+          setError(
+            message ||
+              text(
+                "Profil konnte nicht geladen werden.",
+                "تعذر تحميل الملف الشخصي.",
+                "Could not load profile."
+              )
+          );
+        }
       } finally {
         setIsLoading(false);
       }
@@ -170,9 +188,45 @@ function PublicUserProfile() {
           </p>
         )}
 
-        {error && <p className="auth-message auth-error">{error}</p>}
+        {!isLoading && notFound && (
+          <section className="not-found-card product-not-found-card">
+            <p className="eyebrow">404</p>
 
-        {!isLoading && !error && profile && (
+            <h1>
+              {text(
+                "Nutzer nicht verfügbar",
+                "المستخدم غير متاح",
+                "User unavailable"
+              )}
+            </h1>
+
+            <p>
+              {text(
+                "Dieses Profil existiert nicht mehr oder ist aktuell nicht verfügbar.",
+                "هذا الملف الشخصي لم يعد موجوداً أو غير متاح حالياً.",
+                "This profile no longer exists or is currently unavailable."
+              )}
+            </p>
+
+            <div className="not-found-actions">
+              <Link className="btn btn-primary" to="/products">
+                {text(
+                  "Anzeigen entdecken",
+                  "استكشف الإعلانات",
+                  "Explore listings"
+                )}
+              </Link>
+
+              <Link className="btn btn-secondary" to="/">
+                {text("Zur Startseite", "إلى الرئيسية", "Back home")}
+              </Link>
+            </div>
+          </section>
+        )}
+
+        {error && !notFound && <p className="auth-message auth-error">{error}</p>}
+
+        {!isLoading && !error && !notFound && profile && (
           <>
             <section className="public-profile-card">
               <UserAvatar
@@ -198,7 +252,9 @@ function PublicUserProfile() {
                   </div>
 
                   <div>
-                    <span>{text("Mitglied seit", "عضو منذ", "Member since")}</span>
+                    <span>
+                      {text("Mitglied seit", "عضو منذ", "Member since")}
+                    </span>
                     <strong>{formatDate(profile.createdAt)}</strong>
                   </div>
 
