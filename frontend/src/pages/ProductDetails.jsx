@@ -199,6 +199,10 @@ function ProductDetails() {
   }, [product, productId]);
 
   async function handleFavoriteClick() {
+    if (isOwner) {
+      return;
+    }
+
     if (!isLoggedIn()) {
       navigate("/login");
       return;
@@ -350,29 +354,31 @@ function ProductDetails() {
             <div className="product-details-layout">
               <section className="product-details-gallery">
                 <div className="product-details-image">
-                  <button
-                    className={`favorite-btn details-favorite-btn ${
-                      isFavorite ? "active" : ""
-                    }`}
-                    type="button"
-                    onClick={handleFavoriteClick}
-                    disabled={favoriteLoading}
-                    aria-label={
-                      isFavorite
-                        ? text(
-                            "Aus Favoriten entfernen",
-                            "إزالة من المفضلة",
-                            "Remove from favorites"
-                          )
-                        : text(
-                            "Zu Favoriten hinzufügen",
-                            "إضافة إلى المفضلة",
-                            "Add to favorites"
-                          )
-                    }
-                  >
-                    {isFavorite ? "♥" : "♡"}
-                  </button>
+                  {!isOwner && (
+                    <button
+                      className={`favorite-btn details-favorite-btn ${
+                        isFavorite ? "active" : ""
+                      }`}
+                      type="button"
+                      onClick={handleFavoriteClick}
+                      disabled={favoriteLoading}
+                      aria-label={
+                        isFavorite
+                          ? text(
+                              "Aus Favoriten entfernen",
+                              "إزالة من المفضلة",
+                              "Remove from favorites"
+                            )
+                          : text(
+                              "Zu Favoriten hinzufügen",
+                              "إضافة إلى المفضلة",
+                              "Add to favorites"
+                            )
+                      }
+                    >
+                      {isFavorite ? "♥" : "♡"}
+                    </button>
+                  )}
 
                   {hasMultipleImages && (
                     <>
