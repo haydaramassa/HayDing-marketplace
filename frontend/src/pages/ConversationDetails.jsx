@@ -338,31 +338,6 @@ function ConversationDetails() {
                 </Link>
               )}
 
-              {otherUser && (
-                <Link
-                  className="conversation-user-card"
-                  to={`/users/${otherUser.id}`}
-                >
-                  <UserAvatar user={otherUser} size="medium" />
-
-                  <div>
-                    <span className="conversation-label">
-                      {text("Kontakt", "جهة التواصل", "Contact")}
-                    </span>
-
-                    <h3>{getUserName(otherUser)}</h3>
-
-                    <p>
-                      {otherUser.city ||
-                        text(
-                          "Ort nicht angegeben",
-                          "المدينة غير محددة",
-                          "City not specified"
-                        )}
-                    </p>
-                  </div>
-                </Link>
-              )}
             </aside>
 
             <section className="conversation-chat">
