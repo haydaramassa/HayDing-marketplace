@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import {
@@ -22,6 +22,10 @@ function Products() {
   const [favoriteLoadingId, setFavoriteLoadingId] = useState(null);
   const [error, setError] = useState("");
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [cityFilter, setCityFilter] = useState("");
+  const [conditionFilter, setConditionFilter] = useState("");
+
   function text(de, ar, en) {
     if (isArabic) return ar;
     if (language === "EN") return en;
@@ -30,6 +34,18 @@ function Products() {
 
   function isLoggedIn() {
     return Boolean(localStorage.getItem("hayding-token"));
+  }
+
+  function getConditionLabel(conditionStatus) {
+    const labels = {
+      NEW: text("Neu", "جديد", "New"),
+      LIKE_NEW: text("Wie neu", "شبه جديد", "Like new"),
+      GOOD: text("Gut", "جيد", "Good"),
+      ACCEPTABLE: text("Akzeptabel", "مقبول", "Acceptable"),
+      USED: text("Gebraucht", "مستعمل", "Used"),
+    };
+
+    return labels[conditionStatus] || conditionStatus;
   }
 
   useEffect(() => {
@@ -67,6 +83,50 @@ function Products() {
 
     loadProducts();
   }, []);
+
+  const availableCities = useMemo(() => {
+    const cities = products
+      .map((product) => product.city)
+      .filter(Boolean)
+      .map((city) => city.trim())
+      .filter(Boolean);
+
+    return [...new Set(cities)].sort((a, b) => a.localeCompare(b));
+  }, [products]);
+
+  const filteredProducts = useMemo(() => {
+    const cleanSearch = searchTerm.trim().toLowerCase();
+    const cleanCity = cityFilter.trim().toLowerCase();
+
+    return products.filter((product) => {
+      const title = product.title?.toLowerCase() || "";
+      const description = product.description?.toLowerCase() || "";
+      const city = product.city?.toLowerCase() || "";
+      const condition = product.conditionStatus || product.condition || "";
+
+      const matchesSearch =
+        !cleanSearch ||
+        title.includes(cleanSearch) ||
+        description.includes(cleanSearch);
+
+      const matchesCity = !cleanCity || city === cleanCity;
+
+      const matchesCondition =
+        !conditionFilter || condition === conditionFilter;
+
+      return matchesSearch && matchesCity && matchesCondition;
+    });
+  }, [products, searchTerm, cityFilter, conditionFilter]);
+
+  const hasActiveFilters = Boolean(
+    searchTerm.trim() || cityFilter || conditionFilter
+  );
+
+  function clearFilters() {
+    setSearchTerm("");
+    setCityFilter("");
+    setConditionFilter("");
+  }
 
   async function handleFavoriteClick(event, productId) {
     event.preventDefault();
@@ -137,6 +197,85 @@ function Products() {
           </div>
         </div>
 
+        <section className="products-filter-card">
+          <div className="products-filter-grid">
+            <label className="products-filter-field products-filter-search">
+              <span>{text("Suche", "بحث", "Search")}</span>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder={text(
+                  "Titel oder Beschreibung suchen...",
+                  "ابحث بالعنوان أو الوصف...",
+                  "Search title or description..."
+                )}
+              />
+            </label>
+
+            <label className="products-filter-field">
+              <span>{text("Stadt", "المدينة", "City")}</span>
+              <select
+                value={cityFilter}
+                onChange={(event) => setCityFilter(event.target.value)}
+              >
+                <option value="">
+                  {text("Alle Städte", "كل المدن", "All cities")}
+                </option>
+
+                {availableCities.map((city) => (
+                  <option value={city} key={city}>
+                    {city}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="products-filter-field">
+              <span>{text("Zustand", "الحالة", "Condition")}</span>
+              <select
+                value={conditionFilter}
+                onChange={(event) => setConditionFilter(event.target.value)}
+              >
+                <option value="">
+                  {text("Alle Zustände", "كل الحالات", "All conditions")}
+                </option>
+                <option value="NEW">{text("Neu", "جديد", "New")}</option>
+                <option value="LIKE_NEW">
+                  {text("Wie neu", "شبه جديد", "Like new")}
+                </option>
+                <option value="GOOD">{text("Gut", "جيد", "Good")}</option>
+                <option value="ACCEPTABLE">
+                  {text("Akzeptabel", "مقبول", "Acceptable")}
+                </option>
+                <option value="USED">
+                  {text("Gebraucht", "مستعمل", "Used")}
+                </option>
+              </select>
+            </label>
+          </div>
+
+          <div className="products-filter-footer">
+            <p>
+              {text(
+                `${filteredProducts.length} von ${products.length} Anzeigen`,
+                `${filteredProducts.length} من ${products.length} إعلان`,
+                `${filteredProducts.length} of ${products.length} listings`
+              )}
+            </p>
+
+            {hasActiveFilters && (
+              <button
+                className="btn btn-secondary"
+                type="button"
+                onClick={clearFilters}
+              >
+                {text("Filter zurücksetzen", "إزالة الفلاتر", "Clear filters")}
+              </button>
+            )}
+          </div>
+        </section>
+
         {isLoading && (
           <p className="auth-message auth-success">
             {text(
@@ -149,31 +288,49 @@ function Products() {
 
         {error && <p className="auth-message auth-error">{error}</p>}
 
-        {!isLoading && !error && products.length === 0 && (
+        {!isLoading && !error && filteredProducts.length === 0 && (
           <div className="empty-state">
             <div className="empty-icon">🔎</div>
 
             <h2>
-              {text(
-                "Noch keine Anzeigen gefunden.",
-                "لا توجد إعلانات بعد.",
-                "No listings found yet."
-              )}
+              {products.length === 0
+                ? text(
+                    "Noch keine Anzeigen gefunden.",
+                    "لا توجد إعلانات بعد.",
+                    "No listings found yet."
+                  )
+                : text(
+                    "Keine passenden Anzeigen gefunden.",
+                    "لا توجد إعلانات مطابقة.",
+                    "No matching listings found."
+                  )}
             </h2>
 
             <p>
-              {text(
-                "Sobald neue Anzeigen veröffentlicht werden, erscheinen sie hier.",
-                "عند نشر إعلانات جديدة، ستظهر هنا.",
-                "Once new listings are published, they will appear here."
-              )}
+              {products.length === 0
+                ? text(
+                    "Sobald neue Anzeigen veröffentlicht werden, erscheinen sie hier.",
+                    "عند نشر إعلانات جديدة، ستظهر هنا.",
+                    "Once new listings are published, they will appear here."
+                  )
+                : text(
+                    "Versuche andere Suchbegriffe oder entferne die Filter.",
+                    "جرّب كلمات بحث أخرى أو أزل الفلاتر.",
+                    "Try different search terms or clear the filters."
+                  )}
             </p>
+
+            {hasActiveFilters && (
+              <button className="btn btn-primary" type="button" onClick={clearFilters}>
+                {text("Filter zurücksetzen", "إزالة الفلاتر", "Clear filters")}
+              </button>
+            )}
           </div>
         )}
 
-        {!isLoading && !error && products.length > 0 && (
+        {!isLoading && !error && filteredProducts.length > 0 && (
           <div className="my-products-grid">
-            {products.map((product) => {
+            {filteredProducts.map((product) => {
               const isFavorite = favoriteIds.includes(product.id);
               const isFavoriteLoading = favoriteLoadingId === product.id;
 
@@ -211,9 +368,9 @@ function Products() {
 
                   <div className="product-info">
                     <span className="product-tag">
-                      {product.conditionStatus ||
-                        product.condition ||
-                        text("Aktiv", "نشط", "Active")}
+                      {getConditionLabel(
+                        product.conditionStatus || product.condition
+                      ) || text("Aktiv", "نشط", "Active")}
                     </span>
 
                     <h3>{product.title}</h3>
