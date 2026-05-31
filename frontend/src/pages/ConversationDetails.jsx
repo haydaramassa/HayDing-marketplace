@@ -24,7 +24,9 @@ function ConversationDetails() {
   const [error, setError] = useState("");
 
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const emojiPickerRef = useRef(null);
+  const shouldScrollToBottomRef = useRef(true);
 
   const emojis = [
     "😀",
@@ -95,6 +97,19 @@ function ConversationDetails() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }
 
+  function isNearBottom() {
+    const container = messagesContainerRef.current;
+
+    if (!container) {
+      return true;
+    }
+
+    const distanceFromBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight;
+
+    return distanceFromBottom < 90;
+  }
+
   function goToUserProfile(user) {
     if (!user?.id) return;
 
@@ -107,10 +122,14 @@ function ConversationDetails() {
 
   async function loadMessagesOnly(showError = false) {
     try {
+      const wasNearBottom = isNearBottom();
+
       const messagesData = await getConversationMessages(conversationId);
       const loadedMessages = messagesData?.data || messagesData || [];
 
       setMessages(Array.isArray(loadedMessages) ? loadedMessages : []);
+
+      shouldScrollToBottomRef.current = wasNearBottom;
     } catch (err) {
       if (showError) {
         setError(
@@ -135,6 +154,7 @@ function ConversationDetails() {
       try {
         setIsLoading(true);
         setError("");
+        shouldScrollToBottomRef.current = true;
 
         const conversationsData = await getConversations();
         const conversations = conversationsData?.data || conversationsData || [];
@@ -158,6 +178,7 @@ function ConversationDetails() {
         setConversation(selectedConversation);
 
         await loadMessagesOnly(true);
+        shouldScrollToBottomRef.current = true;
       } catch (err) {
         setError(
           err.message ||
@@ -190,7 +211,9 @@ function ConversationDetails() {
   }, [conversationId]);
 
   useEffect(() => {
-    scrollToBottom();
+    if (shouldScrollToBottomRef.current) {
+      scrollToBottom();
+    }
   }, [messages]);
 
   useEffect(() => {
@@ -223,6 +246,7 @@ function ConversationDetails() {
       setIsSending(true);
       setError("");
       setIsEmojiOpen(false);
+      shouldScrollToBottomRef.current = true;
 
       const data = await sendConversationMessage(conversationId, cleanMessage);
       const savedMessage = data?.data || data;
@@ -233,6 +257,7 @@ function ConversationDetails() {
 
       setMessageText("");
       await loadMessagesOnly(false);
+      shouldScrollToBottomRef.current = true;
     } catch (err) {
       setError(
         err.message ||
@@ -351,7 +376,7 @@ function ConversationDetails() {
                 </div>
               </div>
 
-              <div className="conversation-messages">
+              <div className="conversation-messages" ref={messagesContainerRef}>
                 {messages.length === 0 && (
                   <div className="empty-state conversation-empty">
                     <div className="empty-icon">💬</div>
