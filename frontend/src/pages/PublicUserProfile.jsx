@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { getProducts, getPublicUserProfile } from "../services/api";
 import ProductCardImage from "../components/ProductCardImage";
@@ -8,6 +8,7 @@ import "../App.css";
 
 function PublicUserProfile() {
   const { userId } = useParams();
+  const navigate = useNavigate();
   const { isArabic, language, setLanguage } = useLanguage();
 
   const [profile, setProfile] = useState(null);
@@ -22,6 +23,15 @@ function PublicUserProfile() {
     if (isArabic) return ar;
     if (language === "EN") return en;
     return de;
+  }
+
+  function handleBack() {
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+
+    navigate("/products");
   }
 
   function formatDate(dateValue) {
@@ -171,9 +181,13 @@ function PublicUserProfile() {
             ))}
           </div>
 
-          <Link className="btn btn-secondary" to="/products">
+          <button
+            className="btn btn-secondary"
+            type="button"
+            onClick={handleBack}
+          >
             {text("Zurück", "رجوع", "Back")}
-          </Link>
+          </button>
         </div>
       </header>
 
