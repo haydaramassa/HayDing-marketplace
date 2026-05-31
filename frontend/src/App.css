@@ -4157,3 +4157,63 @@ font-size: 1.05rem;
   padding: 14px 16px;
 }
 
+/* Softer compact conversation composer */
+.conversation-form {
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.emoji-toggle {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 14px;
+  font-size: 1.05rem;
+}
+
+.conversation-form textarea {
+  height: 44px;
+  min-height: 44px;
+  max-height: 44px;
+  padding: 11px 14px;
+  border-radius: 16px;
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.conversation-form .btn {
+  min-width: 96px;
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-size: 0.92rem;
+}
+
+.emoji-picker {
+  width: 230px;
+  gap: 5px;
+  padding: 9px;
+  border-radius: 16px;
+}
+
+.emoji-picker button {
+  height: 31px;
+  border-radius: 10px;
+  font-size: 1rem;
+}
+
+@media (max-width: 720px) {
+  .conversation-form {
+    grid-template-columns: 40px 1fr;
+  }
+
+  .conversation-form .btn {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .emoji-picker {
+    width: 220px;
+  }
+}
+
