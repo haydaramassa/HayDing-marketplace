@@ -30,6 +30,9 @@ function Products() {
   const [conditionFilter, setConditionFilter] = useState(
     searchParams.get("condition") || ""
   );
+  const [categoryFilter, setCategoryFilter] = useState(
+    searchParams.get("category") || ""
+  );
   const [sortOption, setSortOption] = useState(
     searchParams.get("sort") || "newest"
   );
@@ -54,6 +57,21 @@ function Products() {
     };
 
     return labels[conditionStatus] || conditionStatus;
+  }
+
+  function getCategoryOptions() {
+    return [
+      { id: "1", label: text("Elektronik", "إلكترونيات", "Electronics") },
+      { id: "2", label: text("Möbel", "أثاث", "Furniture") },
+      { id: "3", label: text("Kleidung", "ملابس", "Clothing") },
+      { id: "5", label: text("Haushalt", "منزل", "Home") },
+      { id: "6", label: text("Bücher", "كتب", "Books") },
+      { id: "8", label: text("Sport", "رياضة", "Sport") },
+    ];
+  }
+  
+  function getProductCategoryId(product) {
+    return String(product.categoryId || product.category?.id || "");
   }
 
   function getProductDateValue(product) {
@@ -117,6 +135,7 @@ function Products() {
     setSearchTerm(searchParams.get("search") || "");
     setCityFilter(searchParams.get("city") || "");
     setConditionFilter(searchParams.get("condition") || "");
+    setCategoryFilter(searchParams.get("category") || "");
     setSortOption(searchParams.get("sort") || "newest");
   }, [searchParams]);
 
@@ -139,6 +158,7 @@ function Products() {
       const description = product.description?.toLowerCase() || "";
       const city = product.city?.toLowerCase() || "";
       const condition = product.conditionStatus || product.condition || "";
+      const categoryId = getProductCategoryId(product);
 
       const matchesSearch =
         !cleanSearch ||
@@ -150,9 +170,12 @@ function Products() {
       const matchesCondition =
         !conditionFilter || condition === conditionFilter;
 
-      return matchesSearch && matchesCity && matchesCondition;
+      const matchesCategory =
+        !categoryFilter || categoryId === String(categoryFilter);
+
+      return matchesSearch && matchesCity && matchesCondition && matchesCategory;
     });
-  }, [products, searchTerm, cityFilter, conditionFilter]);
+  }, [products, searchTerm, cityFilter, conditionFilter, categoryFilter]);
 
   const visibleProducts = useMemo(() => {
     const sortedProducts = [...filteredProducts];
@@ -171,13 +194,18 @@ function Products() {
   }, [filteredProducts, sortOption]);
 
   const hasActiveFilters = Boolean(
-    searchTerm.trim() || cityFilter || conditionFilter || sortOption !== "newest"
+    searchTerm.trim() ||
+      cityFilter ||
+      conditionFilter ||
+      categoryFilter ||
+      sortOption !== "newest"
   );
 
   function clearFilters() {
     setSearchTerm("");
     setCityFilter("");
     setConditionFilter("");
+    setCategoryFilter("");
     setSortOption("newest");
   }
 
@@ -279,6 +307,24 @@ function Products() {
                 {availableCities.map((city) => (
                   <option value={city} key={city}>
                     {city}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="products-filter-field">
+              <span>{text("Kategorie", "الفئة", "Category")}</span>
+              <select
+                value={categoryFilter}
+                onChange={(event) => setCategoryFilter(event.target.value)}
+                >
+                <option value="">
+                  {text("Alle Kategorien", "كل الفئات", "All categories")}
+                </option>
+
+                {getCategoryOptions().map((category) => (
+                  <option value={category.id} key={category.id}>
+                    {category.label}
                   </option>
                 ))}
               </select>

@@ -162,6 +162,7 @@ function Home() {
   };
 
   const t = content[language];
+  const categoryIds = ["1", "2", "3", "5", "6", "8"];
 
   useEffect(() => {
     async function loadLatestProducts() {
@@ -337,8 +338,13 @@ function Home() {
           </div>
 
           <div className="categories-grid">
-            {t.categories.map((category) => (
-              <button className="category-card" type="button" key={category}>
+            {t.categories.map((category, index) => (
+              <button
+                className="category-card"
+                type="button"
+                key={category}
+                onClick={() => navigate(`/products?category=${categoryIds[index]}`)}
+               >
                 {category}
               </button>
             ))}
