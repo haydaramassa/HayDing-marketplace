@@ -18,11 +18,40 @@ function ConversationDetails() {
   const [conversation, setConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [messageText, setMessageText] = useState("");
+  const [isEmojiOpen, setIsEmojiOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState("");
 
   const messagesEndRef = useRef(null);
+  const emojiPickerRef = useRef(null);
+
+  const emojis = [
+    "😀",
+    "😁",
+    "😂",
+    "😊",
+    "😍",
+    "😎",
+    "🥳",
+    "👍",
+    "🙏",
+    "👏",
+    "🔥",
+    "❤️",
+    "💚",
+    "✅",
+    "👌",
+    "🤝",
+    "💬",
+    "📦",
+    "🚲",
+    "📍",
+    "💶",
+    "⭐",
+    "🎉",
+    "🙌",
+  ];
 
   function text(de, ar, en) {
     if (isArabic) return ar;
@@ -70,6 +99,10 @@ function ConversationDetails() {
     if (!user?.id) return;
 
     navigate(`/users/${user.id}`);
+  }
+
+  function handleEmojiClick(emoji) {
+    setMessageText((currentText) => `${currentText}${emoji}`);
   }
 
   async function loadMessagesOnly(showError = false) {
@@ -160,6 +193,23 @@ function ConversationDetails() {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        emojiPickerRef.current &&
+        !emojiPickerRef.current.contains(event.target)
+      ) {
+        setIsEmojiOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   async function handleSendMessage(event) {
     event.preventDefault();
 
@@ -172,6 +222,7 @@ function ConversationDetails() {
     try {
       setIsSending(true);
       setError("");
+      setIsEmojiOpen(false);
 
       const data = await sendConversationMessage(conversationId, cleanMessage);
       const savedMessage = data?.data || data;
@@ -383,6 +434,35 @@ function ConversationDetails() {
               </div>
 
               <form className="conversation-form" onSubmit={handleSendMessage}>
+                <div className="conversation-input-tools" ref={emojiPickerRef}>
+                  <button
+                    className="emoji-toggle"
+                    type="button"
+                    onClick={() => setIsEmojiOpen((current) => !current)}
+                    aria-label={text(
+                      "Emoji auswählen",
+                      "اختيار إيموجي",
+                      "Choose emoji"
+                    )}
+                  >
+                    😀
+                  </button>
+
+                  {isEmojiOpen && (
+                    <div className="emoji-picker">
+                      {emojis.map((emoji) => (
+                        <button
+                          type="button"
+                          key={emoji}
+                          onClick={() => handleEmojiClick(emoji)}
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <textarea
                   value={messageText}
                   onChange={(event) => setMessageText(event.target.value)}
