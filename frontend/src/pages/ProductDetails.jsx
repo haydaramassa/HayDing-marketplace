@@ -31,6 +31,7 @@ function ProductDetails() {
   const [favoriteLoading, setFavoriteLoading] = useState(false);
   const [isStartingConversation, setIsStartingConversation] = useState(false);
   const [error, setError] = useState("");
+  const [notFound, setNotFound] = useState(false);
 
   function text(de, ar, en) {
     if (isArabic) return ar;
@@ -71,11 +72,18 @@ function ProductDetails() {
       try {
         setIsLoading(true);
         setError("");
+        setNotFound(false);
+        setProduct(null);
         setSimilarProducts([]);
         setSelectedImageIndex(0);
 
         const productData = await getProductById(productId);
         const loadedProduct = productData?.data || productData;
+
+        if (!loadedProduct || !loadedProduct.id) {
+          setNotFound(true);
+          return;
+        }
 
         setProduct(loadedProduct);
 
@@ -103,14 +111,27 @@ function ProductDetails() {
           setIsOwner(ownsThisProduct);
         }
       } catch (err) {
-        setError(
-          err.message ||
-            text(
-              "Anzeige konnte nicht geladen werden.",
-              "تعذر تحميل الإعلان.",
-              "Could not load listing."
-            )
-        );
+        const message = err.message || "";
+        const isNumericProductId = /^\d+$/.test(String(productId));
+
+        if (
+          isNumericProductId ||
+          message.toLowerCase().includes("not found") ||
+          message.toLowerCase().includes("bad request") ||
+          message.includes("404") ||
+          message.includes("400")
+        ) {
+          setNotFound(true);
+        } else {
+          setError(
+            message ||
+              text(
+                "Anzeige konnte nicht geladen werden.",
+                "تعذر تحميل الإعلان.",
+                "Could not load listing."
+              )
+          );
+        }
       } finally {
         setIsLoading(false);
       }
@@ -140,8 +161,7 @@ function ProductDetails() {
         const relatedProducts = Array.isArray(products)
           ? products
               .filter((item) => {
-                const isSameProduct =
-                  Number(item.id) === Number(productId);
+                const isSameProduct = Number(item.id) === Number(productId);
 
                 const isSameCategory =
                   getProductCategoryId(item) === currentCategoryId;
@@ -151,8 +171,12 @@ function ProductDetails() {
                 return !isSameProduct && isSameCategory && !isSold;
               })
               .sort((a, b) => {
-                const dateA = new Date(a.updatedAt || a.createdAt || 0).getTime();
-                const dateB = new Date(b.updatedAt || b.createdAt || 0).getTime();
+                const dateA = new Date(
+                  a.updatedAt || a.createdAt || 0
+                ).getTime();
+                const dateB = new Date(
+                  b.updatedAt || b.createdAt || 0
+                ).getTime();
 
                 if (Number.isNaN(dateA) || Number.isNaN(dateB)) {
                   return Number(b.id || 0) - Number(a.id || 0);
@@ -281,9 +305,47 @@ function ProductDetails() {
           </p>
         )}
 
-        {error && <p className="auth-message auth-error">{error}</p>}
+        {!isLoading && notFound && (
+          <section className="not-found-card product-not-found-card">
+            <p className="eyebrow">404</p>
 
-        {!isLoading && !error && product && (
+            <h1>
+              {text(
+                "Anzeige nicht gefunden",
+                "الإعلان غير موجود",
+                "Listing not found"
+              )}
+            </h1>
+
+            <p>
+              {text(
+                "Diese Anzeige existiert nicht mehr oder wurde entfernt.",
+                "هذا الإعلان لم يعد موجوداً أو تم حذفه.",
+                "This listing no longer exists or has been removed."
+              )}
+            </p>
+
+            <div className="not-found-actions">
+              <Link className="btn btn-primary" to="/products">
+                {text(
+                  "Anzeigen entdecken",
+                  "استكشف الإعلانات",
+                  "Explore listings"
+                )}
+              </Link>
+
+              <Link className="btn btn-secondary" to="/">
+                {text("Zur Startseite", "إلى الرئيسية", "Back home")}
+              </Link>
+            </div>
+          </section>
+        )}
+
+        {error && !notFound && (
+          <p className="auth-message auth-error">{error}</p>
+        )}
+
+        {!isLoading && !error && !notFound && product && (
           <>
             <div className="product-details-layout">
               <section className="product-details-gallery">
@@ -482,7 +544,11 @@ function ProductDetails() {
                       className="btn btn-secondary"
                       to={`/edit-product/${product.id}`}
                     >
-                      {text("Anzeige bearbeiten", "تعديل الإعلان", "Edit listing")}
+                      {text(
+                        "Anzeige bearbeiten",
+                        "تعديل الإعلان",
+                        "Edit listing"
+                      )}
                     </Link>
                   )}
                 </div>
@@ -493,7 +559,11 @@ function ProductDetails() {
               <div className="similar-listings-header">
                 <div>
                   <p className="eyebrow">
-                    {text("Ähnliche Anzeigen", "إعلانات مشابهة", "Similar listings")}
+                    {text(
+                      "Ähnliche Anzeigen",
+                      "إعلانات مشابهة",
+                      "Similar listings"
+                    )}
                   </p>
 
                   <h2>
