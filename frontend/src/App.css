@@ -3943,3 +3943,53 @@ font-size: 1.05rem;
   margin: 70px auto;
 }
 
+.message-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.message-row.mine {
+  justify-content: flex-end;
+}
+
+.message-row.theirs {
+  justify-content: flex-start;
+}
+
+.message-avatar-button {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.message-avatar-button:hover {
+  transform: translateY(-1px);
+}
+
+.message-meta-button {
+  display: block;
+  margin-top: 5px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  opacity: 0.72;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.68rem;
+  text-align: start;
+}
+
+.message-row.mine .message-meta-button {
+  margin-left: auto;
+  text-align: end;
+}
+
+.message-meta-button:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+

@@ -66,6 +66,12 @@ function ConversationDetails() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }
 
+  function goToUserProfile(user) {
+    if (!user?.id) return;
+
+    navigate(`/users/${user.id}`);
+  }
+
   async function loadMessagesOnly(showError = false) {
     try {
       const messagesData = await getConversationMessages(conversationId);
@@ -326,14 +332,49 @@ function ConversationDetails() {
                       className={`message-row ${isMine ? "mine" : "theirs"}`}
                       key={message.id}
                     >
+                      {!isMine && (
+                        <button
+                          className="message-avatar-button"
+                          type="button"
+                          onClick={() => goToUserProfile(message.sender)}
+                          aria-label={text(
+                            "Profil öffnen",
+                            "فتح الملف الشخصي",
+                            "Open profile"
+                          )}
+                        >
+                          <UserAvatar user={message.sender} size="small" />
+                        </button>
+                      )}
+
                       <div className="message-bubble">
                         <p>{message.content}</p>
 
-                        <span>
+                        <button
+                          className="message-meta-button"
+                          type="button"
+                          onClick={() => goToUserProfile(message.sender)}
+                          disabled={!message.sender?.id}
+                        >
                           {getUserName(message.sender)} ·{" "}
                           {formatDate(message.createdAt)}
-                        </span>
+                        </button>
                       </div>
+
+                      {isMine && (
+                        <button
+                          className="message-avatar-button"
+                          type="button"
+                          onClick={() => goToUserProfile(message.sender)}
+                          aria-label={text(
+                            "Profil öffnen",
+                            "فتح الملف الشخصي",
+                            "Open profile"
+                          )}
+                        >
+                          <UserAvatar user={message.sender} size="small" />
+                        </button>
+                      )}
                     </div>
                   );
                 })}
