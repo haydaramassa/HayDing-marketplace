@@ -47,6 +47,24 @@ function Products() {
     return Boolean(localStorage.getItem("hayding-token"));
   }
 
+  function getCurrentUser() {
+    try {
+      return JSON.parse(localStorage.getItem("hayding-user") || "{}");
+    } catch {
+      return {};
+    }
+  }
+
+  function isOwnProduct(product) {
+    const currentUser = getCurrentUser();
+
+    return (
+      currentUser?.id &&
+      product?.seller?.id &&
+      Number(currentUser.id) === Number(product.seller.id)
+    );
+  }
+
   function getConditionLabel(conditionStatus) {
     const labels = {
       NEW: text("Neu", "جديد", "New"),
@@ -69,7 +87,7 @@ function Products() {
       { id: "8", label: text("Sport", "رياضة", "Sport") },
     ];
   }
-  
+
   function getProductCategoryId(product) {
     return String(product.categoryId || product.category?.id || "");
   }
@@ -213,6 +231,12 @@ function Products() {
     event.preventDefault();
     event.stopPropagation();
 
+    const product = products.find((item) => Number(item.id) === Number(productId));
+
+    if (isOwnProduct(product)) {
+      return;
+    }
+
     if (!isLoggedIn()) {
       navigate("/login");
       return;
@@ -317,7 +341,7 @@ function Products() {
               <select
                 value={categoryFilter}
                 onChange={(event) => setCategoryFilter(event.target.value)}
-                >
+              >
                 <option value="">
                   {text("Alle Kategorien", "كل الفئات", "All categories")}
                 </option>
@@ -462,6 +486,7 @@ function Products() {
             {visibleProducts.map((product) => {
               const isFavorite = favoriteIds.includes(product.id);
               const isFavoriteLoading = favoriteLoadingId === product.id;
+              const belongsToCurrentUser = isOwnProduct(product);
 
               return (
                 <Link
@@ -470,29 +495,33 @@ function Products() {
                   to={`/products/${product.id}`}
                 >
                   <ProductCardImage product={product}>
-                    <button
-                      className={`favorite-btn ${isFavorite ? "active" : ""}`}
-                      type="button"
-                      onClick={(event) =>
-                        handleFavoriteClick(event, product.id)
-                      }
-                      disabled={isFavoriteLoading}
-                      aria-label={
-                        isFavorite
-                          ? text(
-                              "Aus Favoriten entfernen",
-                              "إزالة من المفضلة",
-                              "Remove from favorites"
-                            )
-                          : text(
-                              "Zu Favoriten hinzufügen",
-                              "إضافة إلى المفضلة",
-                              "Add to favorites"
-                            )
-                      }
-                    >
-                      {isFavorite ? "♥" : "♡"}
-                    </button>
+                    {!belongsToCurrentUser && (
+                      <button
+                        className={`favorite-btn ${
+                          isFavorite ? "active" : ""
+                        }`}
+                        type="button"
+                        onClick={(event) =>
+                          handleFavoriteClick(event, product.id)
+                        }
+                        disabled={isFavoriteLoading}
+                        aria-label={
+                          isFavorite
+                            ? text(
+                                "Aus Favoriten entfernen",
+                                "إزالة من المفضلة",
+                                "Remove from favorites"
+                              )
+                            : text(
+                                "Zu Favoriten hinzufügen",
+                                "إضافة إلى المفضلة",
+                                "Add to favorites"
+                              )
+                        }
+                      >
+                        {isFavorite ? "♥" : "♡"}
+                      </button>
+                    )}
                   </ProductCardImage>
 
                   <div className="product-info">
