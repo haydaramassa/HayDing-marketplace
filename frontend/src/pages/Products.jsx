@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import {
   addFavorite,
@@ -15,6 +15,7 @@ import "../App.css";
 function Products() {
   const { isArabic, language } = useLanguage();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [products, setProducts] = useState([]);
   const [favoriteIds, setFavoriteIds] = useState([]);
@@ -22,9 +23,13 @@ function Products() {
   const [favoriteLoadingId, setFavoriteLoadingId] = useState(null);
   const [error, setError] = useState("");
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [cityFilter, setCityFilter] = useState("");
-  const [conditionFilter, setConditionFilter] = useState("");
+  const [searchTerm, setSearchTerm] = useState(
+    searchParams.get("search") || ""
+  );
+  const [cityFilter, setCityFilter] = useState(searchParams.get("city") || "");
+  const [conditionFilter, setConditionFilter] = useState(
+    searchParams.get("condition") || ""
+  );
 
   function text(de, ar, en) {
     if (isArabic) return ar;
@@ -83,6 +88,12 @@ function Products() {
 
     loadProducts();
   }, []);
+
+  useEffect(() => {
+    setSearchTerm(searchParams.get("search") || "");
+    setCityFilter(searchParams.get("city") || "");
+    setConditionFilter(searchParams.get("condition") || "");
+  }, [searchParams]);
 
   const availableCities = useMemo(() => {
     const cities = products

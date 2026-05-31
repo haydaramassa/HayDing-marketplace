@@ -1,9 +1,15 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import Navbar from "../components/Navbar";
 import "../App.css";
 
 function Home() {
   const { language, isArabic } = useLanguage();
+  const navigate = useNavigate();
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchCity, setSearchCity] = useState("");
 
   const content = {
     DE: {
@@ -199,6 +205,24 @@ function Home() {
 
   const t = content[language];
 
+  function handleSearch(event) {
+    event.preventDefault();
+
+    const params = new URLSearchParams();
+
+    if (searchTerm.trim()) {
+      params.set("search", searchTerm.trim());
+    }
+
+    if (searchCity.trim()) {
+      params.set("city", searchCity.trim());
+    }
+
+    const queryString = params.toString();
+
+    navigate(queryString ? `/products?${queryString}` : "/products");
+  }
+
   return (
     <div
       className={`app ${isArabic ? "rtl" : ""}`}
@@ -221,21 +245,25 @@ function Home() {
 
             <p className="hero-text">{t.heroText}</p>
 
-            <div className="search-box">
+            <form className="search-box" onSubmit={handleSearch}>
               <input
                 type="text"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
                 placeholder={t.searchPlaceholder}
                 aria-label="Search products"
               />
 
               <input
                 type="text"
+                value={searchCity}
+                onChange={(event) => setSearchCity(event.target.value)}
                 placeholder={t.locationPlaceholder}
                 aria-label="Search location"
               />
 
-              <button type="button">{t.searchButton}</button>
-            </div>
+              <button type="submit">{t.searchButton}</button>
+            </form>
 
             <div className="hero-stats">
               <div>
