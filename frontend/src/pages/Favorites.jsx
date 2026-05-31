@@ -21,6 +21,18 @@ function Favorites() {
     return de;
   }
 
+  function getConditionLabel(conditionStatus) {
+    const labels = {
+      NEW: text("Neu", "جديد", "New"),
+      LIKE_NEW: text("Wie neu", "شبه جديد", "Like new"),
+      GOOD: text("Gut", "جيد", "Good"),
+      ACCEPTABLE: text("Akzeptabel", "مقبول", "Acceptable"),
+      USED: text("Gebraucht", "مستعمل", "Used"),
+    };
+
+    return labels[conditionStatus] || conditionStatus || text("Aktiv", "نشط", "Active");
+  }
+
   function isLoggedIn() {
     return Boolean(localStorage.getItem("hayding-token"));
   }
@@ -189,9 +201,9 @@ function Favorites() {
 
                 <div className="product-info">
                   <span className="product-tag">
-                    {product.conditionStatus ||
-                      product.condition ||
-                      text("Aktiv", "نشط", "Active")}
+                    {getConditionLabel(
+                      product.conditionStatus || product.condition
+                    )}
                   </span>
 
                   <h3>{product.title}</h3>
