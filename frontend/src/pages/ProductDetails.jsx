@@ -7,10 +7,12 @@ import {
   getFavorites,
   getMyProducts,
   getProductById,
+  getProducts,
   removeFavorite,
 } from "../services/api";
 import { getProductImages } from "../utils/productImages";
 import Navbar from "../components/Navbar";
+import ProductCardImage from "../components/ProductCardImage";
 import UserAvatar from "../components/UserAvatar";
 import "../App.css";
 
@@ -20,10 +22,12 @@ function ProductDetails() {
   const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
+  const [similarProducts, setSimilarProducts] = useState([]);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSimilarLoading, setIsSimilarLoading] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
   const [isStartingConversation, setIsStartingConversation] = useState(false);
   const [error, setError] = useState("");
@@ -40,6 +44,10 @@ function ProductDetails() {
 
   function normalizeId(value) {
     return Number(value);
+  }
+
+  function getProductCategoryId(item) {
+    return String(item?.categoryId || item?.category?.id || "");
   }
 
   function getConditionLabel(conditionStatus) {
@@ -61,6 +69,11 @@ function ProductDetails() {
   useEffect(() => {
     async function loadProduct() {
       try {
+        setIsLoading(true);
+        setError("");
+        setSimilarProducts([]);
+        setSelectedImageIndex(0);
+
         const productData = await getProductById(productId);
         const loadedProduct = productData?.data || productData;
 
@@ -105,6 +118,61 @@ function ProductDetails() {
 
     loadProduct();
   }, [productId]);
+
+  useEffect(() => {
+    if (!product) {
+      return;
+    }
+
+    async function loadSimilarProducts() {
+      const currentCategoryId = getProductCategoryId(product);
+
+      if (!currentCategoryId) {
+        return;
+      }
+
+      try {
+        setIsSimilarLoading(true);
+
+        const data = await getProducts();
+        const products = data?.data || data || [];
+
+        const relatedProducts = Array.isArray(products)
+          ? products
+              .filter((item) => {
+                const isSameProduct =
+                  Number(item.id) === Number(productId);
+
+                const isSameCategory =
+                  getProductCategoryId(item) === currentCategoryId;
+
+                const isSold = item.productStatus === "SOLD";
+
+                return !isSameProduct && isSameCategory && !isSold;
+              })
+              .sort((a, b) => {
+                const dateA = new Date(a.updatedAt || a.createdAt || 0).getTime();
+                const dateB = new Date(b.updatedAt || b.createdAt || 0).getTime();
+
+                if (Number.isNaN(dateA) || Number.isNaN(dateB)) {
+                  return Number(b.id || 0) - Number(a.id || 0);
+                }
+
+                return dateB - dateA;
+              })
+              .slice(0, 3)
+          : [];
+
+        setSimilarProducts(relatedProducts);
+      } catch {
+        setSimilarProducts([]);
+      } finally {
+        setIsSimilarLoading(false);
+      }
+    }
+
+    loadSimilarProducts();
+  }, [product, productId]);
 
   async function handleFavoriteClick() {
     if (!isLoggedIn()) {
@@ -216,209 +284,294 @@ function ProductDetails() {
         {error && <p className="auth-message auth-error">{error}</p>}
 
         {!isLoading && !error && product && (
-          <div className="product-details-layout">
-            <section className="product-details-gallery">
-              <div className="product-details-image">
-                <button
-                  className={`favorite-btn details-favorite-btn ${
-                    isFavorite ? "active" : ""
-                  }`}
-                  type="button"
-                  onClick={handleFavoriteClick}
-                  disabled={favoriteLoading}
-                  aria-label={
-                    isFavorite
-                      ? text(
-                          "Aus Favoriten entfernen",
-                          "إزالة من المفضلة",
-                          "Remove from favorites"
-                        )
-                      : text(
-                          "Zu Favoriten hinzufügen",
-                          "إضافة إلى المفضلة",
-                          "Add to favorites"
-                        )
-                  }
-                >
-                  {isFavorite ? "♥" : "♡"}
-                </button>
+          <>
+            <div className="product-details-layout">
+              <section className="product-details-gallery">
+                <div className="product-details-image">
+                  <button
+                    className={`favorite-btn details-favorite-btn ${
+                      isFavorite ? "active" : ""
+                    }`}
+                    type="button"
+                    onClick={handleFavoriteClick}
+                    disabled={favoriteLoading}
+                    aria-label={
+                      isFavorite
+                        ? text(
+                            "Aus Favoriten entfernen",
+                            "إزالة من المفضلة",
+                            "Remove from favorites"
+                          )
+                        : text(
+                            "Zu Favoriten hinzufügen",
+                            "إضافة إلى المفضلة",
+                            "Add to favorites"
+                          )
+                    }
+                  >
+                    {isFavorite ? "♥" : "♡"}
+                  </button>
 
-                {hasMultipleImages && (
-                  <>
-                    <button
-                      className="details-image-arrow details-image-arrow-left"
-                      type="button"
-                      onClick={goToPreviousImage}
-                      aria-label={text(
-                        "Vorheriges Bild",
-                        "الصورة السابقة",
-                        "Previous image"
-                      )}
-                    >
-                      ‹
-                    </button>
+                  {hasMultipleImages && (
+                    <>
+                      <button
+                        className="details-image-arrow details-image-arrow-left"
+                        type="button"
+                        onClick={goToPreviousImage}
+                        aria-label={text(
+                          "Vorheriges Bild",
+                          "الصورة السابقة",
+                          "Previous image"
+                        )}
+                      >
+                        ‹
+                      </button>
 
-                    <button
-                      className="details-image-arrow details-image-arrow-right"
-                      type="button"
-                      onClick={goToNextImage}
-                      aria-label={text(
-                        "Nächstes Bild",
-                        "الصورة التالية",
-                        "Next image"
-                      )}
-                    >
-                      ›
-                    </button>
+                      <button
+                        className="details-image-arrow details-image-arrow-right"
+                        type="button"
+                        onClick={goToNextImage}
+                        aria-label={text(
+                          "Nächstes Bild",
+                          "الصورة التالية",
+                          "Next image"
+                        )}
+                      >
+                        ›
+                      </button>
 
-                    <span className="details-image-counter">
-                      {selectedImageIndex + 1}/{productImages.length}
-                    </span>
-                  </>
-                )}
+                      <span className="details-image-counter">
+                        {selectedImageIndex + 1}/{productImages.length}
+                      </span>
+                    </>
+                  )}
 
-                {selectedImage ? (
-                  <img
-                    className="product-details-real-image"
-                    src={selectedImage}
-                    alt={product.title}
-                  />
-                ) : (
-                  <span>📦</span>
-                )}
-              </div>
-
-              <div className="product-thumbnails product-thumbnails-scroll">
-                {productImages.length > 0 ? (
-                  productImages.map((imageUrl, index) => (
-                    <button
-                      type="button"
-                      className={`thumbnail ${
-                        selectedImageIndex === index ? "active" : ""
-                      }`}
-                      key={imageUrl}
-                      onClick={() => setSelectedImageIndex(index)}
-                    >
-                      <img
-                        src={imageUrl}
-                        alt={`${product.title} ${index + 1}`}
-                      />
-                    </button>
-                  ))
-                ) : (
-                  <>
-                    <button type="button" className="thumbnail active">
-                      📦
-                    </button>
-                    <button type="button" className="thumbnail">
-                      ＋
-                    </button>
-                    <button type="button" className="thumbnail">
-                      ＋
-                    </button>
-                  </>
-                )}
-              </div>
-            </section>
-
-            <section className="product-details-info">
-              <p className="eyebrow">{text("Anzeige", "إعلان", "Listing")}</p>
-
-              <h1>{product.title}</h1>
-
-              <strong className="details-price">{product.price} €</strong>
-
-              <div className="details-meta">
-                <div>
-                  <span>{text("Stadt", "المدينة", "City")}</span>
-                  <strong>
-                    {product.city ||
-                      text("Nicht angegeben", "غير محدد", "Not specified")}
-                  </strong>
+                  {selectedImage ? (
+                    <img
+                      className="product-details-real-image"
+                      src={selectedImage}
+                      alt={product.title}
+                    />
+                  ) : (
+                    <span>📦</span>
+                  )}
                 </div>
 
-                <div>
-                  <span>{text("Zustand", "الحالة", "Condition")}</span>
-                  <strong>
-                    {getConditionLabel(
-                      product.conditionStatus || product.condition
-                    )}
-                  </strong>
+                <div className="product-thumbnails product-thumbnails-scroll">
+                  {productImages.length > 0 ? (
+                    productImages.map((imageUrl, index) => (
+                      <button
+                        type="button"
+                        className={`thumbnail ${
+                          selectedImageIndex === index ? "active" : ""
+                        }`}
+                        key={imageUrl}
+                        onClick={() => setSelectedImageIndex(index)}
+                      >
+                        <img
+                          src={imageUrl}
+                          alt={`${product.title} ${index + 1}`}
+                        />
+                      </button>
+                    ))
+                  ) : (
+                    <>
+                      <button type="button" className="thumbnail active">
+                        📦
+                      </button>
+                      <button type="button" className="thumbnail">
+                        ＋
+                      </button>
+                      <button type="button" className="thumbnail">
+                        ＋
+                      </button>
+                    </>
+                  )}
                 </div>
+              </section>
 
-                <div>
-                  <span>{text("Status", "الحالة العامة", "Status")}</span>
-                  <strong>
-                    {product.productStatus || text("Aktiv", "نشط", "Active")}
-                  </strong>
-                </div>
-              </div>
+              <section className="product-details-info">
+                <p className="eyebrow">{text("Anzeige", "إعلان", "Listing")}</p>
 
-              {seller && (
-                <Link
-                  className="seller-card seller-card-link"
-                  to={`/users/${seller.id}`}
-                >
-                  <UserAvatar user={seller} size="medium" />
+                <h1>{product.title}</h1>
+
+                <strong className="details-price">{product.price} €</strong>
+
+                <div className="details-meta">
+                  <div>
+                    <span>{text("Stadt", "المدينة", "City")}</span>
+                    <strong>
+                      {product.city ||
+                        text("Nicht angegeben", "غير محدد", "Not specified")}
+                    </strong>
+                  </div>
 
                   <div>
-                    <span>{text("Verkäufer", "البائع", "Seller")}</span>
-
+                    <span>{text("Zustand", "الحالة", "Condition")}</span>
                     <strong>
-                      {seller.fullName ||
-                        text("Unbekannt", "غير معروف", "Unknown")}
+                      {getConditionLabel(
+                        product.conditionStatus || product.condition
+                      )}
                     </strong>
-
-                    <p>
-                      {seller.city ||
-                        text(
-                          "Ort nicht angegeben",
-                          "المدينة غير محددة",
-                          "City not specified"
-                        )}
-                    </p>
                   </div>
-                </Link>
-              )}
 
-              <div className="details-section">
-                <h2>{text("Beschreibung", "الوصف", "Description")}</h2>
+                  <div>
+                    <span>{text("Status", "الحالة العامة", "Status")}</span>
+                    <strong>
+                      {product.productStatus || text("Aktiv", "نشط", "Active")}
+                    </strong>
+                  </div>
+                </div>
 
-                <p>
-                  {product.description ||
-                    text(
-                      "Keine Beschreibung vorhanden.",
-                      "لا يوجد وصف متاح.",
-                      "No description available."
-                    )}
-                </p>
-              </div>
-
-              <div className="details-actions">
-                {!isOwner && (
-                  <button
-                    className="btn btn-primary"
-                    type="button"
-                    onClick={handleStartConversation}
-                    disabled={isStartingConversation}
-                  >
-                    {isStartingConversation
-                      ? text("Wird geöffnet...", "جارٍ الفتح...", "Opening...")
-                      : text("Nachricht senden", "إرسال رسالة", "Send message")}
-                  </button>
-                )}
-
-                {isOwner && (
+                {seller && (
                   <Link
-                    className="btn btn-secondary"
-                    to={`/edit-product/${product.id}`}
+                    className="seller-card seller-card-link"
+                    to={`/users/${seller.id}`}
                   >
-                    {text("Anzeige bearbeiten", "تعديل الإعلان", "Edit listing")}
+                    <UserAvatar user={seller} size="medium" />
+
+                    <div>
+                      <span>{text("Verkäufer", "البائع", "Seller")}</span>
+
+                      <strong>
+                        {seller.fullName ||
+                          text("Unbekannt", "غير معروف", "Unknown")}
+                      </strong>
+
+                      <p>
+                        {seller.city ||
+                          text(
+                            "Ort nicht angegeben",
+                            "المدينة غير محددة",
+                            "City not specified"
+                          )}
+                      </p>
+                    </div>
                   </Link>
                 )}
+
+                <div className="details-section">
+                  <h2>{text("Beschreibung", "الوصف", "Description")}</h2>
+
+                  <p>
+                    {product.description ||
+                      text(
+                        "Keine Beschreibung vorhanden.",
+                        "لا يوجد وصف متاح.",
+                        "No description available."
+                      )}
+                  </p>
+                </div>
+
+                <div className="details-actions">
+                  {!isOwner && (
+                    <button
+                      className="btn btn-primary"
+                      type="button"
+                      onClick={handleStartConversation}
+                      disabled={isStartingConversation}
+                    >
+                      {isStartingConversation
+                        ? text("Wird geöffnet...", "جارٍ الفتح...", "Opening...")
+                        : text("Nachricht senden", "إرسال رسالة", "Send message")}
+                    </button>
+                  )}
+
+                  {isOwner && (
+                    <Link
+                      className="btn btn-secondary"
+                      to={`/edit-product/${product.id}`}
+                    >
+                      {text("Anzeige bearbeiten", "تعديل الإعلان", "Edit listing")}
+                    </Link>
+                  )}
+                </div>
+              </section>
+            </div>
+
+            <section className="similar-listings-section">
+              <div className="similar-listings-header">
+                <div>
+                  <p className="eyebrow">
+                    {text("Ähnliche Anzeigen", "إعلانات مشابهة", "Similar listings")}
+                  </p>
+
+                  <h2>
+                    {text(
+                      "Vielleicht interessiert dich auch",
+                      "قد يعجبك أيضاً",
+                      "You might also like"
+                    )}
+                  </h2>
+                </div>
+
+                <Link className="btn btn-secondary" to="/products">
+                  {text("Alle anzeigen", "عرض الكل", "View all")}
+                </Link>
               </div>
+
+              {isSimilarLoading && (
+                <p className="auth-message auth-success">
+                  {text(
+                    "Ähnliche Anzeigen werden geladen...",
+                    "جارٍ تحميل الإعلانات المشابهة...",
+                    "Loading similar listings..."
+                  )}
+                </p>
+              )}
+
+              {!isSimilarLoading && similarProducts.length === 0 && (
+                <div className="empty-state similar-empty-state">
+                  <div className="empty-icon">🔎</div>
+
+                  <h2>
+                    {text(
+                      "Keine ähnlichen Anzeigen gefunden.",
+                      "لا توجد إعلانات مشابهة حالياً.",
+                      "No similar listings found."
+                    )}
+                  </h2>
+
+                  <p>
+                    {text(
+                      "Entdecke weitere Anzeigen in der Übersicht.",
+                      "استكشف المزيد من الإعلانات في صفحة المنتجات.",
+                      "Explore more listings on the products page."
+                    )}
+                  </p>
+                </div>
+              )}
+
+              {!isSimilarLoading && similarProducts.length > 0 && (
+                <div className="my-products-grid similar-listings-grid">
+                  {similarProducts.map((similarProduct) => (
+                    <Link
+                      className="product-card my-product-card product-card-link"
+                      key={similarProduct.id}
+                      to={`/products/${similarProduct.id}`}
+                    >
+                      <ProductCardImage product={similarProduct} />
+
+                      <div className="product-info">
+                        <span className="product-tag">
+                          {getConditionLabel(
+                            similarProduct.conditionStatus ||
+                              similarProduct.condition
+                          ) || text("Aktiv", "نشط", "Active")}
+                        </span>
+
+                        <h3>{similarProduct.title}</h3>
+
+                        <p>{similarProduct.city}</p>
+
+                        <strong>{similarProduct.price} €</strong>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </section>
-          </div>
+          </>
         )}
       </main>
     </div>
