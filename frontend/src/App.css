@@ -4911,3 +4911,62 @@ font-size: 1.05rem;
   }
 }
 
+/* Bigger emoji picker + non-clickable message time */
+.emoji-picker {
+  width: 357px;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 7px;
+  padding: 12px;
+}
+
+.emoji-picker button {
+  height: 34px;
+  border-radius: 10px;
+  font-size: 1.08rem;
+}
+
+.message-meta-line {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 5px;
+  color: inherit;
+  opacity: 0.72;
+  font-size: 0.68rem;
+  line-height: 1.25;
+}
+
+.message-row.mine .message-meta-line {
+  justify-content: flex-end;
+}
+
+.message-sender-button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+}
+
+.message-sender-button:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+.message-sender-button:disabled {
+  cursor: default;
+  text-decoration: none;
+}
+
+.message-meta-line time {
+  cursor: default;
+}
+
+@media (max-width: 720px) {
+  .emoji-picker {
+    width: 260px;
+    grid-template-columns: repeat(6, 1fr);
+  }
+}

@@ -53,6 +53,14 @@ function ConversationDetails() {
     "⭐",
     "🎉",
     "🙌",
+    "😅",
+    "😉",
+    "🙂",
+    "🤩",
+    "💯",
+    "🛍️",
+    "🏠",
+    "🚗",
   ];
 
   function text(de, ar, en) {
@@ -337,7 +345,6 @@ function ConversationDetails() {
                   <strong>{product.price} €</strong>
                 </Link>
               )}
-
             </aside>
 
             <section className="conversation-chat">
@@ -401,15 +408,11 @@ function ConversationDetails() {
                       <div className="message-bubble">
                         <p>{message.content}</p>
 
-                        <button
-                          className="message-meta-button"
-                          type="button"
-                          onClick={() => goToUserProfile(message.sender)}
-                          disabled={!message.sender?.id}
-                        >
-                          {getUserName(message.sender)} ·{" "}
-                          {formatDate(message.createdAt)}
-                        </button>
+                        <div className="message-meta-line">
+                          <time dateTime={message.createdAt || ""}>
+                            {formatDate(message.createdAt)}
+                          </time>
+                        </div>
                       </div>
 
                       {isMine && (
