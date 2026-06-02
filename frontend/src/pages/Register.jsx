@@ -5,7 +5,7 @@ import { registerUser } from "../services/api";
 import "../App.css";
 
 function Register() {
-  const { isArabic, t } = useLanguage();
+  const { isArabic, language, t } = useLanguage();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -18,6 +18,41 @@ function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
+  function text(de, ar, en) {
+    if (isArabic) return ar;
+    if (language === "EN") return en;
+    return de;
+  }
+  
+  function getRegisterErrorMessage(err) {
+    const rawMessage = String(err?.message || "").toLowerCase();
+  
+    const isEmailAlreadyUsed =
+      rawMessage.includes("email") ||
+      rawMessage.includes("already") ||
+      rawMessage.includes("exists") ||
+      rawMessage.includes("duplicate") ||
+      rawMessage.includes("bad request") ||
+      rawMessage.includes("400");
+  
+    if (isEmailAlreadyUsed) {
+      return text(
+        "Diese E-Mail-Adresse ist bereits registriert. Bitte melde dich an oder verwende eine andere E-Mail-Adresse.",
+        "هذا البريد الإلكتروني مستخدم مسبقاً. جرّب تسجيل الدخول أو استخدم بريداً آخر.",
+        "This email is already registered. Please sign in or use another email."
+      );
+    }
+  
+    return (
+      err.message ||
+      text(
+        "Beim Erstellen deines Kontos ist ein Fehler aufgetreten.",
+        "حدث خطأ أثناء إنشاء الحساب.",
+        "Something went wrong while creating your account."
+      )
+    );
+  }
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -36,27 +71,27 @@ function Register() {
     setIsLoading(true);
 
     try {
-        await registerUser({
-            ...formData,
-            preferredLanguage: isArabic ? "AR" : "DE",
-          });
+      await registerUser({
+        ...formData,
+        email: formData.email.trim(),
+        fullName: formData.fullName.trim(),
+        city: formData.city.trim(),
+        preferredLanguage: isArabic ? "AR" : "DE",
+      });
 
       setMessage(
-        isArabic
-          ? "تم إنشاء الحساب بنجاح. سيتم نقلك إلى تسجيل الدخول."
-          : "Account created successfully. Redirecting to login."
+        text(
+          "Konto erfolgreich erstellt. Du wirst zur Anmeldung weitergeleitet.",
+          "تم إنشاء الحساب بنجاح. سيتم نقلك إلى تسجيل الدخول.",
+          "Account created successfully. Redirecting to login."
+        )
       );
 
       setTimeout(() => {
         navigate("/login");
       }, 900);
     } catch (err) {
-      setError(
-        err.message ||
-          (isArabic
-            ? "حدث خطأ أثناء إنشاء الحساب."
-            : "Something went wrong while creating your account.")
-      );
+      setError(getRegisterErrorMessage(err));
     } finally {
       setIsLoading(false);
     }
@@ -83,13 +118,13 @@ function Register() {
           <label>
             {t.name}
             <input
-                type="text"
-                name="fullName"
-                placeholder={t.registerNamePlaceholder}
-                value={formData.fullName}
-                onChange={handleChange}
-                required
-                />
+              type="text"
+              name="fullName"
+              placeholder={t.registerNamePlaceholder}
+              value={formData.fullName}
+              onChange={handleChange}
+              required
+            />
           </label>
 
           <label>
@@ -105,16 +140,16 @@ function Register() {
           </label>
 
           <label>
-  {isArabic ? "المدينة" : "City"}
-  <input
-    type="text"
-    name="city"
-    placeholder={isArabic ? "مثال: Berlin" : "Example: Berlin"}
-    value={formData.city}
-    onChange={handleChange}
-    required
-  />
-</label>
+            {isArabic ? "المدينة" : "City"}
+            <input
+              type="text"
+              name="city"
+              placeholder={isArabic ? "مثال: Berlin" : "Example: Berlin"}
+              value={formData.city}
+              onChange={handleChange}
+              required
+            />
+          </label>
 
           <label>
             {t.password}
@@ -133,11 +168,11 @@ function Register() {
           {message && <p className="auth-message auth-success">{message}</p>}
 
           <button className="btn btn-primary" type="submit" disabled={isLoading}>
-            {isLoading
-              ? isArabic
-                ? "جارٍ إنشاء الحساب..."
-                : "Creating account..."
-              : t.registerButton}
+          
+          {isLoading
+            ? text("Konto wird erstellt...", "جارٍ إنشاء الحساب...", "Creating account...")
+            : t.registerButton}
+
           </button>
         </form>
 
