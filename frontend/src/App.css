@@ -4562,27 +4562,40 @@ font-size: 1.05rem;
     padding: 11px 12px 13px;
   }
 }
-
-/* Compact product details page */
+/* Product details final compact layout */
 .product-details-page {
   width: min(1120px, calc(100% - 32px));
 }
 
 .product-details-layout {
-  grid-template-columns: minmax(0, 0.9fr) minmax(340px, 1fr);
-  gap: 22px;
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(340px, 1fr);
+  gap: 20px;
+  align-items: stretch;
 }
 
 .product-details-gallery,
 .product-details-info {
-  border-radius: 28px;
-  padding: 18px;
+  border-radius: 26px;
+  padding: 16px;
+}
+
+.product-details-gallery {
+  display: flex;
+  flex-direction: column;
+}
+
+.product-details-info {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 18px;
 }
 
 .product-details-image {
+  height: 390px;
   min-height: 0;
-  height: min(430px, 58vh);
-  border-radius: 24px;
+  border-radius: 23px;
 }
 
 .product-details-real-image {
@@ -4590,123 +4603,18 @@ font-size: 1.05rem;
   padding: 10px;
 }
 
-.product-details-info h1 {
-  margin: 0 0 10px;
-  font-size: clamp(2rem, 3.2vw, 3.35rem);
-  line-height: 1;
-}
-
-.details-price {
-  margin-bottom: 16px;
-  font-size: 1.85rem;
-}
-
-.details-meta {
-  gap: 10px;
-  margin: 16px 0;
-}
-
-.details-meta div {
-  border-radius: 18px;
-  padding: 12px 14px;
-}
-
-.details-meta span {
-  margin-bottom: 4px;
-  font-size: 0.78rem;
-}
-
-.details-meta strong {
-  font-size: 0.95rem;
-}
-
-.seller-card {
-  margin: 16px 0;
-  padding: 13px 14px;
-  border-radius: 20px;
-}
-
-.details-section {
-  margin-top: 16px;
-  padding-top: 16px;
-}
-
-.details-section h2 {
-  margin-bottom: 9px;
-  font-size: 1.15rem;
-}
-
-.details-section p {
-  max-height: 5.8em;
-  padding: 11px 13px;
-  border-radius: 16px;
-  line-height: 1.65;
-}
-
-.details-actions {
-  margin-top: 18px;
-}
-
 .product-thumbnails-scroll {
   margin-top: 10px;
+  padding: 3px 2px 4px;
+  gap: 8px;
 }
 
 .product-thumbnails-scroll .thumbnail {
-  flex-basis: 74px;
-  height: 58px;
-  min-height: 58px;
+  flex: 0 0 66px;
+  width: 66px;
+  height: 52px;
+  min-height: 52px;
   border-radius: 14px;
-}
-
-/* Similar listings should not feel huge after details */
-.similar-listings-section {
-  margin-top: 22px;
-}
-
-.similar-listings-header {
-  border-radius: 24px;
-  padding: 18px 22px;
-}
-
-.similar-listings-header h2 {
-  font-size: clamp(1.35rem, 2.2vw, 1.9rem);
-}
-
-@media (max-width: 900px) {
-  .product-details-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .product-details-image {
-    height: min(380px, 54vh);
-  }
-}
-
-@media (max-width: 640px) {
-  .product-details-gallery,
-  .product-details-info {
-    padding: 14px;
-    border-radius: 24px;
-  }
-
-  .product-details-image {
-    height: 310px;
-  }
-
-  .product-details-info h1 {
-    font-size: 2rem;
-  }
-
-  .details-meta {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Softer product details info card */
-.product-details-info {
-  align-self: start;
-  padding: 16px 18px;
-  border-radius: 26px;
 }
 
 .product-details-info .eyebrow {
@@ -4793,7 +4701,8 @@ font-size: 1.05rem;
 }
 
 .details-actions {
-  margin-top: 14px;
+  margin-top: auto;
+  padding-top: 14px;
 }
 
 .details-actions .btn {
@@ -4802,36 +4711,67 @@ font-size: 1.05rem;
   font-size: 0.92rem;
 }
 
-/* Make the details layout feel lighter */
-.product-details-layout {
-  align-items: start;
-  gap: 20px;
+.details-image-arrow {
+  width: 38px;
+  height: 38px;
+  font-size: 1.75rem;
 }
 
-.product-details-gallery {
-  padding: 16px;
-  border-radius: 28px;
+.details-image-counter {
+  right: 14px;
+  bottom: 14px;
+  padding: 5px 9px;
+  font-size: 0.75rem;
 }
 
-.product-details-image {
- /* height: min(410px, 55vh);*/
- height: min(385px, 52vh);
-  border-radius: 23px;
+.similar-listings-section {
+  margin-top: 22px;
 }
 
-.product-thumbnails-scroll .thumbnail {
-  flex-basis: 68px;
-  height: 54px;
-  min-height: 54px;
+.similar-listings-header {
+  border-radius: 24px;
+  padding: 18px 22px;
 }
 
-/* On medium screens, keep info readable */
+.similar-listings-header h2 {
+  font-size: clamp(1.35rem, 2.2vw, 1.9rem);
+}
+
 @media (max-width: 900px) {
-  .details-meta {
+  .product-details-layout {
     grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .product-details-info {
+    align-self: auto;
   }
 
   .product-details-image {
     height: min(360px, 52vh);
+  }
+
+  .details-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .details-actions {
+    margin-top: 14px;
+  }
+}
+
+@media (max-width: 640px) {
+  .product-details-gallery,
+  .product-details-info {
+    padding: 14px;
+    border-radius: 24px;
+  }
+
+  .product-details-image {
+    height: 310px;
+  }
+
+  .product-details-info h1 {
+    font-size: 2rem;
   }
 }
