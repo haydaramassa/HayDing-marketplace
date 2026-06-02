@@ -4776,3 +4776,138 @@ font-size: 1.05rem;
     font-size: 2rem;
   }
 }
+
+/* Product details image lightbox */
+.product-details-image-button {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: zoom-in;
+}
+
+.product-details-image-button .product-details-real-image {
+  position: absolute;
+  inset: 0;
+}
+
+.image-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: grid;
+  place-items: center;
+  padding: 34px;
+  background: rgba(12, 16, 14, 0.86);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.image-lightbox-image {
+  max-width: min(1100px, 92vw);
+  max-height: 86vh;
+  border-radius: 22px;
+  object-fit: contain;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.38);
+}
+
+.image-lightbox-close {
+  position: fixed;
+  top: 22px;
+  right: 24px;
+  z-index: 2002;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  font-size: 2rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  backdrop-filter: blur(12px);
+}
+
+.image-lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.26);
+}
+
+.image-lightbox-arrow {
+  position: fixed;
+  top: 50%;
+  z-index: 2002;
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  font-size: 2.4rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  transform: translateY(-50%);
+  backdrop-filter: blur(12px);
+}
+
+.image-lightbox-arrow:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.image-lightbox-arrow-left {
+  left: 28px;
+}
+
+.image-lightbox-arrow-right {
+  right: 28px;
+}
+
+.image-lightbox-counter {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  z-index: 2002;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  padding: 8px 13px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 900;
+  backdrop-filter: blur(12px);
+}
+
+.rtl .image-lightbox-close {
+  right: auto;
+  left: 24px;
+}
+
+@media (max-width: 640px) {
+  .image-lightbox {
+    padding: 20px;
+  }
+
+  .image-lightbox-image {
+    max-width: 94vw;
+    max-height: 80vh;
+    border-radius: 18px;
+  }
+
+  .image-lightbox-arrow {
+    width: 40px;
+    height: 40px;
+    font-size: 2rem;
+  }
+
+  .image-lightbox-arrow-left {
+    left: 14px;
+  }
+
+  .image-lightbox-arrow-right {
+    right: 14px;
+  }
+}
+

@@ -26,6 +26,7 @@ function ProductDetails() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSimilarLoading, setIsSimilarLoading] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
@@ -76,6 +77,7 @@ function ProductDetails() {
         setProduct(null);
         setSimilarProducts([]);
         setSelectedImageIndex(0);
+        setIsLightboxOpen(false);
 
         const productData = await getProductById(productId);
         const loadedProduct = productData?.data || productData;
@@ -162,10 +164,8 @@ function ProductDetails() {
           ? products
               .filter((item) => {
                 const isSameProduct = Number(item.id) === Number(productId);
-
                 const isSameCategory =
                   getProductCategoryId(item) === currentCategoryId;
-
                 const isSold = item.productStatus === "SOLD";
 
                 return !isSameProduct && isSameCategory && !isSold;
@@ -197,6 +197,30 @@ function ProductDetails() {
 
     loadSimilarProducts();
   }, [product, productId]);
+
+  useEffect(() => {
+    function handleKeyDown(event) {
+      if (!isLightboxOpen) return;
+
+      if (event.key === "Escape") {
+        setIsLightboxOpen(false);
+      }
+
+      if (event.key === "ArrowLeft") {
+        goToPreviousImage();
+      }
+
+      if (event.key === "ArrowRight") {
+        goToNextImage();
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isLightboxOpen, selectedImageIndex, product]);
 
   async function handleFavoriteClick() {
     if (isOwner) {
@@ -289,6 +313,11 @@ function ProductDetails() {
     setSelectedImageIndex((currentIndex) =>
       currentIndex === productImages.length - 1 ? 0 : currentIndex + 1
     );
+  }
+
+  function openLightbox() {
+    if (!selectedImage) return;
+    setIsLightboxOpen(true);
   }
 
   return (
@@ -415,11 +444,22 @@ function ProductDetails() {
                   )}
 
                   {selectedImage ? (
-                    <img
-                      className="product-details-real-image"
-                      src={selectedImage}
-                      alt={product.title}
-                    />
+                    <button
+                      className="product-details-image-button"
+                      type="button"
+                      onClick={openLightbox}
+                      aria-label={text(
+                        "Bild vergrößern",
+                        "تكبير الصورة",
+                        "Enlarge image"
+                      )}
+                    >
+                      <img
+                        className="product-details-real-image"
+                        src={selectedImage}
+                        alt={product.title}
+                      />
+                    </button>
                   ) : (
                     <span>📦</span>
                   )}
@@ -650,6 +690,73 @@ function ProductDetails() {
           </>
         )}
       </main>
+
+      {isLightboxOpen && selectedImage && (
+        <div
+          className="image-lightbox"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setIsLightboxOpen(false)}
+        >
+          <button
+            className="image-lightbox-close"
+            type="button"
+            onClick={() => setIsLightboxOpen(false)}
+            aria-label={text("Schließen", "إغلاق", "Close")}
+          >
+            ×
+          </button>
+
+          {hasMultipleImages && (
+            <button
+              className="image-lightbox-arrow image-lightbox-arrow-left"
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                goToPreviousImage();
+              }}
+              aria-label={text(
+                "Vorheriges Bild",
+                "الصورة السابقة",
+                "Previous image"
+              )}
+            >
+              ‹
+            </button>
+          )}
+
+          <img
+            className="image-lightbox-image"
+            src={selectedImage}
+            alt={product?.title || ""}
+            onClick={(event) => event.stopPropagation()}
+          />
+
+          {hasMultipleImages && (
+            <button
+              className="image-lightbox-arrow image-lightbox-arrow-right"
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                goToNextImage();
+              }}
+              aria-label={text(
+                "Nächstes Bild",
+                "الصورة التالية",
+                "Next image"
+              )}
+            >
+              ›
+            </button>
+          )}
+
+          {hasMultipleImages && (
+            <span className="image-lightbox-counter">
+              {selectedImageIndex + 1}/{productImages.length}
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }
