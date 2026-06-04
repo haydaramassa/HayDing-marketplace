@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
+import { getConversations } from "../services/api";
 import UserAvatar from "./UserAvatar";
 
 function Navbar({ variant = "home" }) {
@@ -9,6 +10,7 @@ function Navbar({ variant = "home" }) {
   const isLoggedIn = Boolean(localStorage.getItem("hayding-token"));
 
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+  const [conversationCount, setConversationCount] = useState(0);
   const accountMenuRef = useRef(null);
 
   function text(de, ar, en) {
@@ -32,6 +34,8 @@ function Navbar({ variant = "home" }) {
     currentUser?.email ||
     text("Mein Konto", "حسابي", "My account");
 
+  const hasMessageBadge = isLoggedIn && conversationCount > 0;
+
   useEffect(() => {
     function handleClickOutside(event) {
       if (
@@ -48,6 +52,32 @@ function Navbar({ variant = "home" }) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setConversationCount(0);
+      return;
+    }
+
+    async function loadConversationCount() {
+      try {
+        const data = await getConversations();
+        const conversations = data?.data || data || [];
+
+        setConversationCount(Array.isArray(conversations) ? conversations.length : 0);
+      } catch {
+        setConversationCount(0);
+      }
+    }
+
+    loadConversationCount();
+
+    const intervalId = setInterval(loadConversationCount, 15000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [isLoggedIn]);
 
   function handleLogout() {
     localStorage.removeItem("hayding-token");
@@ -85,8 +115,19 @@ function Navbar({ variant = "home" }) {
             </Link>
 
             {isLoggedIn && (
-              <Link to="/conversations">
+              <Link className="nav-link-with-badge" to="/conversations">
                 {text("Nachrichten", "الرسائل", "Messages")}
+
+                {hasMessageBadge && (
+                  <span
+                    className="nav-notification-dot"
+                    aria-label={text(
+                      "Du hast Konversationen",
+                      "لديك محادثات",
+                      "You have conversations"
+                    )}
+                  />
+                )}
               </Link>
             )}
 
@@ -148,10 +189,15 @@ function Navbar({ variant = "home" }) {
                 </Link>
 
                 <Link
+                  className="account-menu-link-with-badge"
                   to="/conversations"
                   onClick={() => setIsAccountMenuOpen(false)}
                 >
-                  {text("Nachrichten", "الرسائل", "Messages")}
+                  <span>{text("Nachrichten", "الرسائل", "Messages")}</span>
+
+                  {hasMessageBadge && (
+                    <span className="account-menu-badge">{conversationCount}</span>
+                  )}
                 </Link>
 
                 <Link
