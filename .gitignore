@@ -1,1 +1,4 @@
 uploads/
+data/
+*.mv.db
+*.trace.db
