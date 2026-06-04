@@ -3,6 +3,7 @@ package com.hayding.favorite.service;
 import com.hayding.common.enums.ProductStatus;
 import com.hayding.favorite.model.Favorite;
 import com.hayding.favorite.repository.FavoriteRepository;
+import com.hayding.notification.service.NotificationService;
 import com.hayding.product.dto.ProductImageResponse;
 import com.hayding.product.dto.ProductResponse;
 import com.hayding.product.model.Product;
@@ -22,15 +23,18 @@ public class FavoriteService {
     private final ProductRepository productRepository;
     private final ProductImageRepository productImageRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public FavoriteService(FavoriteRepository favoriteRepository,
                            ProductRepository productRepository,
                            ProductImageRepository productImageRepository,
-                           UserRepository userRepository) {
+                           UserRepository userRepository,
+                           NotificationService notificationService) {
         this.favoriteRepository = favoriteRepository;
         this.productRepository = productRepository;
         this.productImageRepository = productImageRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -54,6 +58,8 @@ public class FavoriteService {
 
         Favorite favorite = new Favorite(user, product);
         favoriteRepository.save(favorite);
+
+        notificationService.createFavoriteNotification(user, product);
 
         return toProductResponse(product);
     }

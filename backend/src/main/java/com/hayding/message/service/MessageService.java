@@ -8,6 +8,7 @@ import com.hayding.message.model.Conversation;
 import com.hayding.message.model.Message;
 import com.hayding.message.repository.ConversationRepository;
 import com.hayding.message.repository.MessageRepository;
+import com.hayding.notification.service.NotificationService;
 import com.hayding.product.dto.ProductImageResponse;
 import com.hayding.product.dto.ProductResponse;
 import com.hayding.product.model.Product;
@@ -28,17 +29,20 @@ public class MessageService {
     private final ProductRepository productRepository;
     private final ProductImageRepository productImageRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public MessageService(ConversationRepository conversationRepository,
                           MessageRepository messageRepository,
                           ProductRepository productRepository,
                           ProductImageRepository productImageRepository,
-                          UserRepository userRepository) {
+                          UserRepository userRepository,
+                          NotificationService notificationService) {
         this.conversationRepository = conversationRepository;
         this.messageRepository = messageRepository;
         this.productRepository = productRepository;
         this.productImageRepository = productImageRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -72,12 +76,14 @@ public class MessageService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<MessageResponse> getMessages(Long conversationId, String userEmail) {
         User user = getUserByEmail(userEmail);
         Conversation conversation = getConversationById(conversationId);
 
         validateParticipant(conversation, user);
+
+        notificationService.markConversationNotificationsAsRead(conversationId, user);
 
         return messageRepository.findByConversationIdOrderByCreatedAtAsc(conversationId)
                 .stream()
@@ -94,6 +100,8 @@ public class MessageService {
 
         Message message = new Message(conversation, sender, request.getContent());
         Message savedMessage = messageRepository.save(message);
+
+        notificationService.createMessageNotification(conversation, savedMessage);
 
         conversationRepository.save(conversation);
 
