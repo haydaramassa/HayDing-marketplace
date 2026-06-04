@@ -5537,3 +5537,9 @@ font-size: 1.05rem;
   font-weight: 900;
   box-shadow: 0 8px 18px rgba(217, 74, 58, 0.22);
 }
+
+.account-menu-main-badge {
+  min-width: 20px;
+  height: 20px;
+  font-size: 0.68rem;
+}

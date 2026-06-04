@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
-import { getConversations } from "../services/api";
+import { getUnreadNotificationCount } from "../services/api";
 import UserAvatar from "./UserAvatar";
 
 function Navbar({ variant = "home" }) {
@@ -10,7 +10,7 @@ function Navbar({ variant = "home" }) {
   const isLoggedIn = Boolean(localStorage.getItem("hayding-token"));
 
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
-  const [conversationCount, setConversationCount] = useState(0);
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
   const accountMenuRef = useRef(null);
 
   function text(de, ar, en) {
@@ -34,7 +34,7 @@ function Navbar({ variant = "home" }) {
     currentUser?.email ||
     text("Mein Konto", "حسابي", "My account");
 
-  const hasMessageBadge = isLoggedIn && conversationCount > 0;
+  const hasNotificationBadge = isLoggedIn && unreadNotificationCount > 0;
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -55,24 +55,24 @@ function Navbar({ variant = "home" }) {
 
   useEffect(() => {
     if (!isLoggedIn) {
-      setConversationCount(0);
+      setUnreadNotificationCount(0);
       return;
     }
 
-    async function loadConversationCount() {
+    async function loadUnreadNotificationCount() {
       try {
-        const data = await getConversations();
-        const conversations = data?.data || data || [];
+        const data = await getUnreadNotificationCount();
+        const count = data?.data ?? data ?? 0;
 
-        setConversationCount(Array.isArray(conversations) ? conversations.length : 0);
+        setUnreadNotificationCount(Number(count) || 0);
       } catch {
-        setConversationCount(0);
+        setUnreadNotificationCount(0);
       }
     }
 
-    loadConversationCount();
+    loadUnreadNotificationCount();
 
-    const intervalId = setInterval(loadConversationCount, 15000);
+    const intervalId = setInterval(loadUnreadNotificationCount, 10000);
 
     return () => {
       clearInterval(intervalId);
@@ -118,13 +118,13 @@ function Navbar({ variant = "home" }) {
               <Link className="nav-link-with-badge" to="/conversations">
                 {text("Nachrichten", "الرسائل", "Messages")}
 
-                {hasMessageBadge && (
+                {hasNotificationBadge && (
                   <span
                     className="nav-notification-dot"
                     aria-label={text(
-                      "Du hast Konversationen",
-                      "لديك محادثات",
-                      "You have conversations"
+                      "Du hast neue Benachrichtigungen",
+                      "لديك إشعارات جديدة",
+                      "You have new notifications"
                     )}
                   />
                 )}
@@ -175,6 +175,19 @@ function Navbar({ variant = "home" }) {
 
                 <span className="account-menu-name">{accountLabel}</span>
 
+                {hasNotificationBadge && (
+                  <span
+                    className="account-menu-badge account-menu-main-badge"
+                    aria-label={text(
+                      "Neue Benachrichtigungen",
+                      "إشعارات جديدة",
+                      "New notifications"
+                    )}
+                  >
+                    {unreadNotificationCount}
+                  </span>
+                )}
+
                 <span className="account-menu-chevron" aria-hidden="true">
                   ▾
                 </span>
@@ -190,14 +203,29 @@ function Navbar({ variant = "home" }) {
 
                 <Link
                   className="account-menu-link-with-badge"
+                  to="/notifications"
+                  onClick={() => setIsAccountMenuOpen(false)}
+                >
+                  <span>
+                    {text(
+                      "Benachrichtigungen",
+                      "الإشعارات",
+                      "Notifications"
+                    )}
+                  </span>
+
+                  {hasNotificationBadge && (
+                    <span className="account-menu-badge">
+                      {unreadNotificationCount}
+                    </span>
+                  )}
+                </Link>
+
+                <Link
                   to="/conversations"
                   onClick={() => setIsAccountMenuOpen(false)}
                 >
-                  <span>{text("Nachrichten", "الرسائل", "Messages")}</span>
-
-                  {hasMessageBadge && (
-                    <span className="account-menu-badge">{conversationCount}</span>
-                  )}
+                  {text("Nachrichten", "الرسائل", "Messages")}
                 </Link>
 
                 <Link
