@@ -4,6 +4,7 @@ import { useLanguage } from "../context/LanguageContext";
 import {
   getConversationMessages,
   getConversations,
+  markConversationNotificationsAsRead,
   sendConversationMessage,
 } from "../services/api";
 import Navbar from "../components/Navbar";
@@ -118,6 +119,19 @@ function ConversationDetails() {
     return distanceFromBottom < 90;
   }
 
+  function notifyNavbarToRefreshNotifications() {
+    window.dispatchEvent(new Event("hayding-notifications-updated"));
+  }
+
+  async function markConversationAsRead() {
+    try {
+      await markConversationNotificationsAsRead(conversationId);
+      notifyNavbarToRefreshNotifications();
+    } catch {
+      // Silent fail: message loading should not break if notification marking fails.
+    }
+  }
+
   function goToUserProfile(user) {
     if (!user?.id) return;
 
@@ -138,6 +152,8 @@ function ConversationDetails() {
       setMessages(Array.isArray(loadedMessages) ? loadedMessages : []);
 
       shouldScrollToBottomRef.current = wasNearBottom;
+
+      await markConversationAsRead();
     } catch (err) {
       if (showError) {
         setError(

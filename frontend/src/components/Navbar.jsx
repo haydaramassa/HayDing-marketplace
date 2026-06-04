@@ -70,12 +70,26 @@ function Navbar({ variant = "home" }) {
       }
     }
 
+    function handleNotificationsUpdated() {
+      loadUnreadNotificationCount();
+    }
+
     loadUnreadNotificationCount();
+
+    window.addEventListener(
+      "hayding-notifications-updated",
+      handleNotificationsUpdated
+    );
 
     const intervalId = setInterval(loadUnreadNotificationCount, 10000);
 
     return () => {
       clearInterval(intervalId);
+
+      window.removeEventListener(
+        "hayding-notifications-updated",
+        handleNotificationsUpdated
+      );
     };
   }, [isLoggedIn]);
 
