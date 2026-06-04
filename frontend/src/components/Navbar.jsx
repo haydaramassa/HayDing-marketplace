@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
+import UserAvatar from "./UserAvatar";
 
 function Navbar({ variant = "home" }) {
   const { language, setLanguage, isArabic } = useLanguage();
@@ -15,6 +16,21 @@ function Navbar({ variant = "home" }) {
     if (language === "EN") return en;
     return de;
   }
+
+  function getCurrentUser() {
+    try {
+      return JSON.parse(localStorage.getItem("hayding-user") || "{}");
+    } catch {
+      return {};
+    }
+  }
+
+  const currentUser = getCurrentUser();
+
+  const accountLabel =
+    currentUser?.fullName ||
+    currentUser?.email ||
+    text("Mein Konto", "حسابي", "My account");
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -114,7 +130,9 @@ function Navbar({ variant = "home" }) {
                 onClick={() => setIsAccountMenuOpen((current) => !current)}
                 aria-expanded={isAccountMenuOpen}
               >
-                <span>{text("Mein Konto", "حسابي", "My account")}</span>
+                <UserAvatar user={currentUser} size="small" />
+
+                <span className="account-menu-name">{accountLabel}</span>
 
                 <span className="account-menu-chevron" aria-hidden="true">
                   ▾

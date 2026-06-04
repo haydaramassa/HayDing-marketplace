@@ -4970,3 +4970,16 @@ font-size: 1.05rem;
     grid-template-columns: repeat(6, 1fr);
   }
 }
+
+.account-menu-button .user-avatar {
+  flex: 0 0 auto;
+}
+
+.account-menu-name {
+  display: inline-block;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
