@@ -50,4 +50,12 @@ public class NotificationController {
 
         return ApiResponse.success("Conversation notifications marked as read successfully", null);
     }
+
+    @PatchMapping("/{notificationId}/read")
+    public ApiResponse<Void> markOneAsRead(@PathVariable Long notificationId,
+                                           Authentication authentication) {
+        notificationService.markOneAsRead(notificationId, authentication.getName());
+
+        return ApiResponse.success("Notification marked as read successfully", null);
+    }
 }

@@ -36,4 +36,16 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     void markConversationNotificationsAsRead(@Param("recipientId") Long recipientId,
                                              @Param("conversationId") Long conversationId,
                                              @Param("readAt") LocalDateTime readAt);
+
+    @Modifying
+    @Query("""
+            update Notification n
+            set n.readAt = :readAt
+            where n.id = :notificationId
+              and n.recipient.id = :recipientId
+              and n.readAt is null
+            """)
+    void markOneAsRead(@Param("notificationId") Long notificationId,
+                       @Param("recipientId") Long recipientId,
+                       @Param("readAt") LocalDateTime readAt);
 }

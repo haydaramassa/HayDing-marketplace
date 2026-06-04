@@ -274,3 +274,10 @@ export async function uploadProfileImage(file) {
 
   return data;
 }
+
+export function markNotificationAsRead(notificationId) {
+  return request(`/notifications/${notificationId}/read`, {
+    method: "PATCH",
+    headers: getAuthHeaders(),
+  });
+}

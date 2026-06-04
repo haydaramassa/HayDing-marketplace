@@ -121,4 +121,15 @@ public class NotificationService {
         return userRepository.findByEmail(email.toLowerCase().trim())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
+
+    @Transactional
+    public void markOneAsRead(Long notificationId, String userEmail) {
+        User user = getUserByEmail(userEmail);
+
+        notificationRepository.markOneAsRead(
+                notificationId,
+                user.getId(),
+                LocalDateTime.now()
+        );
+    }
 }

@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
-import {
-  getNotifications,
-  markAllNotificationsAsRead,
-} from "../services/api";
 import Navbar from "../components/Navbar";
 import "../App.css";
+import {
+    getNotifications,
+    markAllNotificationsAsRead,
+    markNotificationAsRead,
+  } from "../services/api";
 
 function Notifications() {
   const { isArabic, language } = useLanguage();
@@ -170,7 +171,25 @@ function Notifications() {
     }
   }
 
-  function handleNotificationClick(notification) {
+  async function handleNotificationClick(notification) {
+    try {
+      if (!notification.read) {
+        await markNotificationAsRead(notification.id);
+  
+        setNotifications((currentNotifications) =>
+          currentNotifications.map((currentNotification) =>
+            currentNotification.id === notification.id
+              ? { ...currentNotification, read: true }
+              : currentNotification
+          )
+        );
+  
+        window.dispatchEvent(new Event("hayding-notifications-updated"));
+      }
+    } catch {
+      // Silent fail: navigation should still work even if marking read fails.
+    }
+  
     navigate(getNotificationTarget(notification));
   }
 
