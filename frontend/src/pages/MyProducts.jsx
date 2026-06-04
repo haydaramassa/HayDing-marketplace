@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import {
   deleteProduct,
+  getMyProductFavoriteCounts,
   getMyProducts,
   markProductAsSold,
 } from "../services/api";
@@ -15,6 +16,7 @@ function MyProducts() {
   const navigate = useNavigate();
 
   const [products, setProducts] = useState([]);
+  const [favoriteCounts, setFavoriteCounts] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [openMenuId, setOpenMenuId] = useState(null);
@@ -57,6 +59,10 @@ function MyProducts() {
       conditionStatus ||
       text("Zustand", "الحالة", "Condition")
     );
+  }
+
+  function getFavoriteCount(productId) {
+    return Number(favoriteCounts[productId] || 0);
   }
 
   async function handleMarkAsSold(productId) {
@@ -118,6 +124,12 @@ function MyProducts() {
         )
       );
 
+      setFavoriteCounts((currentCounts) => {
+        const nextCounts = { ...currentCounts };
+        delete nextCounts[deleteTargetProduct.id];
+        return nextCounts;
+      });
+
       setDeleteTargetProduct(null);
     } catch (err) {
       setError(
@@ -143,9 +155,25 @@ function MyProducts() {
 
     async function loadMyProducts() {
       try {
+        setIsLoading(true);
+        setError("");
+
         const data = await getMyProducts();
         const items = data?.data || data || [];
+
         setProducts(Array.isArray(items) ? items : []);
+
+        const countsData = await getMyProductFavoriteCounts();
+        const counts = countsData?.data || countsData || [];
+
+        const countsMap = Array.isArray(counts)
+          ? counts.reduce((result, item) => {
+              result[item.productId] = item.favoriteCount;
+              return result;
+            }, {})
+          : {};
+
+        setFavoriteCounts(countsMap);
       } catch (err) {
         setError(
           err.message ||
@@ -351,7 +379,20 @@ function MyProducts() {
 
                     <p>{product.city}</p>
 
-                    <strong>{product.price} €</strong>
+                    <div className="my-product-card-footer">
+                      <strong>{product.price} €</strong>
+
+                      <span
+                        className="my-product-favorite-count"
+                        title={text(
+                          "Anzahl der Favoriten",
+                          "عدد مرات الإضافة للمفضلة",
+                          "Number of favorites"
+                        )}
+                      >
+                        ❤️ {getFavoriteCount(product.id)}
+                      </span>
+                    </div>
                   </div>
                 </Link>
               </article>

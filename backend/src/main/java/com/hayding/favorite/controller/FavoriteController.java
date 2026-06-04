@@ -1,6 +1,7 @@
 package com.hayding.favorite.controller;
 
 import com.hayding.common.dto.ApiResponse;
+import com.hayding.favorite.dto.FavoriteCountResponse;
 import com.hayding.favorite.service.FavoriteService;
 import com.hayding.product.dto.ProductResponse;
 import org.springframework.security.core.Authentication;
@@ -37,4 +38,15 @@ public class FavoriteController {
         favoriteService.removeFromFavorites(productId, authentication.getName());
         return ApiResponse.success("Product removed from favorites successfully", null);
     }
+
+    @GetMapping("/my-products/counts")
+    public ApiResponse<List<FavoriteCountResponse>> getFavoriteCountsForMyProducts(
+            Authentication authentication
+    ) {
+        List<FavoriteCountResponse> counts =
+                favoriteService.getFavoriteCountsForMyProducts(authentication.getName());
+
+        return ApiResponse.success("Favorite counts fetched successfully", counts);
+    }
+    
 }

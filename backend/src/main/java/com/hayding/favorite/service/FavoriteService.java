@@ -1,6 +1,7 @@
 package com.hayding.favorite.service;
 
 import com.hayding.common.enums.ProductStatus;
+import com.hayding.favorite.dto.FavoriteCountResponse;
 import com.hayding.favorite.model.Favorite;
 import com.hayding.favorite.repository.FavoriteRepository;
 import com.hayding.notification.service.NotificationService;
@@ -99,5 +100,18 @@ public class FavoriteService {
                 .toList();
 
         return ProductResponse.fromEntity(product, images);
+    }
+
+    @Transactional(readOnly = true)
+    public List<FavoriteCountResponse> getFavoriteCountsForMyProducts(String userEmail) {
+        User user = getUserByEmail(userEmail);
+
+        return favoriteRepository.countFavoritesForSellerProducts(user.getId())
+                .stream()
+                .map(row -> new FavoriteCountResponse(
+                        (Long) row[0],
+                        (Long) row[1]
+                ))
+                .toList();
     }
 }

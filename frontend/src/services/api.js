@@ -281,3 +281,10 @@ export function markNotificationAsRead(notificationId) {
     headers: getAuthHeaders(),
   });
 }
+
+export function getMyProductFavoriteCounts() {
+  return request("/favorites/my-products/counts", {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+}
