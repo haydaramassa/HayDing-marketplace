@@ -11,6 +11,7 @@ import Favorites from "./pages/Favorites";
 import EditProduct from "./pages/EditProduct";
 import Conversations from "./pages/Conversations";
 import ConversationDetails from "./pages/ConversationDetails";
+import Notifications from "./pages/Notifications";
 import Account from "./pages/Account";
 import PublicUserProfile from "./pages/PublicUserProfile";
 import NotFound from "./pages/NotFound";
@@ -30,7 +31,11 @@ function App() {
           <Route path="/products/:productId" element={<ProductDetails />} />
           <Route path="/edit-product/:productId" element={<EditProduct />} />
           <Route path="/conversations" element={<Conversations />} />
-          <Route path="/conversations/:conversationId" element={<ConversationDetails />} />
+          <Route
+            path="/conversations/:conversationId"
+            element={<ConversationDetails />}
+          />
+          <Route path="/notifications" element={<Notifications />} />
           <Route path="/account" element={<Account />} />
           <Route path="/users/:userId" element={<PublicUserProfile />} />
           <Route path="*" element={<NotFound />} />
