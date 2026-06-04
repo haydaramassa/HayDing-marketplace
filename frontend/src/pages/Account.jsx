@@ -35,6 +35,7 @@ function Account() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const [isUploadingProfileImage, setIsUploadingProfileImage] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -47,7 +48,10 @@ function Account() {
 
   function buildProfileImageUrl(imageUrl) {
     if (!imageUrl) return "";
-    if (imageUrl.startsWith("http") || imageUrl.startsWith("blob:")) return imageUrl;
+    if (imageUrl.startsWith("http") || imageUrl.startsWith("blob:")) {
+      return imageUrl;
+    }
+
     return `http://localhost:8080${imageUrl}`;
   }
 
@@ -107,8 +111,24 @@ function Account() {
     loadProfile();
   }, [navigate]);
 
+  useEffect(() => {
+    if (!message && !isSaved) return;
+
+    const timeoutId = setTimeout(() => {
+      setMessage("");
+      setIsSaved(false);
+    }, 3000);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [message, isSaved]);
+
   function handleChange(event) {
     const { name, value } = event.target;
+
+    setIsSaved(false);
+    setMessage("");
 
     setProfile((currentProfile) => ({
       ...currentProfile,
@@ -121,6 +141,7 @@ function Account() {
 
     setError("");
     setMessage("");
+    setIsSaved(false);
 
     if (!file) return;
 
@@ -188,6 +209,7 @@ function Account() {
       setSelectedProfileImage(croppedFile);
       setProfileImagePreview(croppedPreviewUrl);
       setIsCropOpen(false);
+      setIsSaved(false);
       setMessage(
         text(
           "Bild zugeschnitten. Klicke auf Bild speichern.",
@@ -222,6 +244,7 @@ function Account() {
 
     setError("");
     setMessage("");
+    setIsSaved(false);
     setIsUploadingProfileImage(true);
 
     try {
@@ -269,6 +292,7 @@ function Account() {
 
     setError("");
     setMessage("");
+    setIsSaved(false);
     setIsSaving(true);
 
     try {
@@ -294,11 +318,12 @@ function Account() {
 
       updateStoredUser(updatedUser);
 
+      setIsSaved(true);
       setMessage(
         text(
-          "Profil wurde erfolgreich aktualisiert.",
-          "تم تحديث الملف الشخصي بنجاح.",
-          "Profile updated successfully."
+          "Änderungen wurden gespeichert.",
+          "تم حفظ التعديلات.",
+          "Changes saved successfully."
         )
       );
     } catch (err) {
@@ -392,7 +417,7 @@ function Account() {
 
                 <p>
                   {text(
-                    "Wähle eine صورة ثم حرّكها داخل الدائرة قبل الحفظ.",
+                    "Wähle ein Bild und richte es im Kreis aus, bevor du es speicherst.",
                     "اختر صورة ثم حرّكها داخل الدائرة قبل الحفظ.",
                     "Choose an image, then move it inside the circle before saving."
                   )}
@@ -497,11 +522,13 @@ function Account() {
               >
                 {isSaving
                   ? text("Wird gespeichert...", "جارٍ الحفظ...", "Saving...")
-                  : text(
-                      "Änderungen speichern",
-                      "حفظ التعديلات",
-                      "Save changes"
-                    )}
+                  : isSaved
+                    ? text("Gespeichert ✓", "تم الحفظ ✓", "Saved ✓")
+                    : text(
+                        "Änderungen speichern",
+                        "حفظ التعديلات",
+                        "Save changes"
+                      )}
               </button>
             </div>
           </form>
