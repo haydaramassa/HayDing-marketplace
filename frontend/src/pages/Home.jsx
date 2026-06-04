@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { getProducts } from "../services/api";
+import { getProductImages } from "../utils/productImages";
 import Navbar from "../components/Navbar";
 import ProductCardImage from "../components/ProductCardImage";
 import "../App.css";
@@ -15,6 +16,14 @@ function Home() {
   const [latestProducts, setLatestProducts] = useState([]);
   const [isProductsLoading, setIsProductsLoading] = useState(true);
   const [productsError, setProductsError] = useState("");
+  const [activeShowcaseIndex, setActiveShowcaseIndex] = useState(0);
+  const [isShowcasePaused, setIsShowcasePaused] = useState(false);
+
+  function text(de, ar, en) {
+    if (isArabic) return ar;
+    if (language === "EN") return en;
+    return de;
+  }
 
   const content = {
     DE: {
@@ -37,6 +46,15 @@ function Home() {
       previewTitle: "Schöne Dinge finden ein neues Zuhause",
       previewText:
         "Einfach einstellen, lokal entdecken und direkt Kontakt aufnehmen.",
+      liveEyebrow: "Live auf HayDing",
+      liveTitle: "Aktuelle Anzeigen auf der Plattform",
+      liveText:
+        "Echte Anzeigen von Nutzern – automatisch aktualisiert und alle 5 Sekunden hervorgehoben.",
+      showListing: "Anzeige ansehen",
+      noLiveListingsTitle: "Bald erscheinen hier echte Anzeigen.",
+      noLiveListingsText:
+        "Sobald Nutzer Anzeigen veröffentlichen, werden sie hier lebendig angezeigt.",
+      createFirstListing: "Erste Anzeige erstellen",
       categoriesEyebrow: "Kategorien",
       categoriesTitle: "Entdecke, was in deiner Nähe angeboten wird",
       productsEyebrow: "Aktuell",
@@ -87,6 +105,15 @@ function Home() {
       newAd: "إعلان جديد",
       previewTitle: "غرض لا تحتاجه، فرصة يحتاجها غيرك",
       previewText: "اعرض غرضك بسهولة، ودع المهتمين يتواصلون معك مباشرة.",
+      liveEyebrow: "مباشر على HayDing",
+      liveTitle: "إعلانات حقيقية من المنصة",
+      liveText:
+        "إعلانات حقيقية من المستخدمين، تتبدل تلقائياً كل 5 ثوانٍ وتبقي الصفحة حيّة.",
+      showListing: "عرض الإعلان",
+      noLiveListingsTitle: "قريباً ستظهر هنا إعلانات حقيقية.",
+      noLiveListingsText:
+        "بمجرد أن ينشر المستخدمون إعلاناتهم، ستظهر هنا بشكل حي وجذاب.",
+      createFirstListing: "أضف أول إعلان",
       categoriesEyebrow: "الفئات",
       categoriesTitle: "اكتشف ما يُعرض بالقرب منك",
       productsEyebrow: "الأحدث",
@@ -133,6 +160,15 @@ function Home() {
       newAd: "New listing",
       previewTitle: "Beautiful things find a new home",
       previewText: "List easily, discover locally and contact directly.",
+      liveEyebrow: "Live on HayDing",
+      liveTitle: "Real listings from the platform",
+      liveText:
+        "Real user listings, rotating automatically every 5 seconds to keep the page alive.",
+      showListing: "View listing",
+      noLiveListingsTitle: "Real listings will appear here soon.",
+      noLiveListingsText:
+        "As soon as users publish listings, they will appear here in a lively showcase.",
+      createFirstListing: "Create the first listing",
       categoriesEyebrow: "Categories",
       categoriesTitle: "Discover what is offered near you",
       productsEyebrow: "Latest",
@@ -161,7 +197,7 @@ function Home() {
     },
   };
 
-  const t = content[language];
+  const t = content[language] || content.DE;
   const categoryIds = ["1", "2", "3", "5", "6", "8"];
 
   useEffect(() => {
@@ -191,7 +227,7 @@ function Home() {
     loadLatestProducts();
   }, [language]);
 
-  const newestProducts = useMemo(() => {
+  const sortedActiveProducts = useMemo(() => {
     return [...latestProducts]
       .filter((product) => product.productStatus !== "SOLD")
       .sort((a, b) => {
@@ -203,22 +239,47 @@ function Home() {
         }
 
         return dateB - dateA;
-      })
-      .slice(0, 3);
+      });
   }, [latestProducts]);
+
+  const newestProducts = useMemo(() => {
+    return sortedActiveProducts.slice(0, 3);
+  }, [sortedActiveProducts]);
+
+  const showcaseProducts = useMemo(() => {
+    return sortedActiveProducts.slice(0, 6);
+  }, [sortedActiveProducts]);
+
+  useEffect(() => {
+    setActiveShowcaseIndex(0);
+  }, [showcaseProducts.length]);
+
+  useEffect(() => {
+    if (showcaseProducts.length <= 1 || isShowcasePaused) {
+      return;
+    }
+
+    const intervalId = setInterval(() => {
+      setActiveShowcaseIndex((currentIndex) =>
+        currentIndex === showcaseProducts.length - 1 ? 0 : currentIndex + 1
+      );
+    }, 5000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [showcaseProducts.length, isShowcasePaused]);
 
   function getConditionLabel(conditionStatus) {
     const labels = {
-      NEW:
-        language === "AR" ? "جديد" : language === "EN" ? "New" : "Neu",
+      NEW: language === "AR" ? "جديد" : language === "EN" ? "New" : "Neu",
       LIKE_NEW:
         language === "AR"
           ? "شبه جديد"
           : language === "EN"
             ? "Like new"
             : "Wie neu",
-      GOOD:
-        language === "AR" ? "جيد" : language === "EN" ? "Good" : "Gut",
+      GOOD: language === "AR" ? "جيد" : language === "EN" ? "Good" : "Gut",
       ACCEPTABLE:
         language === "AR"
           ? "مقبول"
@@ -234,6 +295,24 @@ function Home() {
     };
 
     return labels[conditionStatus] || conditionStatus;
+  }
+
+  function getProductImage(product) {
+    return getProductImages(product)?.[0] || "";
+  }
+
+  function getProductDescription(product) {
+    const description = product?.description?.trim();
+
+    if (!description) {
+      return t.liveText;
+    }
+
+    if (description.length > 110) {
+      return `${description.slice(0, 107)}...`;
+    }
+
+    return description;
   }
 
   function handleSearch(event) {
@@ -253,6 +332,9 @@ function Home() {
 
     navigate(queryString ? `/products?${queryString}` : "/products");
   }
+
+  const activeShowcaseProduct =
+    showcaseProducts[activeShowcaseIndex] || null;
 
   return (
     <div
@@ -295,24 +377,118 @@ function Home() {
 
               <button type="submit">{t.searchButton}</button>
             </form>
-
-            
           </div>
 
-          <div className="hero-card">
-            <div className="hero-card-header">
-              <span className="status-dot"></span>
-              <span>{t.newAd}</span>
+          <div
+            className="hero-card live-hero-card"
+            onMouseEnter={() => setIsShowcasePaused(true)}
+            onMouseLeave={() => setIsShowcasePaused(false)}
+          >
+            <div className="hero-card-header live-hero-card-header">
+              <span className="status-dot live-status-dot"></span>
+              <span>{t.liveEyebrow}</span>
             </div>
 
-            <div className="preview-card">
-              <div className="preview-image">📦</div>
+            {isProductsLoading && (
+              <div className="showcase-card showcase-card-loading">
+                <div className="showcase-image-skeleton"></div>
 
-              <div>
-                <h3>{t.previewTitle}</h3>
-                <p>{t.previewText}</p>
+                <div className="showcase-content">
+                  <h3>{t.liveTitle}</h3>
+                  <p>{t.loadingProducts}</p>
+                </div>
               </div>
-            </div>
+            )}
+
+            {!isProductsLoading && productsError && (
+              <div className="showcase-card showcase-fallback-card">
+                <div className="showcase-fallback-icon">⚡</div>
+                <h3>{t.liveTitle}</h3>
+                <p>{productsError}</p>
+              </div>
+            )}
+
+            {!isProductsLoading && !productsError && activeShowcaseProduct && (
+              <div className="showcase-card">
+                <Link
+                  className="showcase-image-link"
+                  to={`/products/${activeShowcaseProduct.id}`}
+                >
+                  {getProductImage(activeShowcaseProduct) ? (
+                    <img
+                      className="showcase-image"
+                      src={getProductImage(activeShowcaseProduct)}
+                      alt={activeShowcaseProduct.title}
+                    />
+                  ) : (
+                    <div className="showcase-image-placeholder">📦</div>
+                  )}
+
+                  <span className="showcase-glow"></span>
+                </Link>
+
+                <div className="showcase-content">
+                  <div className="showcase-meta-row">
+                    <span className="product-tag">
+                      {getConditionLabel(
+                        activeShowcaseProduct.conditionStatus ||
+                          activeShowcaseProduct.condition
+                      ) || t.newAd}
+                    </span>
+
+                    <span className="showcase-city">
+                      {activeShowcaseProduct.city ||
+                        text("Ort", "المدينة", "City")}
+                    </span>
+                  </div>
+
+                  <h3>{activeShowcaseProduct.title}</h3>
+
+                  <p>{getProductDescription(activeShowcaseProduct)}</p>
+
+                  <div className="showcase-footer">
+                    <strong>{activeShowcaseProduct.price} €</strong>
+
+                    <Link
+                      className="btn btn-primary showcase-cta"
+                      to={`/products/${activeShowcaseProduct.id}`}
+                    >
+                      {t.showListing}
+                    </Link>
+                  </div>
+
+                  {showcaseProducts.length > 1 && (
+                    <div className="showcase-dots" aria-label="Showcase pages">
+                      {showcaseProducts.map((product, index) => (
+                        <button
+                          type="button"
+                          key={product.id}
+                          className={`showcase-dot ${
+                            activeShowcaseIndex === index ? "active" : ""
+                          }`}
+                          onClick={() => setActiveShowcaseIndex(index)}
+                          aria-label={`${t.showListing} ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {!isProductsLoading &&
+              !productsError &&
+              showcaseProducts.length === 0 && (
+                <div className="showcase-card showcase-fallback-card">
+                  <div className="showcase-fallback-icon">✨</div>
+                  <h3>{t.noLiveListingsTitle}</h3>
+                  <p>{t.noLiveListingsText}</p>
+
+                  <Link className="btn btn-primary showcase-cta" to="/create-product">
+                    {t.createFirstListing}
+                  </Link>
+                </div>
+              )}
           </div>
         </section>
 
@@ -329,7 +505,7 @@ function Home() {
                 type="button"
                 key={category}
                 onClick={() => navigate(`/products?category=${categoryIds[index]}`)}
-               >
+              >
                 {category}
               </button>
             ))}
