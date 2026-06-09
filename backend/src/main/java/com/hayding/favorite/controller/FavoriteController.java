@@ -48,5 +48,5 @@ public class FavoriteController {
 
         return ApiResponse.success("Favorite counts fetched successfully", counts);
     }
-    
+
 }

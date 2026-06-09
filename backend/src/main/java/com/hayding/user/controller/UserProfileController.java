@@ -1,10 +1,19 @@
 package com.hayding.user.controller;
 
 import com.hayding.common.dto.ApiResponse;
+import com.hayding.favorite.repository.FavoriteRepository;
+import com.hayding.message.repository.ConversationRepository;
+import com.hayding.message.repository.MessageRepository;
+import com.hayding.notification.repository.NotificationRepository;
+import com.hayding.product.repository.ProductImageRepository;
+import com.hayding.product.repository.ProductRepository;
+import com.hayding.report.repository.ReportRepository;
+import com.hayding.request.repository.RequestRepository;
 import com.hayding.user.dto.UpdateUserProfileRequest;
 import com.hayding.user.dto.UserProfileResponse;
 import com.hayding.user.model.User;
 import com.hayding.user.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -21,9 +31,33 @@ import java.util.UUID;
 public class UserProfileController {
 
     private final UserRepository userRepository;
+    private final ProductRepository productRepository;
+    private final ProductImageRepository productImageRepository;
+    private final FavoriteRepository favoriteRepository;
+    private final ConversationRepository conversationRepository;
+    private final MessageRepository messageRepository;
+    private final NotificationRepository notificationRepository;
+    private final RequestRepository requestRepository;
+    private final ReportRepository reportRepository;
 
-    public UserProfileController(UserRepository userRepository) {
+    public UserProfileController(UserRepository userRepository,
+                                 ProductRepository productRepository,
+                                 ProductImageRepository productImageRepository,
+                                 FavoriteRepository favoriteRepository,
+                                 ConversationRepository conversationRepository,
+                                 MessageRepository messageRepository,
+                                 NotificationRepository notificationRepository,
+                                 RequestRepository requestRepository,
+                                 ReportRepository reportRepository) {
         this.userRepository = userRepository;
+        this.productRepository = productRepository;
+        this.productImageRepository = productImageRepository;
+        this.favoriteRepository = favoriteRepository;
+        this.conversationRepository = conversationRepository;
+        this.messageRepository = messageRepository;
+        this.notificationRepository = notificationRepository;
+        this.requestRepository = requestRepository;
+        this.reportRepository = reportRepository;
     }
 
     @GetMapping("/me")
@@ -54,6 +88,56 @@ public class UserProfileController {
                 "User profile updated successfully",
                 toResponse(savedUser)
         );
+    }
+
+    @DeleteMapping("/me")
+    @Transactional
+    public ApiResponse<Void> deleteCurrentUser(Authentication authentication) {
+        System.out.println("DELETE ACCOUNT ENDPOINT HIT");
+
+        User user = getAuthenticatedUser(authentication);
+        Long userId = user.getId();
+
+        List<Long> productIds = productRepository.findIdsBySellerId(userId);
+        List<Long> conversationIds = conversationRepository.findIdsRelatedToUser(userId);
+
+        notificationRepository.deleteByRecipientIdOrActorId(userId, userId);
+
+        if (!conversationIds.isEmpty()) {
+            notificationRepository.deleteByConversationIdIn(conversationIds);
+        }
+
+        if (!productIds.isEmpty()) {
+            notificationRepository.deleteByProductIdIn(productIds);
+        }
+
+        requestRepository.deleteByBuyerIdOrSellerId(userId, userId);
+
+        if (!productIds.isEmpty()) {
+            requestRepository.deleteByProductIdIn(productIds);
+        }
+
+        favoriteRepository.deleteByUserId(userId);
+
+        if (!productIds.isEmpty()) {
+            favoriteRepository.deleteByProductIdIn(productIds);
+        }
+
+        reportRepository.deleteByReporterId(userId);
+
+        if (!conversationIds.isEmpty()) {
+            messageRepository.deleteByConversationIdIn(conversationIds);
+            conversationRepository.deleteByIdIn(conversationIds);
+        }
+
+        if (!productIds.isEmpty()) {
+            productImageRepository.deleteByProductIdIn(productIds);
+            productRepository.deleteByIdIn(productIds);
+        }
+
+        userRepository.delete(user);
+
+        return ApiResponse.success("Account deleted successfully", null);
     }
 
     @PostMapping(

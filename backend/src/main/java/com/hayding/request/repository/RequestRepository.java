@@ -20,4 +20,8 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
     Optional<Request> findByBuyerIdAndProductId(Long buyerId, Long productId);
 
     boolean existsByBuyerIdAndProductId(Long buyerId, Long productId);
+
+    void deleteByBuyerIdOrSellerId(Long buyerId, Long sellerId);
+
+    void deleteByProductIdIn(List<Long> productIds);
 }

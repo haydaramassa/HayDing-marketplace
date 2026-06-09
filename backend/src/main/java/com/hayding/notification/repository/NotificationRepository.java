@@ -48,4 +48,11 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     void markOneAsRead(@Param("notificationId") Long notificationId,
                        @Param("recipientId") Long recipientId,
                        @Param("readAt") LocalDateTime readAt);
+
+    void deleteByRecipientIdOrActorId(Long recipientId, Long actorId);
+
+    void deleteByProductIdIn(List<Long> productIds);
+
+    void deleteByConversationIdIn(List<Long> conversationIds);
 }
+
