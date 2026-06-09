@@ -93,7 +93,7 @@ function Account() {
   }
 
   async function handleDeleteAccount() {
-    if (deleteConfirmText !== "DELETE") return;
+    if (!canDeleteAccount) return;
 
     try {
       setIsDeletingAccount(true);
@@ -399,7 +399,10 @@ function Account() {
       profileImagePreview || buildProfileImageUrl(profile.profileImageUrl),
   };
 
-  const canDeleteAccount = deleteConfirmText === "DELETE";
+  const normalizedDeleteConfirmText = deleteConfirmText.trim().toUpperCase();
+  const canDeleteAccount = normalizedDeleteConfirmText === "DELETE";
+  const isDeleteConfirmWrong =
+    normalizedDeleteConfirmText.length > 0 && !canDeleteAccount;
 
   return (
     <div
@@ -707,11 +710,13 @@ function Account() {
               )}
             </p>
 
-            <div className="delete-confirm-product">
-              {profile.email}
-            </div>
+            <div className="delete-confirm-product">{profile.email}</div>
 
-            <label className="form-field account-delete-confirm-field">
+            <label
+              className={`form-field account-delete-confirm-field ${
+                isDeleteConfirmWrong ? "wrong" : ""
+              }`}
+            >
               {text(
                 "Tippe DELETE zur Bestätigung",
                 "اكتب DELETE للتأكيد",
@@ -725,6 +730,16 @@ function Account() {
                 placeholder="DELETE"
                 autoFocus
               />
+
+              {isDeleteConfirmWrong && (
+                <small className="account-delete-warning">
+                  {text(
+                    "Bitte tippe genau DELETE.",
+                    "يرجى كتابة DELETE بالضبط.",
+                    "Please type DELETE exactly."
+                  )}
+                </small>
+              )}
             </label>
 
             <div className="delete-confirm-actions">
