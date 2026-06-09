@@ -295,3 +295,10 @@ export function deleteCurrentUserAccount() {
     headers: getAuthHeaders(),
   });
 }
+
+export function getProductFavoriteUsers(productId) {
+  return request(`/favorites/products/${productId}/users`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+}

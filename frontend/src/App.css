@@ -5841,3 +5841,120 @@ font-size: 1.05rem;
   font-size: 0.8rem;
   font-weight: 800;
 }
+
+.my-product-favorite-count {
+  cursor: pointer;
+  border: 1px solid rgba(217, 74, 58, 0.16);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.my-product-favorite-count:hover {
+  transform: translateY(-1px);
+  border-color: rgba(217, 74, 58, 0.34);
+  box-shadow: 0 10px 24px rgba(217, 74, 58, 0.12);
+}
+
+.favorite-users-modal-card {
+  width: min(560px, calc(100% - 28px));
+  max-height: min(720px, calc(100vh - 38px));
+  overflow: auto;
+}
+
+.favorite-users-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.favorite-users-modal-header h2 {
+  margin: 4px 0 6px;
+}
+
+.favorite-users-modal-header p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.favorite-users-list {
+  display: grid;
+  gap: 10px;
+}
+
+.favorite-user-row {
+  border: 1px solid rgba(218, 206, 185, 0.9);
+  border-radius: 20px;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.82);
+  text-align: start;
+}
+
+.favorite-user-row strong {
+  display: block;
+  color: var(--primary);
+  font-size: 0.98rem;
+}
+
+.favorite-user-row span {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.favorite-user-row small {
+  display: block;
+  margin-top: 4px;
+  color: #958b7c;
+  font-size: 0.76rem;
+}
+
+.favorite-user-profile-link {
+  padding: 8px 12px;
+  min-height: auto;
+  font-size: 0.82rem;
+}
+
+.favorite-users-empty {
+  border: 1px dashed rgba(218, 206, 185, 0.95);
+  border-radius: 22px;
+  padding: 26px;
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  text-align: center;
+}
+
+.favorite-users-empty div {
+  font-size: 2rem;
+}
+
+.favorite-users-empty h3 {
+  margin: 0;
+  color: var(--primary);
+  font-size: 1rem;
+}
+
+.rtl .favorite-user-row {
+  text-align: right;
+}
+
+@media (max-width: 560px) {
+  .favorite-user-row {
+    grid-template-columns: auto 1fr;
+  }
+
+  .favorite-user-profile-link {
+    grid-column: 1 / -1;
+    justify-content: center;
+  }
+}

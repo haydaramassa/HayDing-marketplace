@@ -5,10 +5,12 @@ import {
   deleteProduct,
   getMyProductFavoriteCounts,
   getMyProducts,
+  getProductFavoriteUsers,
   markProductAsSold,
 } from "../services/api";
 import ProductCardImage from "../components/ProductCardImage";
 import Navbar from "../components/Navbar";
+import UserAvatar from "../components/UserAvatar";
 import "../App.css";
 
 function MyProducts() {
@@ -17,6 +19,10 @@ function MyProducts() {
 
   const [products, setProducts] = useState([]);
   const [favoriteCounts, setFavoriteCounts] = useState({});
+  const [favoriteUsers, setFavoriteUsers] = useState([]);
+  const [favoriteUsersProduct, setFavoriteUsersProduct] = useState(null);
+  const [isLoadingFavoriteUsers, setIsLoadingFavoriteUsers] = useState(false);
+  const [favoriteUsersError, setFavoriteUsersError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [openMenuId, setOpenMenuId] = useState(null);
@@ -29,6 +35,15 @@ function MyProducts() {
     if (isArabic) return ar;
     if (language === "EN") return en;
     return de;
+  }
+
+  function buildProfileImageUrl(imageUrl) {
+    if (!imageUrl) return "";
+    if (imageUrl.startsWith("http") || imageUrl.startsWith("blob:")) {
+      return imageUrl;
+    }
+
+    return `http://localhost:8080${imageUrl}`;
   }
 
   function getStatusLabel(status) {
@@ -63,6 +78,57 @@ function MyProducts() {
 
   function getFavoriteCount(productId) {
     return Number(favoriteCounts[productId] || 0);
+  }
+
+  function formatDate(dateValue) {
+    if (!dateValue) return "";
+
+    try {
+      return new Intl.DateTimeFormat(
+        language === "AR" ? "ar" : language === "EN" ? "en" : "de-DE",
+        {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        }
+      ).format(new Date(dateValue));
+    } catch {
+      return dateValue;
+    }
+  }
+
+  async function openFavoriteUsersModal(product) {
+    setFavoriteUsersProduct(product);
+    setFavoriteUsers([]);
+    setFavoriteUsersError("");
+    setIsLoadingFavoriteUsers(true);
+
+    try {
+      const data = await getProductFavoriteUsers(product.id);
+      const users = data?.data || data || [];
+
+      setFavoriteUsers(Array.isArray(users) ? users : []);
+    } catch (err) {
+      setFavoriteUsersError(
+        err.message ||
+          text(
+            "Favoriten konnten nicht geladen werden.",
+            "تعذر تحميل المستخدمين الذين أضافوا الإعلان للمفضلة.",
+            "Could not load favorite users."
+          )
+      );
+    } finally {
+      setIsLoadingFavoriteUsers(false);
+    }
+  }
+
+  function closeFavoriteUsersModal() {
+    setFavoriteUsersProduct(null);
+    setFavoriteUsers([]);
+    setFavoriteUsersError("");
+    setIsLoadingFavoriteUsers(false);
   }
 
   async function handleMarkAsSold(productId) {
@@ -382,16 +448,22 @@ function MyProducts() {
                     <div className="my-product-card-footer">
                       <strong>{product.price} €</strong>
 
-                      <span
+                      <button
                         className="my-product-favorite-count"
+                        type="button"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          openFavoriteUsersModal(product);
+                        }}
                         title={text(
-                          "Anzahl der Favoriten",
-                          "عدد مرات الإضافة للمفضلة",
-                          "Number of favorites"
+                          "Favoriten ansehen",
+                          "عرض من أضاف للمفضلة",
+                          "View favorites"
                         )}
                       >
                         ❤️ {getFavoriteCount(product.id)}
-                      </span>
+                      </button>
                     </div>
                   </div>
                 </Link>
@@ -400,6 +472,111 @@ function MyProducts() {
           </div>
         )}
       </main>
+
+      {favoriteUsersProduct && (
+        <div className="delete-confirm-modal" role="dialog" aria-modal="true">
+          <section className="delete-confirm-card favorite-users-modal-card">
+            <div className="favorite-users-modal-header">
+              <div>
+                <p className="eyebrow">
+                  {text("Favoriten", "المفضلة", "Favorites")}
+                </p>
+
+                <h2>
+                  {text(
+                    "Wer hat diese Anzeige gespeichert?",
+                    "من أضاف هذا الإعلان للمفضلة؟",
+                    "Who saved this listing?"
+                  )}
+                </h2>
+
+                <p>{favoriteUsersProduct.title}</p>
+              </div>
+
+              <button
+                className="crop-close"
+                type="button"
+                onClick={closeFavoriteUsersModal}
+                aria-label={text("Schließen", "إغلاق", "Close")}
+              >
+                ×
+              </button>
+            </div>
+
+            {isLoadingFavoriteUsers && (
+              <p className="auth-message auth-success">
+                {text(
+                  "Favoriten werden geladen...",
+                  "جارٍ تحميل المفضلة...",
+                  "Loading favorites..."
+                )}
+              </p>
+            )}
+
+            {favoriteUsersError && (
+              <p className="auth-message auth-error">{favoriteUsersError}</p>
+            )}
+
+            {!isLoadingFavoriteUsers &&
+              !favoriteUsersError &&
+              favoriteUsers.length === 0 && (
+                <div className="favorite-users-empty">
+                  <div>🤍</div>
+
+                  <h3>
+                    {text(
+                      "Noch niemand hat diese Anzeige gespeichert.",
+                      "لم يضف أحد هذا الإعلان للمفضلة بعد.",
+                      "No one has saved this listing yet."
+                    )}
+                  </h3>
+                </div>
+              )}
+
+            {!isLoadingFavoriteUsers &&
+              !favoriteUsersError &&
+              favoriteUsers.length > 0 && (
+                <div className="favorite-users-list">
+                  {favoriteUsers.map((favoriteUser) => (
+                    <div className="favorite-user-row" key={favoriteUser.userId}>
+                      <UserAvatar
+                        user={{
+                          ...favoriteUser,
+                          profileImageUrl: buildProfileImageUrl(
+                            favoriteUser.profileImageUrl
+                          ),
+                        }}
+                        size="medium"
+                      />
+
+                      <div>
+                        <strong>{favoriteUser.fullName}</strong>
+
+                        <span>
+                          {favoriteUser.city ||
+                            text("Keine Stadt", "لا توجد مدينة", "No city")}
+                        </span>
+
+                        <small>
+                          {text("Gespeichert am", "تمت الإضافة في", "Saved on")}{" "}
+                          {formatDate(favoriteUser.favoritedAt)}
+                        </small>
+                      </div>
+
+                      <Link
+                        className="btn btn-secondary favorite-user-profile-link"
+                        to={`/users/${favoriteUser.userId}`}
+                        onClick={closeFavoriteUsersModal}
+                      >
+                        {text("Profil", "الملف", "Profile")}
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              )}
+          </section>
+        </div>
+      )}
 
       {deleteTargetProduct && (
         <div className="delete-confirm-modal" role="dialog" aria-modal="true">
