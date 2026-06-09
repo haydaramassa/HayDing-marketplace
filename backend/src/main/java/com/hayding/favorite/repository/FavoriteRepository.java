@@ -12,6 +12,8 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
 
     List<Favorite> findByUserIdOrderByCreatedAtDesc(Long userId);
 
+    List<Favorite> findByProductIdOrderByCreatedAtDesc(Long productId);
+
     Optional<Favorite> findByUserIdAndProductId(Long userId, Long productId);
 
     boolean existsByUserIdAndProductId(Long userId, Long productId);
@@ -21,6 +23,7 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
     void deleteByUserId(Long userId);
 
     void deleteByProductIdIn(List<Long> productIds);
+
 
     @Query("""
             select f.product.id, count(f.id)

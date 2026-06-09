@@ -2,6 +2,7 @@ package com.hayding.favorite.controller;
 
 import com.hayding.common.dto.ApiResponse;
 import com.hayding.favorite.dto.FavoriteCountResponse;
+import com.hayding.favorite.dto.FavoriteUserResponse;
 import com.hayding.favorite.service.FavoriteService;
 import com.hayding.product.dto.ProductResponse;
 import org.springframework.security.core.Authentication;
@@ -47,6 +48,20 @@ public class FavoriteController {
                 favoriteService.getFavoriteCountsForMyProducts(authentication.getName());
 
         return ApiResponse.success("Favorite counts fetched successfully", counts);
+    }
+
+    @GetMapping("/products/{productId}/users")
+    public ApiResponse<List<FavoriteUserResponse>> getUsersWhoFavoritedMyProduct(
+            @PathVariable Long productId,
+            Authentication authentication
+    ) {
+        List<FavoriteUserResponse> users =
+                favoriteService.getUsersWhoFavoritedMyProduct(
+                        productId,
+                        authentication.getName()
+                );
+
+        return ApiResponse.success("Favorite users fetched successfully", users);
     }
 
 }

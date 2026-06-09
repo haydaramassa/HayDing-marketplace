@@ -2,6 +2,7 @@ package com.hayding.favorite.service;
 
 import com.hayding.common.enums.ProductStatus;
 import com.hayding.favorite.dto.FavoriteCountResponse;
+import com.hayding.favorite.dto.FavoriteUserResponse;
 import com.hayding.favorite.model.Favorite;
 import com.hayding.favorite.repository.FavoriteRepository;
 import com.hayding.notification.service.NotificationService;
@@ -114,4 +115,22 @@ public class FavoriteService {
                 ))
                 .toList();
     }
+
+    @Transactional(readOnly = true)
+    public List<FavoriteUserResponse> getUsersWhoFavoritedMyProduct(Long productId, String userEmail) {
+        User user = getUserByEmail(userEmail);
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+
+        if (!product.getSeller().getId().equals(user.getId())) {
+            throw new IllegalArgumentException("You can only view favorites for your own products");
+        }
+
+        return favoriteRepository.findByProductIdOrderByCreatedAtDesc(productId)
+                .stream()
+                .map(FavoriteUserResponse::fromEntity)
+                .toList();
+    }
+
 }
