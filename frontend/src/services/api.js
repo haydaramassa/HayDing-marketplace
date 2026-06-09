@@ -288,3 +288,10 @@ export function getMyProductFavoriteCounts() {
     headers: getAuthHeaders(),
   });
 }
+
+export function deleteCurrentUserAccount() {
+  return request("/users/me", {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+}

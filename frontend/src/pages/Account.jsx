@@ -3,6 +3,7 @@ import Cropper from "react-easy-crop";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import {
+  deleteCurrentUserAccount,
   getCurrentUserProfile,
   updateCurrentUserProfile,
   uploadProfileImage,
@@ -40,6 +41,10 @@ function Account() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+
   function text(de, ar, en) {
     if (isArabic) return ar;
     if (language === "EN") return en;
@@ -71,6 +76,52 @@ function Account() {
           updatedUser.preferredLanguage || profile.preferredLanguage,
       })
     );
+  }
+
+  function openDeleteModal() {
+    setError("");
+    setMessage("");
+    setDeleteConfirmText("");
+    setIsDeleteModalOpen(true);
+  }
+
+  function closeDeleteModal() {
+    if (isDeletingAccount) return;
+
+    setDeleteConfirmText("");
+    setIsDeleteModalOpen(false);
+  }
+
+  async function handleDeleteAccount() {
+    if (deleteConfirmText !== "DELETE") return;
+
+    try {
+      setIsDeletingAccount(true);
+      setError("");
+      setMessage("");
+
+      await deleteCurrentUserAccount();
+
+      localStorage.removeItem("hayding-token");
+      localStorage.removeItem("hayding-user");
+
+      navigate("/", {
+        replace: true,
+      });
+    } catch (err) {
+      setError(
+        err.message ||
+          text(
+            "Konto konnte nicht gelöscht werden.",
+            "تعذر حذف الحساب.",
+            "Could not delete account."
+          )
+      );
+
+      setIsDeleteModalOpen(false);
+    } finally {
+      setIsDeletingAccount(false);
+    }
   }
 
   useEffect(() => {
@@ -348,6 +399,8 @@ function Account() {
       profileImagePreview || buildProfileImageUrl(profile.profileImageUrl),
   };
 
+  const canDeleteAccount = deleteConfirmText === "DELETE";
+
   return (
     <div
       className={`create-page ${isArabic ? "rtl" : ""}`}
@@ -396,142 +449,172 @@ function Account() {
         {message && <p className="auth-message auth-success">{message}</p>}
 
         {!isLoading && (
-          <form className="account-card" onSubmit={handleSubmit}>
-            <div className="profile-image-section">
-              <div className="profile-image-preview">
-                <UserAvatar user={avatarUser} size="xl" />
+          <>
+            <form className="account-card" onSubmit={handleSubmit}>
+              <div className="profile-image-section">
+                <div className="profile-image-preview">
+                  <UserAvatar user={avatarUser} size="xl" />
+                </div>
+
+                <div className="profile-image-content">
+                  <p className="eyebrow">
+                    {text("Profilbild", "صورة الملف الشخصي", "Profile image")}
+                  </p>
+
+                  <h2>
+                    {text(
+                      "Lade ein Bild hoch",
+                      "ارفع صورة شخصية",
+                      "Upload an image"
+                    )}
+                  </h2>
+
+                  <p>
+                    {text(
+                      "Wähle ein Bild und richte es im Kreis aus, bevor du es speicherst.",
+                      "اختر صورة ثم حرّكها داخل الدائرة قبل الحفظ.",
+                      "Choose an image, then move it inside the circle before saving."
+                    )}
+                  </p>
+
+                  <div className="profile-image-actions">
+                    <label className="btn btn-secondary profile-image-picker">
+                      {text("Bild auswählen", "اختيار صورة", "Choose image")}
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        onChange={handleProfileImageChange}
+                      />
+                    </label>
+
+                    <button
+                      className="btn btn-primary"
+                      type="button"
+                      onClick={handleUploadProfileImage}
+                      disabled={!selectedProfileImage || isUploadingProfileImage}
+                    >
+                      {isUploadingProfileImage
+                        ? text("Wird hochgeladen...", "جارٍ الرفع...", "Uploading...")
+                        : text("Bild speichern", "حفظ الصورة", "Save image")}
+                    </button>
+                  </div>
+                </div>
               </div>
 
-              <div className="profile-image-content">
+              <div className="form-grid">
+                <label className="form-field form-field-full">
+                  {text("Vollständiger Name", "الاسم الكامل", "Full name")}
+                  <input
+                    type="text"
+                    name="fullName"
+                    value={profile.fullName}
+                    onChange={handleChange}
+                    required
+                  />
+                </label>
+
+                <label className="form-field form-field-full">
+                  {text("E-Mail", "البريد الإلكتروني", "Email")}
+                  <input type="email" value={profile.email} disabled />
+                </label>
+
+                <label className="form-field">
+                  {text("Stadt", "المدينة", "City")}
+                  <input
+                    type="text"
+                    name="city"
+                    value={profile.city}
+                    onChange={handleChange}
+                    placeholder="Leipzig"
+                  />
+                </label>
+
+                <label className="form-field">
+                  {text(
+                    "Bevorzugte Sprache",
+                    "اللغة المفضلة",
+                    "Preferred language"
+                  )}
+                  <select
+                    name="preferredLanguage"
+                    value={profile.preferredLanguage}
+                    onChange={handleChange}
+                  >
+                    <option value="DE">Deutsch</option>
+                    <option value="EN">English</option>
+                    <option value="AR">العربية</option>
+                  </select>
+                </label>
+
+                <label className="form-field form-field-full">
+                  {text("Kurzbeschreibung", "نبذة قصيرة", "Short bio")}
+                  <textarea
+                    name="bio"
+                    value={profile.bio}
+                    onChange={handleChange}
+                    maxLength="500"
+                    rows="4"
+                    placeholder={text(
+                      "Erzähle kurz etwas über dich, z. B. was du verkaufst oder wonach du suchst.",
+                      "اكتب نبذة قصيرة عنك، مثلاً ماذا تبيع أو عمّ تبحث.",
+                      "Write a short bio, for example what you sell or what you are looking for."
+                    )}
+                  />
+                  <small className="field-hint">{bioLength}/500</small>
+                </label>
+              </div>
+
+              <div className="form-actions">
+                <Link className="btn btn-secondary" to="/">
+                  {text("Abbrechen", "إلغاء", "Cancel")}
+                </Link>
+
+                <button
+                  className="btn btn-primary"
+                  type="submit"
+                  disabled={isSaving}
+                >
+                  {isSaving
+                    ? text("Wird gespeichert...", "جارٍ الحفظ...", "Saving...")
+                    : isSaved
+                      ? text("Gespeichert ✓", "تم الحفظ ✓", "Saved ✓")
+                      : text(
+                          "Änderungen speichern",
+                          "حفظ التعديلات",
+                          "Save changes"
+                        )}
+                </button>
+              </div>
+            </form>
+
+            <section className="account-danger-zone">
+              <div>
                 <p className="eyebrow">
-                  {text("Profilbild", "صورة الملف الشخصي", "Profile image")}
+                  {text("Gefahrenbereich", "منطقة خطرة", "Danger zone")}
                 </p>
 
                 <h2>
-                  {text(
-                    "Lade ein Bild hoch",
-                    "ارفع صورة شخصية",
-                    "Upload an image"
-                  )}
+                  {text("Konto löschen", "حذف الحساب", "Delete account")}
                 </h2>
 
                 <p>
                   {text(
-                    "Wähle ein Bild und richte es im Kreis aus, bevor du es speicherst.",
-                    "اختر صورة ثم حرّكها داخل الدائرة قبل الحفظ.",
-                    "Choose an image, then move it inside the circle before saving."
+                    "Wenn du dein Konto löschst, werden deine Anzeigen, Nachrichten, Favoriten und Benachrichtigungen dauerhaft entfernt.",
+                    "عند حذف حسابك سيتم حذف إعلاناتك ورسائلك والمفضلة والإشعارات نهائياً.",
+                    "Deleting your account permanently removes your listings, messages, favorites and notifications."
                   )}
                 </p>
-
-                <div className="profile-image-actions">
-                  <label className="btn btn-secondary profile-image-picker">
-                    {text("Bild auswählen", "اختيار صورة", "Choose image")}
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      onChange={handleProfileImageChange}
-                    />
-                  </label>
-
-                  <button
-                    className="btn btn-primary"
-                    type="button"
-                    onClick={handleUploadProfileImage}
-                    disabled={!selectedProfileImage || isUploadingProfileImage}
-                  >
-                    {isUploadingProfileImage
-                      ? text("Wird hochgeladen...", "جارٍ الرفع...", "Uploading...")
-                      : text("Bild speichern", "حفظ الصورة", "Save image")}
-                  </button>
-                </div>
               </div>
-            </div>
-
-            <div className="form-grid">
-              <label className="form-field form-field-full">
-                {text("Vollständiger Name", "الاسم الكامل", "Full name")}
-                <input
-                  type="text"
-                  name="fullName"
-                  value={profile.fullName}
-                  onChange={handleChange}
-                  required
-                />
-              </label>
-
-              <label className="form-field form-field-full">
-                {text("E-Mail", "البريد الإلكتروني", "Email")}
-                <input type="email" value={profile.email} disabled />
-              </label>
-
-              <label className="form-field">
-                {text("Stadt", "المدينة", "City")}
-                <input
-                  type="text"
-                  name="city"
-                  value={profile.city}
-                  onChange={handleChange}
-                  placeholder="Leipzig"
-                />
-              </label>
-
-              <label className="form-field">
-                {text(
-                  "Bevorzugte Sprache",
-                  "اللغة المفضلة",
-                  "Preferred language"
-                )}
-                <select
-                  name="preferredLanguage"
-                  value={profile.preferredLanguage}
-                  onChange={handleChange}
-                >
-                  <option value="DE">Deutsch</option>
-                  <option value="EN">English</option>
-                  <option value="AR">العربية</option>
-                </select>
-              </label>
-
-              <label className="form-field form-field-full">
-                {text("Kurzbeschreibung", "نبذة قصيرة", "Short bio")}
-                <textarea
-                  name="bio"
-                  value={profile.bio}
-                  onChange={handleChange}
-                  maxLength="500"
-                  rows="4"
-                  placeholder={text(
-                    "Erzähle kurz etwas über dich, z. B. was du verkaufst oder wonach du suchst.",
-                    "اكتب نبذة قصيرة عنك، مثلاً ماذا تبيع أو عمّ تبحث.",
-                    "Write a short bio, for example what you sell or what you are looking for."
-                  )}
-                />
-                <small className="field-hint">{bioLength}/500</small>
-              </label>
-            </div>
-
-            <div className="form-actions">
-              <Link className="btn btn-secondary" to="/">
-                {text("Abbrechen", "إلغاء", "Cancel")}
-              </Link>
 
               <button
-                className="btn btn-primary"
-                type="submit"
-                disabled={isSaving}
+                className="btn btn-danger"
+                type="button"
+                onClick={openDeleteModal}
               >
-                {isSaving
-                  ? text("Wird gespeichert...", "جارٍ الحفظ...", "Saving...")
-                  : isSaved
-                    ? text("Gespeichert ✓", "تم الحفظ ✓", "Saved ✓")
-                    : text(
-                        "Änderungen speichern",
-                        "حفظ التعديلات",
-                        "Save changes"
-                      )}
+                {text("Konto löschen", "حذف الحساب", "Delete account")}
               </button>
-            </div>
-          </form>
+            </section>
+          </>
         )}
       </main>
 
@@ -602,6 +685,74 @@ function Account() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {isDeleteModalOpen && (
+        <div className="delete-confirm-modal" role="dialog" aria-modal="true">
+          <section className="delete-confirm-card account-delete-card">
+            <p className="eyebrow">
+              {text("Endgültige Aktion", "إجراء نهائي", "Permanent action")}
+            </p>
+
+            <h2>
+              {text("Konto wirklich löschen?", "هل تريد حذف الحساب؟", "Delete account?")}
+            </h2>
+
+            <p>
+              {text(
+                "Diese Aktion kann nicht rückgängig gemacht werden. Alle deine Daten werden dauerhaft gelöscht.",
+                "لا يمكن التراجع عن هذه العملية. سيتم حذف جميع بياناتك نهائياً.",
+                "This action cannot be undone. All of your data will be permanently deleted."
+              )}
+            </p>
+
+            <div className="delete-confirm-product">
+              {profile.email}
+            </div>
+
+            <label className="form-field account-delete-confirm-field">
+              {text(
+                "Tippe DELETE zur Bestätigung",
+                "اكتب DELETE للتأكيد",
+                "Type DELETE to confirm"
+              )}
+
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(event) => setDeleteConfirmText(event.target.value)}
+                placeholder="DELETE"
+                autoFocus
+              />
+            </label>
+
+            <div className="delete-confirm-actions">
+              <button
+                className="btn btn-secondary"
+                type="button"
+                onClick={closeDeleteModal}
+                disabled={isDeletingAccount}
+              >
+                {text("Abbrechen", "إلغاء", "Cancel")}
+              </button>
+
+              <button
+                className="btn btn-danger"
+                type="button"
+                onClick={handleDeleteAccount}
+                disabled={!canDeleteAccount || isDeletingAccount}
+              >
+                {isDeletingAccount
+                  ? text("Wird gelöscht...", "جارٍ الحذف...", "Deleting...")
+                  : text(
+                      "Konto endgültig löschen",
+                      "حذف الحساب نهائياً",
+                      "Delete account permanently"
+                    )}
+              </button>
+            </div>
+          </section>
         </div>
       )}
     </div>
