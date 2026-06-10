@@ -1,5 +1,14 @@
 const API_BASE_URL = "http://localhost:8080/api";
 
+function handleAuthExpired() {
+  localStorage.removeItem("hayding-token");
+  localStorage.removeItem("hayding-user");
+
+  if (window.location.pathname !== "/login") {
+    window.location.href = "/login?sessionExpired=true";
+  }
+}
+
 async function request(path, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
@@ -18,6 +27,10 @@ async function request(path, options = {}) {
   }
 
   if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      handleAuthExpired();
+    }
+
     const message =
       data?.message ||
       data?.error ||
@@ -144,6 +157,10 @@ export async function uploadProductImage(file) {
   }
 
   if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      handleAuthExpired();
+    }
+
     const message =
       data?.message ||
       data?.error ||
@@ -244,16 +261,13 @@ export async function uploadProfileImage(file) {
 
   formData.append("file", file);
 
-  const response = await fetch(
-    "http://localhost:8080/api/users/me/profile-image",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
-    }
-  );
+  const response = await fetch(`${API_BASE_URL}/users/me/profile-image`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
 
   let data = null;
 
@@ -264,6 +278,10 @@ export async function uploadProfileImage(file) {
   }
 
   if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      handleAuthExpired();
+    }
+
     const message =
       data?.message ||
       data?.error ||

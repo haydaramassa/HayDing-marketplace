@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { loginUser } from "../services/api";
 import "../App.css";
@@ -7,6 +7,7 @@ import "../App.css";
 function Login() {
   const { isArabic, t } = useLanguage();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -16,6 +17,16 @@ function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (searchParams.get("sessionExpired") === "true") {
+      setError(
+        isArabic
+          ? "انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى."
+          : "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an."
+      );
+    }
+  }, [searchParams, isArabic]);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -37,18 +48,18 @@ function Login() {
       const data = await loginUser(formData);
 
       const token =
-  data?.token ||
-  data?.accessToken ||
-  data?.jwt ||
-  data?.data?.token ||
-  data?.data?.accessToken ||
-  data?.data?.jwt;
+        data?.token ||
+        data?.accessToken ||
+        data?.jwt ||
+        data?.data?.token ||
+        data?.data?.accessToken ||
+        data?.data?.jwt;
 
-  const user = data?.user || data?.data?.user;
+      const user = data?.user || data?.data?.user;
 
-if (user) {
-  localStorage.setItem("hayding-user", JSON.stringify(user));
-}
+      if (user) {
+        localStorage.setItem("hayding-user", JSON.stringify(user));
+      }
 
       if (!token) {
         throw new Error(
