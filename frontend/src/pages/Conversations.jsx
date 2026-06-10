@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
-import { getConversations } from "../services/api";
+import { getConversations, getNotifications } from "../services/api";
 import Navbar from "../components/Navbar";
 import UserAvatar from "../components/UserAvatar";
 import "../App.css";
@@ -11,6 +11,7 @@ function Conversations() {
   const { isArabic, language } = useLanguage();
 
   const [conversations, setConversations] = useState([]);
+  const [unreadConversationIds, setUnreadConversationIds] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -61,6 +62,18 @@ function Conversations() {
     );
   }
 
+  function getNotificationConversationId(notification) {
+    return (
+      notification?.conversation?.id ||
+      notification?.conversationId ||
+      notification?.conversation?.conversationId
+    );
+  }
+
+  function isConversationUnread(conversationId) {
+    return unreadConversationIds.includes(Number(conversationId));
+  }
+
   useEffect(() => {
     if (!localStorage.getItem("hayding-token")) {
       navigate("/login");
@@ -72,10 +85,26 @@ function Conversations() {
         setIsLoading(true);
         setError("");
 
-        const data = await getConversations();
-        const items = data?.data || data || [];
+        const conversationsData = await getConversations();
+        const items = conversationsData?.data || conversationsData || [];
 
         setConversations(Array.isArray(items) ? items : []);
+
+        const notificationsData = await getNotifications();
+        const notifications = notificationsData?.data || notificationsData || [];
+
+        const unreadMessageConversationIds = Array.isArray(notifications)
+          ? notifications
+              .filter(
+                (notification) =>
+                  notification?.type === "MESSAGE" && !notification?.read
+              )
+              .map(getNotificationConversationId)
+              .filter(Boolean)
+              .map(Number)
+          : [];
+
+        setUnreadConversationIds([...new Set(unreadMessageConversationIds)]);
       } catch (err) {
         setError(
           err.message ||
@@ -165,6 +194,7 @@ function Conversations() {
           <div className="conversations-list">
             {conversations.map((conversation) => {
               const product = conversation.product;
+              const isUnread = isConversationUnread(conversation.id);
 
               const otherUser =
                 Number(currentUser?.id) === Number(conversation?.buyer?.id)
@@ -173,19 +203,38 @@ function Conversations() {
 
               return (
                 <Link
-                  className="conversation-list-card"
+                  className={`conversation-list-card ${
+                    isUnread ? "conversation-list-card-unread" : ""
+                  }`}
                   key={conversation.id}
                   to={`/conversations/${conversation.id}`}
                 >
-                  <UserAvatar user={otherUser} size="medium" />
+                  <div className="conversation-avatar-wrap">
+                    <UserAvatar user={otherUser} size="medium" />
+
+                    {isUnread && (
+                      <span
+                        className="conversation-unread-avatar-dot"
+                        aria-hidden="true"
+                      />
+                    )}
+                  </div>
 
                   <div className="conversation-list-main">
                     <div className="conversation-list-top">
                       <h2>{getUserName(otherUser)}</h2>
 
-                      <span>
-                        {formatDate(getConversationDate(conversation))}
-                      </span>
+                      <div className="conversation-list-date-wrap">
+                        {isUnread && (
+                          <span className="conversation-unread-pill">
+                            {text("Neu", "جديد", "New")}
+                          </span>
+                        )}
+
+                        <span>
+                          {formatDate(getConversationDate(conversation))}
+                        </span>
+                      </div>
                     </div>
 
                     <p className="conversation-list-product">

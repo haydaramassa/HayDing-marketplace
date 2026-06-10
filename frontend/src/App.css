@@ -6300,3 +6300,83 @@ font-size: 1.05rem;
     max-height: 240px;
   }
 }
+
+/* Highlight unread conversations */
+.conversation-list-card {
+  position: relative;
+}
+
+.conversation-list-card-unread {
+  border-color: rgba(184, 74, 61, 0.32);
+  background:
+    radial-gradient(circle at top left, rgba(184, 74, 61, 0.09), transparent 34%),
+    rgba(255, 255, 255, 0.96);
+  box-shadow:
+    0 20px 54px rgba(184, 74, 61, 0.1),
+    0 0 0 1px rgba(184, 74, 61, 0.08) inset;
+}
+
+.conversation-list-card-unread::before {
+  content: "";
+  position: absolute;
+  top: 18px;
+  bottom: 18px;
+  left: 0;
+  width: 5px;
+  border-radius: 0 999px 999px 0;
+  background: linear-gradient(180deg, var(--accent-red), var(--accent-gold));
+}
+
+.rtl .conversation-list-card-unread::before {
+  left: auto;
+  right: 0;
+  border-radius: 999px 0 0 999px;
+}
+
+.conversation-list-card-unread .conversation-list-top h2 {
+  color: var(--accent-red);
+  font-weight: 950;
+}
+
+.conversation-list-card-unread .conversation-list-preview {
+  color: var(--primary);
+  font-weight: 900;
+}
+
+.conversation-avatar-wrap {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.conversation-unread-avatar-dot {
+  position: absolute;
+  right: -2px;
+  top: -2px;
+  width: 13px;
+  height: 13px;
+  border: 2px solid #ffffff;
+  border-radius: 999px;
+  background: var(--accent-red);
+  box-shadow: 0 0 0 4px rgba(184, 74, 61, 0.13);
+}
+
+.rtl .conversation-unread-avatar-dot {
+  right: auto;
+  left: -2px;
+}
+
+.conversation-list-date-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.conversation-unread-pill {
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: rgba(184, 74, 61, 0.1);
+  color: var(--accent-red);
+  font-size: 0.72rem;
+  font-weight: 950;
+}
+
