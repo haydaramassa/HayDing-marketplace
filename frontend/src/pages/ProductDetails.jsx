@@ -5,8 +5,10 @@ import {
   addFavorite,
   createOrGetConversation,
   getFavorites,
+  getMyProductFavoriteCounts,
   getMyProducts,
   getProductById,
+  getProductFavoriteUsers,
   getProducts,
   removeFavorite,
 } from "../services/api";
@@ -25,6 +27,14 @@ function ProductDetails() {
   const [similarProducts, setSimilarProducts] = useState([]);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
+  const [ownerFavoriteCount, setOwnerFavoriteCount] = useState(0);
+
+  const [favoriteUsers, setFavoriteUsers] = useState([]);
+  const [isFavoriteUsersModalOpen, setIsFavoriteUsersModalOpen] =
+    useState(false);
+  const [isLoadingFavoriteUsers, setIsLoadingFavoriteUsers] = useState(false);
+  const [favoriteUsersError, setFavoriteUsersError] = useState("");
+
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -48,6 +58,16 @@ function ProductDetails() {
     return Number(value);
   }
 
+  function buildProfileImageUrl(imageUrl) {
+    if (!imageUrl) return "";
+
+    if (imageUrl.startsWith("http") || imageUrl.startsWith("blob:")) {
+      return imageUrl;
+    }
+
+    return `http://localhost:8080${imageUrl}`;
+  }
+
   function getProductCategoryId(item) {
     return String(item?.categoryId || item?.category?.id || "");
   }
@@ -68,6 +88,23 @@ function ProductDetails() {
     );
   }
 
+  async function loadOwnerFavoriteCount() {
+    try {
+      const countsData = await getMyProductFavoriteCounts();
+      const counts = countsData?.data || countsData || [];
+
+      const currentProductCount = Array.isArray(counts)
+        ? counts.find(
+            (item) => normalizeId(item.productId) === normalizeId(productId)
+          )
+        : null;
+
+      setOwnerFavoriteCount(Number(currentProductCount?.favoriteCount || 0));
+    } catch {
+      setOwnerFavoriteCount(0);
+    }
+  }
+
   useEffect(() => {
     async function loadProduct() {
       try {
@@ -78,6 +115,7 @@ function ProductDetails() {
         setSimilarProducts([]);
         setSelectedImageIndex(0);
         setIsLightboxOpen(false);
+        setOwnerFavoriteCount(0);
 
         const productData = await getProductById(productId);
         const loadedProduct = productData?.data || productData;
@@ -111,6 +149,10 @@ function ProductDetails() {
             : false;
 
           setIsOwner(ownsThisProduct);
+
+          if (ownsThisProduct) {
+            await loadOwnerFavoriteCount();
+          }
         }
       } catch (err) {
         const message = err.message || "";
@@ -254,6 +296,40 @@ function ProductDetails() {
     } finally {
       setFavoriteLoading(false);
     }
+  }
+
+  async function handleOpenFavoriteUsersModal() {
+    if (!isOwner || !product) return;
+
+    setIsFavoriteUsersModalOpen(true);
+    setFavoriteUsers([]);
+    setFavoriteUsersError("");
+    setIsLoadingFavoriteUsers(true);
+
+    try {
+      const data = await getProductFavoriteUsers(product.id);
+      const users = data?.data || data || [];
+
+      setFavoriteUsers(Array.isArray(users) ? users : []);
+    } catch (err) {
+      setFavoriteUsersError(
+        err.message ||
+          text(
+            "Favoriten konnten nicht geladen werden.",
+            "تعذر تحميل المستخدمين الذين أضافوا الإعلان للمفضلة.",
+            "Could not load favorite users."
+          )
+      );
+    } finally {
+      setIsLoadingFavoriteUsers(false);
+    }
+  }
+
+  function closeFavoriteUsersModal() {
+    setIsFavoriteUsersModalOpen(false);
+    setFavoriteUsers([]);
+    setFavoriteUsersError("");
+    setIsLoadingFavoriteUsers(false);
   }
 
   async function handleStartConversation() {
@@ -503,7 +579,24 @@ function ProductDetails() {
 
                 <h1>{product.title}</h1>
 
-                <strong className="details-price">{product.price} €</strong>
+                <div className="details-price-row">
+                  <strong className="details-price">{product.price} €</strong>
+
+                  {isOwner && (
+                    <button
+                      className="my-product-favorite-count details-owner-favorite-count"
+                      type="button"
+                      onClick={handleOpenFavoriteUsersModal}
+                      title={text(
+                        "Favoriten ansehen",
+                        "عرض من أضاف للمفضلة",
+                        "View favorites"
+                      )}
+                    >
+                      ❤️ {ownerFavoriteCount}
+                    </button>
+                  )}
+                </div>
 
                 <div className="details-meta">
                   <div>
@@ -690,6 +783,96 @@ function ProductDetails() {
           </>
         )}
       </main>
+
+      {isFavoriteUsersModalOpen && product && (
+        <div className="delete-confirm-modal" role="dialog" aria-modal="true">
+          <section className="delete-confirm-card favorite-users-modal-card">
+            <div className="favorite-users-modal-header">
+              <div>
+                <p className="eyebrow">
+                  {text("Favoriten", "المفضلة", "Favorites")}
+                </p>
+
+                <h2>
+                  {text(
+                    "Wer hat diese Anzeige gespeichert?",
+                    "من أضاف هذا الإعلان للمفضلة؟",
+                    "Who saved this listing?"
+                  )}
+                </h2>
+
+                <p>{product.title}</p>
+              </div>
+
+              <button
+                className="crop-close"
+                type="button"
+                onClick={closeFavoriteUsersModal}
+                aria-label={text("Schließen", "إغلاق", "Close")}
+              >
+                ×
+              </button>
+            </div>
+
+            {isLoadingFavoriteUsers && (
+              <p className="auth-message auth-success">
+                {text(
+                  "Favoriten werden geladen...",
+                  "جارٍ تحميل المفضلة...",
+                  "Loading favorites..."
+                )}
+              </p>
+            )}
+
+            {favoriteUsersError && (
+              <p className="auth-message auth-error">{favoriteUsersError}</p>
+            )}
+
+            {!isLoadingFavoriteUsers &&
+              !favoriteUsersError &&
+              favoriteUsers.length === 0 && (
+                <div className="favorite-users-empty">
+                  <div>🤍</div>
+
+                  <h3>
+                    {text(
+                      "Noch niemand hat diese Anzeige gespeichert.",
+                      "لم يضف أحد هذا الإعلان للمفضلة بعد.",
+                      "No one has saved this listing yet."
+                    )}
+                  </h3>
+                </div>
+              )}
+
+            {!isLoadingFavoriteUsers &&
+              !favoriteUsersError &&
+              favoriteUsers.length > 0 && (
+                <div className="favorite-users-list">
+                  {favoriteUsers.map((favoriteUser) => (
+                    <Link
+                      className="favorite-user-row favorite-user-row-link"
+                      key={favoriteUser.userId}
+                      to={`/users/${favoriteUser.userId}`}
+                      onClick={closeFavoriteUsersModal}
+                    >
+                      <UserAvatar
+                        user={{
+                          ...favoriteUser,
+                          profileImageUrl: buildProfileImageUrl(
+                            favoriteUser.profileImageUrl
+                          ),
+                        }}
+                        size="medium"
+                      />
+
+                      <strong>{favoriteUser.fullName}</strong>
+                    </Link>
+                  ))}
+                </div>
+              )}
+          </section>
+        </div>
+      )}
 
       {isLightboxOpen && selectedImage && (
         <div
