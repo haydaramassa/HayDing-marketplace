@@ -11,7 +11,7 @@ function Conversations() {
   const { isArabic, language } = useLanguage();
 
   const [conversations, setConversations] = useState([]);
-  const [unreadConversationIds, setUnreadConversationIds] = useState([]);
+  const [unreadMessageCounts, setUnreadMessageCounts] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -66,12 +66,98 @@ function Conversations() {
     return (
       notification?.conversation?.id ||
       notification?.conversationId ||
-      notification?.conversation?.conversationId
+      notification?.conversation?.conversationId ||
+      notification?.conversation
     );
   }
 
-  function isConversationUnread(conversationId) {
-    return unreadConversationIds.includes(Number(conversationId));
+  function isNotificationUnread(notification) {
+    return (
+      notification?.read === false ||
+      notification?.isRead === false ||
+      (!notification?.readAt && notification?.read !== true)
+    );
+  }
+
+  function getUnreadCountForConversation(conversationId) {
+    return Number(unreadMessageCounts[conversationId] || 0);
+  }
+
+  function getConversationPreview(conversation, unreadCount) {
+    if (unreadCount > 0) {
+      if (unreadCount === 1) {
+        return text("1 neue Nachricht", "رسالة جديدة واحدة", "1 new message");
+      }
+
+      return text(
+        `${unreadCount} neue Nachrichten`,
+        `${unreadCount} رسائل جديدة`,
+        `${unreadCount} new messages`
+      );
+    }
+
+    return (
+      conversation.lastMessage?.content ||
+      conversation.lastMessageContent ||
+      conversation.lastMessagePreview ||
+      text(
+        "Noch keine Nachrichtenvorschau verfügbar",
+        "لا توجد معاينة للرسائل بعد",
+        "No message preview yet"
+      )
+    );
+  }
+
+  async function loadConversations(showLoading = false) {
+    try {
+      if (showLoading) {
+        setIsLoading(true);
+      }
+
+      setError("");
+
+      const conversationsData = await getConversations();
+      const items = conversationsData?.data || conversationsData || [];
+
+      setConversations(Array.isArray(items) ? items : []);
+
+      const notificationsData = await getNotifications();
+      const notifications = notificationsData?.data || notificationsData || [];
+
+      const nextUnreadMessageCounts = {};
+
+      if (Array.isArray(notifications)) {
+        notifications
+          .filter(
+            (notification) =>
+              notification?.type === "MESSAGE" &&
+              isNotificationUnread(notification)
+          )
+          .forEach((notification) => {
+            const conversationId = Number(
+              getNotificationConversationId(notification)
+            );
+
+            if (!conversationId) return;
+
+            nextUnreadMessageCounts[conversationId] =
+              (nextUnreadMessageCounts[conversationId] || 0) + 1;
+          });
+      }
+
+      setUnreadMessageCounts(nextUnreadMessageCounts);
+    } catch (err) {
+      setError(
+        err.message ||
+          text(
+            "Konversationen konnten nicht geladen werden.",
+            "تعذر تحميل المحادثات.",
+            "Could not load conversations."
+          )
+      );
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -80,46 +166,29 @@ function Conversations() {
       return;
     }
 
-    async function loadConversations() {
-      try {
-        setIsLoading(true);
-        setError("");
+    loadConversations(true);
 
-        const conversationsData = await getConversations();
-        const items = conversationsData?.data || conversationsData || [];
-
-        setConversations(Array.isArray(items) ? items : []);
-
-        const notificationsData = await getNotifications();
-        const notifications = notificationsData?.data || notificationsData || [];
-
-        const unreadMessageConversationIds = Array.isArray(notifications)
-          ? notifications
-              .filter(
-                (notification) =>
-                  notification?.type === "MESSAGE" && !notification?.read
-              )
-              .map(getNotificationConversationId)
-              .filter(Boolean)
-              .map(Number)
-          : [];
-
-        setUnreadConversationIds([...new Set(unreadMessageConversationIds)]);
-      } catch (err) {
-        setError(
-          err.message ||
-            text(
-              "Konversationen konnten nicht geladen werden.",
-              "تعذر تحميل المحادثات.",
-              "Could not load conversations."
-            )
-        );
-      } finally {
-        setIsLoading(false);
-      }
+    function handleNotificationsUpdated() {
+      loadConversations(false);
     }
 
-    loadConversations();
+    window.addEventListener(
+      "hayding-notifications-updated",
+      handleNotificationsUpdated
+    );
+
+    const intervalId = setInterval(() => {
+      loadConversations(false);
+    }, 5000);
+
+    return () => {
+      clearInterval(intervalId);
+
+      window.removeEventListener(
+        "hayding-notifications-updated",
+        handleNotificationsUpdated
+      );
+    };
   }, [navigate]);
 
   const currentUser = getCurrentUser();
@@ -194,7 +263,8 @@ function Conversations() {
           <div className="conversations-list">
             {conversations.map((conversation) => {
               const product = conversation.product;
-              const isUnread = isConversationUnread(conversation.id);
+              const unreadCount = getUnreadCountForConversation(conversation.id);
+              const isUnread = unreadCount > 0;
 
               const otherUser =
                 Number(currentUser?.id) === Number(conversation?.buyer?.id)
@@ -227,7 +297,13 @@ function Conversations() {
                       <div className="conversation-list-date-wrap">
                         {isUnread && (
                           <span className="conversation-unread-pill">
-                            {text("Neu", "جديد", "New")}
+                            {unreadCount === 1
+                              ? text("Neu", "جديد", "New")
+                              : text(
+                                  `${unreadCount} neu`,
+                                  `${unreadCount} جديد`,
+                                  `${unreadCount} new`
+                                )}
                           </span>
                         )}
 
@@ -247,13 +323,7 @@ function Conversations() {
                     </p>
 
                     <p className="conversation-list-preview">
-                      {conversation.lastMessage?.content ||
-                        conversation.lastMessageContent ||
-                        text(
-                          "Konversation öffnen",
-                          "افتح المحادثة",
-                          "Open conversation"
-                        )}
+                      {getConversationPreview(conversation, unreadCount)}
                     </p>
                   </div>
 
