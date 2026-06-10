@@ -44,7 +44,6 @@ function Conversations() {
       return new Intl.DateTimeFormat(language === "AR" ? "ar" : "de-DE", {
         day: "2-digit",
         month: "2-digit",
-        year: "numeric",
         hour: "2-digit",
         minute: "2-digit",
       }).format(new Date(dateValue));
@@ -83,6 +82,15 @@ function Conversations() {
     return Number(unreadMessageCounts[conversationId] || 0);
   }
 
+  function getLastMessageText(conversation) {
+    return (
+      conversation.lastMessage?.content ||
+      conversation.lastMessageContent ||
+      conversation.lastMessagePreview ||
+      ""
+    );
+  }
+
   function getConversationPreview(conversation, unreadCount) {
     if (unreadCount > 0) {
       if (unreadCount === 1) {
@@ -96,16 +104,7 @@ function Conversations() {
       );
     }
 
-    return (
-      conversation.lastMessage?.content ||
-      conversation.lastMessageContent ||
-      conversation.lastMessagePreview ||
-      text(
-        "Noch keine Nachrichtenvorschau verfügbar",
-        "لا توجد معاينة للرسائل بعد",
-        "No message preview yet"
-      )
-    );
+    return getLastMessageText(conversation);
   }
 
   async function loadConversations(showLoading = false) {
@@ -200,139 +199,130 @@ function Conversations() {
     >
       <Navbar variant="app" />
 
-      <main className="my-products-page conversations-page">
-        <div className="my-products-header">
-          <div>
-            <p className="eyebrow">
-              {text("Nachrichten", "الرسائل", "Messages")}
-            </p>
+      <main className="conversations-compact-page">
+        <section className="conversations-compact-shell">
+          <header className="conversations-compact-header">
+            <div>
+              <p className="eyebrow">
+                {text("Nachrichten", "الرسائل", "Messages")}
+              </p>
 
-            <h1>
+              <h1>
+                {text("Posteingang", "صندوق الرسائل", "Inbox")}
+              </h1>
+            </div>
+
+            <span className="conversations-compact-count">
               {text(
-                "Meine Konversationen",
-                "محادثاتي",
-                "My conversations"
+                `${conversations.length} Konversationen`,
+                `${conversations.length} محادثة`,
+                `${conversations.length} conversations`
               )}
-            </h1>
+            </span>
+          </header>
 
-            <p>
+          {isLoading && (
+            <p className="auth-message auth-success">
               {text(
-                "Hier findest du alle Nachrichten zu deinen Käufen und Verkäufen.",
-                "هنا تجد كل الرسائل المتعلقة بعمليات الشراء والبيع.",
-                "Find all messages related to your buying and selling here."
-              )}
-            </p>
-          </div>
-        </div>
-
-        {isLoading && (
-          <p className="auth-message auth-success">
-            {text(
-              "Konversationen werden geladen...",
-              "جارٍ تحميل المحادثات...",
-              "Loading conversations..."
-            )}
-          </p>
-        )}
-
-        {error && <p className="auth-message auth-error">{error}</p>}
-
-        {!isLoading && !error && conversations.length === 0 && (
-          <div className="empty-state">
-            <div className="empty-icon">💬</div>
-
-            <h2>
-              {text(
-                "Noch keine Nachrichten.",
-                "لا توجد رسائل بعد.",
-                "No messages yet."
-              )}
-            </h2>
-
-            <p>
-              {text(
-                "Wenn jemand dich wegen einer Anzeige kontaktiert oder du eine Nachricht sendest, erscheint die Konversation hier.",
-                "عندما يتواصل معك شخص بخصوص إعلان أو ترسل أنت رسالة، ستظهر المحادثة هنا.",
-                "When someone contacts you about a listing, or you send a message, the conversation will appear here."
+                "Konversationen werden geladen...",
+                "جارٍ تحميل المحادثات...",
+                "Loading conversations..."
               )}
             </p>
-          </div>
-        )}
+          )}
 
-        {!isLoading && !error && conversations.length > 0 && (
-          <div className="conversations-list">
-            {conversations.map((conversation) => {
-              const product = conversation.product;
-              const unreadCount = getUnreadCountForConversation(conversation.id);
-              const isUnread = unreadCount > 0;
+          {error && <p className="auth-message auth-error">{error}</p>}
 
-              const otherUser =
-                Number(currentUser?.id) === Number(conversation?.buyer?.id)
-                  ? conversation?.seller
-                  : conversation?.buyer;
+          {!isLoading && !error && conversations.length === 0 && (
+            <div className="conversations-compact-empty">
+              <div>💬</div>
 
-              return (
-                <Link
-                  className={`conversation-list-card ${
-                    isUnread ? "conversation-list-card-unread" : ""
-                  }`}
-                  key={conversation.id}
-                  to={`/conversations/${conversation.id}`}
-                >
-                  <div className="conversation-avatar-wrap">
-                    <UserAvatar user={otherUser} size="medium" />
+              <h2>
+                {text(
+                  "Noch keine Nachrichten.",
+                  "لا توجد رسائل بعد.",
+                  "No messages yet."
+                )}
+              </h2>
 
-                    {isUnread && (
-                      <span
-                        className="conversation-unread-avatar-dot"
-                        aria-hidden="true"
-                      />
-                    )}
-                  </div>
+              <p>
+                {text(
+                  "Wenn jemand dich wegen einer Anzeige kontaktiert, erscheint die Konversation hier.",
+                  "عندما يتواصل معك شخص بخصوص إعلان، ستظهر المحادثة هنا.",
+                  "When someone contacts you about a listing, it will appear here."
+                )}
+              </p>
+            </div>
+          )}
 
-                  <div className="conversation-list-main">
-                    <div className="conversation-list-top">
-                      <h2>{getUserName(otherUser)}</h2>
+          {!isLoading && !error && conversations.length > 0 && (
+            <div className="conversations-compact-list">
+              {conversations.map((conversation) => {
+                const product = conversation.product;
+                const unreadCount = getUnreadCountForConversation(conversation.id);
+                const isUnread = unreadCount > 0;
+                const preview = getConversationPreview(conversation, unreadCount);
 
-                      <div className="conversation-list-date-wrap">
-                        {isUnread && (
-                          <span className="conversation-unread-pill">
-                            {unreadCount === 1
-                              ? text("Neu", "جديد", "New")
-                              : text(
-                                  `${unreadCount} neu`,
-                                  `${unreadCount} جديد`,
-                                  `${unreadCount} new`
-                                )}
-                          </span>
-                        )}
+                const otherUser =
+                  Number(currentUser?.id) === Number(conversation?.buyer?.id)
+                    ? conversation?.seller
+                    : conversation?.buyer;
 
-                        <span>
-                          {formatDate(getConversationDate(conversation))}
-                        </span>
-                      </div>
+                return (
+                  <Link
+                    className={`conversation-compact-row ${
+                      isUnread ? "unread" : ""
+                    }`}
+                    key={conversation.id}
+                    to={`/conversations/${conversation.id}`}
+                  >
+                    <div className="conversation-compact-avatar">
+                      <UserAvatar user={otherUser} size="medium" />
+
+                      {isUnread && (
+                        <span
+                          className="conversation-compact-dot"
+                          aria-hidden="true"
+                        />
+                      )}
                     </div>
 
-                    <p className="conversation-list-product">
-                      {product?.title ||
-                        text(
-                          "Anzeige nicht verfügbar",
-                          "الإعلان غير متاح",
-                          "Listing unavailable"
-                        )}
-                    </p>
+                    <div className="conversation-compact-content">
+                      <div className="conversation-compact-top">
+                        <h2>{getUserName(otherUser)}</h2>
 
-                    <p className="conversation-list-preview">
-                      {getConversationPreview(conversation, unreadCount)}
-                    </p>
-                  </div>
+                        <time dateTime={getConversationDate(conversation) || ""}>
+                          {formatDate(getConversationDate(conversation))}
+                        </time>
+                      </div>
 
-                  <span className="conversation-list-arrow">›</span>
-                </Link>
-              );
-            })}
-          </div>
-        )}
+                      <div className="conversation-compact-product">
+                        {product?.title ||
+                          text(
+                            "Anzeige nicht verfügbar",
+                            "الإعلان غير متاح",
+                            "Listing unavailable"
+                          )}
+                      </div>
+
+                      {preview && (
+                        <p className="conversation-compact-preview">
+                          {preview}
+                        </p>
+                      )}
+                    </div>
+
+                    {isUnread && (
+                      <span className="conversation-compact-badge">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </section>
       </main>
     </div>
   );
