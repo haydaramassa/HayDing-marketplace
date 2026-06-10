@@ -80,25 +80,6 @@ function MyProducts() {
     return Number(favoriteCounts[productId] || 0);
   }
 
-  function formatDate(dateValue) {
-    if (!dateValue) return "";
-
-    try {
-      return new Intl.DateTimeFormat(
-        language === "AR" ? "ar" : language === "EN" ? "en" : "de-DE",
-        {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        }
-      ).format(new Date(dateValue));
-    } catch {
-      return dateValue;
-    }
-  }
-
   async function openFavoriteUsersModal(product) {
     setFavoriteUsersProduct(product);
     setFavoriteUsers([]);
@@ -538,39 +519,22 @@ function MyProducts() {
               favoriteUsers.length > 0 && (
                 <div className="favorite-users-list">
                   {favoriteUsers.map((favoriteUser) => (
-                    <div className="favorite-user-row" key={favoriteUser.userId}>
-                      <UserAvatar
-                        user={{
-                          ...favoriteUser,
-                          profileImageUrl: buildProfileImageUrl(
-                            favoriteUser.profileImageUrl
-                          ),
-                        }}
-                        size="medium"
-                      />
-
-                      <div>
-                        <strong>{favoriteUser.fullName}</strong>
-
-                        <span>
-                          {favoriteUser.city ||
-                            text("Keine Stadt", "لا توجد مدينة", "No city")}
-                        </span>
-
-                        <small>
-                          {text("Gespeichert am", "تمت الإضافة في", "Saved on")}{" "}
-                          {formatDate(favoriteUser.favoritedAt)}
-                        </small>
-                      </div>
-
-                      <Link
-                        className="btn btn-secondary favorite-user-profile-link"
-                        to={`/users/${favoriteUser.userId}`}
-                        onClick={closeFavoriteUsersModal}
-                      >
-                        {text("Profil", "الملف", "Profile")}
-                      </Link>
-                    </div>
+                    <Link
+                    className="favorite-user-row favorite-user-row-link"
+                    key={favoriteUser.userId}
+                    to={`/users/${favoriteUser.userId}`}
+                    onClick={closeFavoriteUsersModal}
+                  >
+                    <UserAvatar
+                      user={{
+                        ...favoriteUser,
+                        profileImageUrl: buildProfileImageUrl(favoriteUser.profileImageUrl),
+                      }}
+                      size="medium"
+                    />
+                  
+                    <strong>{favoriteUser.fullName}</strong>
+                  </Link>
                   ))}
                 </div>
               )}
