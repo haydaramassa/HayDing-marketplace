@@ -1,7 +1,13 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
-import { getConversations, getNotifications } from "../services/api";
+import {
+  getConversationMessages,
+  getConversations,
+  getNotifications,
+  markConversationNotificationsAsRead,
+  sendConversationMessage,
+} from "../services/api";
 import Navbar from "../components/Navbar";
 import UserAvatar from "../components/UserAvatar";
 import "../App.css";
@@ -11,9 +17,16 @@ function Conversations() {
   const { isArabic, language } = useLanguage();
 
   const [conversations, setConversations] = useState([]);
+  const [selectedConversationId, setSelectedConversationId] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [messageText, setMessageText] = useState("");
   const [unreadMessageCounts, setUnreadMessageCounts] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState("");
+
+  const messagesEndRef = useRef(null);
 
   function text(de, ar, en) {
     if (isArabic) return ar;
@@ -104,7 +117,70 @@ function Conversations() {
       );
     }
 
-    return getLastMessageText(conversation);
+    return (
+      getLastMessageText(conversation) ||
+      text("Keine Vorschau", "لا توجد معاينة", "No preview")
+    );
+  }
+
+  function getOtherUser(conversation) {
+    const currentUser = getCurrentUser();
+
+    return Number(currentUser?.id) === Number(conversation?.buyer?.id)
+      ? conversation?.seller
+      : conversation?.buyer;
+  }
+
+  function notifyNavbarToRefreshNotifications() {
+    window.dispatchEvent(new Event("hayding-notifications-updated"));
+  }
+
+  function scrollMessagesToBottom() {
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 80);
+  }
+
+  async function loadConversationMessages(conversationId, markAsRead = true) {
+    if (!conversationId) return;
+
+    try {
+      setIsLoadingMessages(true);
+      setError("");
+
+      const messagesData = await getConversationMessages(conversationId);
+      const loadedMessages = messagesData?.data || messagesData || [];
+
+      setMessages(Array.isArray(loadedMessages) ? loadedMessages : []);
+
+      if (markAsRead) {
+        try {
+          await markConversationNotificationsAsRead(conversationId);
+
+          setUnreadMessageCounts((currentCounts) => ({
+            ...currentCounts,
+            [conversationId]: 0,
+          }));
+
+          notifyNavbarToRefreshNotifications();
+        } catch {
+          // Silent fail: the chat should still open even if marking read fails.
+        }
+      }
+
+      scrollMessagesToBottom();
+    } catch (err) {
+      setError(
+        err.message ||
+          text(
+            "Nachrichten konnten nicht geladen werden.",
+            "تعذر تحميل الرسائل.",
+            "Could not load messages."
+          )
+      );
+    } finally {
+      setIsLoadingMessages(false);
+    }
   }
 
   async function loadConversations(showLoading = false) {
@@ -117,8 +193,7 @@ function Conversations() {
 
       const conversationsData = await getConversations();
       const items = conversationsData?.data || conversationsData || [];
-
-      setConversations(Array.isArray(items) ? items : []);
+      const loadedConversations = Array.isArray(items) ? items : [];
 
       const notificationsData = await getNotifications();
       const notifications = notificationsData?.data || notificationsData || [];
@@ -145,6 +220,21 @@ function Conversations() {
       }
 
       setUnreadMessageCounts(nextUnreadMessageCounts);
+      setConversations(loadedConversations);
+
+      setSelectedConversationId((currentSelectedId) => {
+        if (currentSelectedId) return currentSelectedId;
+
+        const firstUnreadConversation = loadedConversations.find(
+          (conversation) => nextUnreadMessageCounts[conversation.id] > 0
+        );
+
+        return (
+          firstUnreadConversation?.id ||
+          loadedConversations[0]?.id ||
+          null
+        );
+      });
     } catch (err) {
       setError(
         err.message ||
@@ -190,7 +280,68 @@ function Conversations() {
     };
   }, [navigate]);
 
+  useEffect(() => {
+    if (selectedConversationId) {
+      loadConversationMessages(selectedConversationId, true);
+    }
+  }, [selectedConversationId]);
+
+  async function handleSelectConversation(conversationId) {
+    setSelectedConversationId(conversationId);
+  }
+
+  async function handleSendMessage(event) {
+    event.preventDefault();
+
+    const cleanMessage = messageText.trim();
+
+    if (!cleanMessage || !selectedConversationId || isSending) {
+      return;
+    }
+
+    try {
+      setIsSending(true);
+      setError("");
+
+      const data = await sendConversationMessage(
+        selectedConversationId,
+        cleanMessage
+      );
+
+      const savedMessage = data?.data || data;
+
+      if (savedMessage) {
+        setMessages((currentMessages) => [...currentMessages, savedMessage]);
+      }
+
+      setMessageText("");
+      await loadConversations(false);
+      await loadConversationMessages(selectedConversationId, false);
+    } catch (err) {
+      setError(
+        err.message ||
+          text(
+            "Nachricht konnte nicht gesendet werden.",
+            "تعذر إرسال الرسالة.",
+            "Could not send message."
+          )
+      );
+    } finally {
+      setIsSending(false);
+    }
+  }
+
   const currentUser = getCurrentUser();
+
+  const selectedConversation = conversations.find(
+    (conversation) => Number(conversation.id) === Number(selectedConversationId)
+  );
+
+  const selectedOtherUser = selectedConversation
+    ? getOtherUser(selectedConversation)
+    : null;
+
+  const selectedProduct = selectedConversation?.product;
 
   return (
     <div
@@ -199,129 +350,244 @@ function Conversations() {
     >
       <Navbar variant="app" />
 
-      <main className="conversations-compact-page">
-        <section className="conversations-compact-shell">
-          <header className="conversations-compact-header">
-            <div>
-              <p className="eyebrow">
-                {text("Nachrichten", "الرسائل", "Messages")}
-              </p>
+      <main className="inbox-page">
+        <section className="inbox-layout">
+          <aside className="inbox-list-panel">
+            <header className="inbox-list-header">
+              <div>
+                <p className="eyebrow">
+                  {text("Nachrichten", "الرسائل", "Messages")}
+                </p>
 
-              <h1>
-                {text("Posteingang", "صندوق الرسائل", "Inbox")}
-              </h1>
-            </div>
+                <h1>{text("Inbox", "صندوق الرسائل", "Inbox")}</h1>
+              </div>
 
-            <span className="conversations-compact-count">
-              {text(
-                `${conversations.length} Konversationen`,
-                `${conversations.length} محادثة`,
-                `${conversations.length} conversations`
-              )}
-            </span>
-          </header>
-
-          {isLoading && (
-            <p className="auth-message auth-success">
-              {text(
-                "Konversationen werden geladen...",
-                "جارٍ تحميل المحادثات...",
-                "Loading conversations..."
-              )}
-            </p>
-          )}
-
-          {error && <p className="auth-message auth-error">{error}</p>}
-
-          {!isLoading && !error && conversations.length === 0 && (
-            <div className="conversations-compact-empty">
-              <div>💬</div>
-
-              <h2>
+              <span>
                 {text(
-                  "Noch keine Nachrichten.",
-                  "لا توجد رسائل بعد.",
-                  "No messages yet."
+                  `${conversations.length}`,
+                  `${conversations.length}`,
+                  `${conversations.length}`
                 )}
-              </h2>
+              </span>
+            </header>
 
-              <p>
-                {text(
-                  "Wenn jemand dich wegen einer Anzeige kontaktiert, erscheint die Konversation hier.",
-                  "عندما يتواصل معك شخص بخصوص إعلان، ستظهر المحادثة هنا.",
-                  "When someone contacts you about a listing, it will appear here."
-                )}
+            {isLoading && (
+              <p className="inbox-loading">
+                {text("Wird geladen...", "جارٍ التحميل...", "Loading...")}
               </p>
-            </div>
-          )}
+            )}
 
-          {!isLoading && !error && conversations.length > 0 && (
-            <div className="conversations-compact-list">
-              {conversations.map((conversation) => {
-                const product = conversation.product;
-                const unreadCount = getUnreadCountForConversation(conversation.id);
-                const isUnread = unreadCount > 0;
-                const preview = getConversationPreview(conversation, unreadCount);
+            {error && <p className="auth-message auth-error">{error}</p>}
 
-                const otherUser =
-                  Number(currentUser?.id) === Number(conversation?.buyer?.id)
-                    ? conversation?.seller
-                    : conversation?.buyer;
+            {!isLoading && !error && conversations.length === 0 && (
+              <div className="inbox-empty">
+                <div>💬</div>
+                <strong>
+                  {text(
+                    "Noch keine Nachrichten.",
+                    "لا توجد رسائل بعد.",
+                    "No messages yet."
+                  )}
+                </strong>
+              </div>
+            )}
 
-                return (
-                  <Link
-                    className={`conversation-compact-row ${
-                      isUnread ? "unread" : ""
-                    }`}
-                    key={conversation.id}
-                    to={`/conversations/${conversation.id}`}
-                  >
-                    <div className="conversation-compact-avatar">
-                      <UserAvatar user={otherUser} size="medium" />
+            {!isLoading && !error && conversations.length > 0 && (
+              <div className="inbox-conversation-list">
+                {conversations.map((conversation) => {
+                  const product = conversation.product;
+                  const otherUser = getOtherUser(conversation);
+                  const unreadCount = getUnreadCountForConversation(
+                    conversation.id
+                  );
+                  const isUnread = unreadCount > 0;
+                  const isActive =
+                    Number(selectedConversationId) === Number(conversation.id);
 
-                      {isUnread && (
-                        <span
-                          className="conversation-compact-dot"
-                          aria-hidden="true"
-                        />
-                      )}
-                    </div>
+                  return (
+                    <button
+                      className={`inbox-conversation-item ${
+                        isActive ? "active" : ""
+                      } ${isUnread ? "unread" : ""}`}
+                      type="button"
+                      key={conversation.id}
+                      onClick={() => handleSelectConversation(conversation.id)}
+                    >
+                      <div className="inbox-avatar-wrap">
+                        <UserAvatar user={otherUser} size="medium" />
 
-                    <div className="conversation-compact-content">
-                      <div className="conversation-compact-top">
-                        <h2>{getUserName(otherUser)}</h2>
-
-                        <time dateTime={getConversationDate(conversation) || ""}>
-                          {formatDate(getConversationDate(conversation))}
-                        </time>
+                        {isUnread && <span className="inbox-avatar-dot" />}
                       </div>
 
-                      <div className="conversation-compact-product">
-                        {product?.title ||
+                      <div className="inbox-item-main">
+                        <div className="inbox-item-top">
+                          <strong>{getUserName(otherUser)}</strong>
+
+                          <time dateTime={getConversationDate(conversation) || ""}>
+                            {formatDate(getConversationDate(conversation))}
+                          </time>
+                        </div>
+
+                        <p className="inbox-item-product">
+                          {product?.title ||
+                            text(
+                              "Anzeige nicht verfügbar",
+                              "الإعلان غير متاح",
+                              "Listing unavailable"
+                            )}
+                        </p>
+
+                        <p className="inbox-item-preview">
+                          {getConversationPreview(conversation, unreadCount)}
+                        </p>
+                      </div>
+
+                      {isUnread && (
+                        <span className="inbox-unread-badge">
+                          {unreadCount}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </aside>
+
+          <section className="inbox-chat-panel">
+            {!selectedConversation && (
+              <div className="inbox-chat-empty">
+                <div>💬</div>
+
+                <h2>
+                  {text(
+                    "Wähle eine Konversation",
+                    "اختر محادثة",
+                    "Select a conversation"
+                  )}
+                </h2>
+
+                <p>
+                  {text(
+                    "Klicke links auf eine Konversation, um den Chat zu öffnen.",
+                    "اضغط على محادثة من القائمة لفتح الدردشة.",
+                    "Choose a conversation from the list to open the chat."
+                  )}
+                </p>
+              </div>
+            )}
+
+            {selectedConversation && (
+              <>
+                <header className="inbox-chat-header">
+                  <div className="inbox-chat-user">
+                    <UserAvatar user={selectedOtherUser} size="medium" />
+
+                    <div>
+                      <h2>{getUserName(selectedOtherUser)}</h2>
+
+                      <p>
+                        {selectedProduct?.title ||
                           text(
                             "Anzeige nicht verfügbar",
                             "الإعلان غير متاح",
                             "Listing unavailable"
                           )}
-                      </div>
-
-                      {preview && (
-                        <p className="conversation-compact-preview">
-                          {preview}
-                        </p>
-                      )}
+                      </p>
                     </div>
+                  </div>
 
-                    {isUnread && (
-                      <span className="conversation-compact-badge">
-                        {unreadCount}
-                      </span>
+                  {selectedProduct?.id && (
+                    <button
+                      className="btn btn-secondary inbox-product-link"
+                      type="button"
+                      onClick={() => navigate(`/products/${selectedProduct.id}`)}
+                    >
+                      {text("Anzeige", "الإعلان", "Listing")}
+                    </button>
+                  )}
+                </header>
+
+                <div className="inbox-chat-messages">
+                  {isLoadingMessages && (
+                    <p className="inbox-loading">
+                      {text(
+                        "Nachrichten werden geladen...",
+                        "جارٍ تحميل الرسائل...",
+                        "Loading messages..."
+                      )}
+                    </p>
+                  )}
+
+                  {!isLoadingMessages && messages.length === 0 && (
+                    <div className="inbox-chat-empty small">
+                      <div>👋</div>
+
+                      <p>
+                        {text(
+                          "Noch keine Nachrichten in diesem Chat.",
+                          "لا توجد رسائل في هذه المحادثة بعد.",
+                          "No messages in this chat yet."
+                        )}
+                      </p>
+                    </div>
+                  )}
+
+                  {!isLoadingMessages &&
+                    messages.map((message) => {
+                      const isMine =
+                        Number(message.sender?.id) === Number(currentUser?.id);
+
+                      return (
+                        <div
+                          className={`inbox-message-row ${
+                            isMine ? "mine" : "theirs"
+                          }`}
+                          key={message.id}
+                        >
+                          <div className="inbox-message-bubble">
+                            <p>{message.content}</p>
+
+                            <time dateTime={message.createdAt || ""}>
+                              {formatDate(message.createdAt)}
+                            </time>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                  <div ref={messagesEndRef} />
+                </div>
+
+                <form className="inbox-message-form" onSubmit={handleSendMessage}>
+                  <textarea
+                    value={messageText}
+                    onChange={(event) => setMessageText(event.target.value)}
+                    placeholder={text(
+                      "Schreibe hier deine Nachricht",
+                      "اكتب رسالتك هنا",
+                      "Write your message here"
                     )}
-                  </Link>
-                );
-              })}
-            </div>
-          )}
+                    rows="1"
+                  />
+
+                  <button
+                    className="btn btn-primary"
+                    type="submit"
+                    disabled={isSending || !messageText.trim()}
+                  >
+                    {isSending
+                      ? text("...", "...", "...")
+                      : text("Senden", "إرسال", "Send")}
+                  </button>
+                </form>
+              </>
+            )}
+          </section>
+
+          <aside className="inbox-ad-space">
+            <span>{text("Werbung", "إعلان", "Ad")}</span>
+          </aside>
         </section>
       </main>
     </div>
