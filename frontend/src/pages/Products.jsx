@@ -104,10 +104,6 @@ function Products() {
   function getSortOptions() {
     return [
       {
-        value: "newest",
-        label: text("Neueste zuerst", "الأحدث أولاً", "Newest first"),
-      },
-      {
         value: "price-asc",
         label: text(
           "Preis aufsteigend",
