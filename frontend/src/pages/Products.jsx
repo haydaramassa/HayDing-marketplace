@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import {
@@ -11,6 +11,75 @@ import ProductCardImage from "../components/ProductCardImage";
 import Navbar from "../components/Navbar";
 import UserAvatar from "../components/UserAvatar";
 import "../App.css";
+
+const GERMAN_CITIES = [
+  "Berlin",
+  "Hamburg",
+  "München",
+  "Köln",
+  "Frankfurt am Main",
+  "Stuttgart",
+  "Düsseldorf",
+  "Leipzig",
+  "Dortmund",
+  "Essen",
+  "Bremen",
+  "Dresden",
+  "Hannover",
+  "Nürnberg",
+  "Duisburg",
+  "Bochum",
+  "Wuppertal",
+  "Bielefeld",
+  "Bonn",
+  "Münster",
+  "Karlsruhe",
+  "Mannheim",
+  "Augsburg",
+  "Wiesbaden",
+  "Mönchengladbach",
+  "Gelsenkirchen",
+  "Aachen",
+  "Braunschweig",
+  "Chemnitz",
+  "Kiel",
+  "Halle",
+  "Magdeburg",
+  "Freiburg im Breisgau",
+  "Krefeld",
+  "Lübeck",
+  "Oberhausen",
+  "Erfurt",
+  "Mainz",
+  "Rostock",
+  "Kassel",
+  "Hagen",
+  "Potsdam",
+  "Saarbrücken",
+  "Heidelberg",
+  "Regensburg",
+  "Würzburg",
+  "Ingolstadt",
+  "Ulm",
+  "Heilbronn",
+  "Paderborn",
+  "Offenbach am Main",
+  "Fürth",
+  "Wolfsburg",
+  "Göttingen",
+  "Reutlingen",
+  "Koblenz",
+  "Bremerhaven",
+  "Bergisch Gladbach",
+  "Jena",
+  "Remscheid",
+  "Trier",
+  "Erlangen",
+  "Moers",
+  "Siegen",
+  "Hildesheim",
+  "Salzgitter",
+];
 
 function Products() {
   const { isArabic, language } = useLanguage();
@@ -36,6 +105,9 @@ function Products() {
   const [sortOption, setSortOption] = useState(
     searchParams.get("sort") || "newest"
   );
+
+  const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
+  const cityDropdownRef = useRef(null);
 
   function text(de, ar, en) {
     if (isArabic) return ar;
@@ -157,15 +229,22 @@ function Products() {
     setSortOption(searchParams.get("sort") || "newest");
   }, [searchParams]);
 
-  const availableCities = useMemo(() => {
-    const cities = products
-      .map((product) => product.city)
-      .filter(Boolean)
-      .map((city) => city.trim())
-      .filter(Boolean);
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        cityDropdownRef.current &&
+        !cityDropdownRef.current.contains(event.target)
+      ) {
+        setIsCityDropdownOpen(false);
+      }
+    }
 
-    return [...new Set(cities)].sort((a, b) => a.localeCompare(b));
-  }, [products]);
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const filteredProducts = useMemo(() => {
     const cleanSearch = searchTerm.trim().toLowerCase();
@@ -174,7 +253,7 @@ function Products() {
     return products.filter((product) => {
       const title = product.title?.toLowerCase() || "";
       const description = product.description?.toLowerCase() || "";
-      const city = product.city?.toLowerCase() || "";
+      const city = product.city?.trim().toLowerCase() || "";
       const condition = product.conditionStatus || product.condition || "";
       const categoryId = getProductCategoryId(product);
 
@@ -225,6 +304,12 @@ function Products() {
     setConditionFilter("");
     setCategoryFilter("");
     setSortOption("newest");
+    setIsCityDropdownOpen(false);
+  }
+
+  function handleCitySelect(city) {
+    setCityFilter(city);
+    setIsCityDropdownOpen(false);
   }
 
   async function handleFavoriteClick(event, productId) {
@@ -318,23 +403,56 @@ function Products() {
               />
             </label>
 
-            <label className="products-filter-field">
+            <div
+              className="products-filter-field city-filter-field"
+              ref={cityDropdownRef}
+            >
               <span>{text("Stadt", "المدينة", "City")}</span>
-              <select
-                value={cityFilter}
-                onChange={(event) => setCityFilter(event.target.value)}
-              >
-                <option value="">
-                  {text("Alle Städte", "كل المدن", "All cities")}
-                </option>
 
-                {availableCities.map((city) => (
-                  <option value={city} key={city}>
-                    {city}
-                  </option>
-                ))}
-              </select>
-            </label>
+              <button
+                className={`city-filter-button ${
+                  isCityDropdownOpen ? "open" : ""
+                }`}
+                type="button"
+                onClick={() =>
+                  setIsCityDropdownOpen((currentValue) => !currentValue)
+                }
+              >
+                <span>
+                  {cityFilter ||
+                    text("Alle Städte", "كل المدن", "All cities")}
+                </span>
+
+                <span aria-hidden="true">▾</span>
+              </button>
+
+              {isCityDropdownOpen && (
+                <div className="city-filter-menu">
+                  <button
+                    className={`city-filter-option ${
+                      cityFilter === "" ? "active" : ""
+                    }`}
+                    type="button"
+                    onClick={() => handleCitySelect("")}
+                  >
+                    {text("Alle Städte", "كل المدن", "All cities")}
+                  </button>
+
+                  {GERMAN_CITIES.map((city) => (
+                    <button
+                      className={`city-filter-option ${
+                        cityFilter === city ? "active" : ""
+                      }`}
+                      type="button"
+                      key={city}
+                      onClick={() => handleCitySelect(city)}
+                    >
+                      {city}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             <label className="products-filter-field">
               <span>{text("Kategorie", "الفئة", "Category")}</span>
