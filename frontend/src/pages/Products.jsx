@@ -12,75 +12,6 @@ import Navbar from "../components/Navbar";
 import UserAvatar from "../components/UserAvatar";
 import "../App.css";
 
-const GERMAN_CITIES = [
-  "Berlin",
-  "Hamburg",
-  "München",
-  "Köln",
-  "Frankfurt am Main",
-  "Stuttgart",
-  "Düsseldorf",
-  "Leipzig",
-  "Dortmund",
-  "Essen",
-  "Bremen",
-  "Dresden",
-  "Hannover",
-  "Nürnberg",
-  "Duisburg",
-  "Bochum",
-  "Wuppertal",
-  "Bielefeld",
-  "Bonn",
-  "Münster",
-  "Karlsruhe",
-  "Mannheim",
-  "Augsburg",
-  "Wiesbaden",
-  "Mönchengladbach",
-  "Gelsenkirchen",
-  "Aachen",
-  "Braunschweig",
-  "Chemnitz",
-  "Kiel",
-  "Halle",
-  "Magdeburg",
-  "Freiburg im Breisgau",
-  "Krefeld",
-  "Lübeck",
-  "Oberhausen",
-  "Erfurt",
-  "Mainz",
-  "Rostock",
-  "Kassel",
-  "Hagen",
-  "Potsdam",
-  "Saarbrücken",
-  "Heidelberg",
-  "Regensburg",
-  "Würzburg",
-  "Ingolstadt",
-  "Ulm",
-  "Heilbronn",
-  "Paderborn",
-  "Offenbach am Main",
-  "Fürth",
-  "Wolfsburg",
-  "Göttingen",
-  "Reutlingen",
-  "Koblenz",
-  "Bremerhaven",
-  "Bergisch Gladbach",
-  "Jena",
-  "Remscheid",
-  "Trier",
-  "Erlangen",
-  "Moers",
-  "Siegen",
-  "Hildesheim",
-  "Salzgitter",
-];
-
 function Products() {
   const { isArabic, language } = useLanguage();
   const navigate = useNavigate();
@@ -106,8 +37,8 @@ function Products() {
     searchParams.get("sort") || "newest"
   );
 
-  const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
-  const cityDropdownRef = useRef(null);
+  const [openDropdown, setOpenDropdown] = useState(null);
+  const filtersRef = useRef(null);
 
   function text(de, ar, en) {
     if (isArabic) return ar;
@@ -151,12 +82,47 @@ function Products() {
 
   function getCategoryOptions() {
     return [
-      { id: "1", label: text("Elektronik", "إلكترونيات", "Electronics") },
-      { id: "2", label: text("Möbel", "أثاث", "Furniture") },
-      { id: "3", label: text("Kleidung", "ملابس", "Clothing") },
-      { id: "5", label: text("Haushalt", "منزل", "Home") },
-      { id: "6", label: text("Bücher", "كتب", "Books") },
-      { id: "8", label: text("Sport", "رياضة", "Sport") },
+      { value: "1", label: text("Elektronik", "إلكترونيات", "Electronics") },
+      { value: "2", label: text("Möbel", "أثاث", "Furniture") },
+      { value: "3", label: text("Kleidung", "ملابس", "Clothing") },
+      { value: "5", label: text("Haushalt", "منزل", "Home") },
+      { value: "6", label: text("Bücher", "كتب", "Books") },
+      { value: "8", label: text("Sport", "رياضة", "Sport") },
+    ];
+  }
+
+  function getConditionOptions() {
+    return [
+      { value: "NEW", label: text("Neu", "جديد", "New") },
+      { value: "LIKE_NEW", label: text("Wie neu", "شبه جديد", "Like new") },
+      { value: "GOOD", label: text("Gut", "جيد", "Good") },
+      { value: "ACCEPTABLE", label: text("Akzeptabel", "مقبول", "Acceptable") },
+      { value: "USED", label: text("Gebraucht", "مستعمل", "Used") },
+    ];
+  }
+
+  function getSortOptions() {
+    return [
+      {
+        value: "newest",
+        label: text("Neueste zuerst", "الأحدث أولاً", "Newest first"),
+      },
+      {
+        value: "price-asc",
+        label: text(
+          "Preis aufsteigend",
+          "السعر من الأقل للأعلى",
+          "Price low to high"
+        ),
+      },
+      {
+        value: "price-desc",
+        label: text(
+          "Preis absteigend",
+          "السعر من الأعلى للأقل",
+          "Price high to low"
+        ),
+      },
     ];
   }
 
@@ -183,6 +149,71 @@ function Products() {
     const value = Number(product.price);
 
     return Number.isNaN(value) ? 0 : value;
+  }
+
+  function getSelectedLabel(options, value, fallback) {
+    return options.find((option) => option.value === value)?.label || fallback;
+  }
+
+  function CustomDropdown({
+    id,
+    label,
+    value,
+    fallback,
+    options,
+    onChange,
+  }) {
+    const isOpen = openDropdown === id;
+
+    return (
+      <div className="products-filter-field custom-filter-field">
+        <span>{label}</span>
+
+        <button
+          className={`custom-filter-button ${isOpen ? "open" : ""}`}
+          type="button"
+          onClick={() =>
+            setOpenDropdown((currentValue) =>
+              currentValue === id ? null : id
+            )
+          }
+        >
+          <span>{getSelectedLabel(options, value, fallback)}</span>
+          <span aria-hidden="true">▾</span>
+        </button>
+
+        {isOpen && (
+          <div className="custom-filter-menu">
+            <button
+              className={`custom-filter-option ${value === "" ? "active" : ""}`}
+              type="button"
+              onClick={() => {
+                onChange("");
+                setOpenDropdown(null);
+              }}
+            >
+              {fallback}
+            </button>
+
+            {options.map((option) => (
+              <button
+                className={`custom-filter-option ${
+                  value === option.value ? "active" : ""
+                }`}
+                type="button"
+                key={option.value}
+                onClick={() => {
+                  onChange(option.value);
+                  setOpenDropdown(null);
+                }}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
   }
 
   useEffect(() => {
@@ -231,11 +262,8 @@ function Products() {
 
   useEffect(() => {
     function handleClickOutside(event) {
-      if (
-        cityDropdownRef.current &&
-        !cityDropdownRef.current.contains(event.target)
-      ) {
-        setIsCityDropdownOpen(false);
+      if (filtersRef.current && !filtersRef.current.contains(event.target)) {
+        setOpenDropdown(null);
       }
     }
 
@@ -253,7 +281,7 @@ function Products() {
     return products.filter((product) => {
       const title = product.title?.toLowerCase() || "";
       const description = product.description?.toLowerCase() || "";
-      const city = product.city?.trim().toLowerCase() || "";
+      const city = product.city?.toLowerCase() || "";
       const condition = product.conditionStatus || product.condition || "";
       const categoryId = getProductCategoryId(product);
 
@@ -262,7 +290,7 @@ function Products() {
         title.includes(cleanSearch) ||
         description.includes(cleanSearch);
 
-      const matchesCity = !cleanCity || city === cleanCity;
+      const matchesCity = !cleanCity || city.includes(cleanCity);
 
       const matchesCondition =
         !conditionFilter || condition === conditionFilter;
@@ -292,7 +320,7 @@ function Products() {
 
   const hasActiveFilters = Boolean(
     searchTerm.trim() ||
-      cityFilter ||
+      cityFilter.trim() ||
       conditionFilter ||
       categoryFilter ||
       sortOption !== "newest"
@@ -304,12 +332,7 @@ function Products() {
     setConditionFilter("");
     setCategoryFilter("");
     setSortOption("newest");
-    setIsCityDropdownOpen(false);
-  }
-
-  function handleCitySelect(city) {
-    setCityFilter(city);
-    setIsCityDropdownOpen(false);
+    setOpenDropdown(null);
   }
 
   async function handleFavoriteClick(event, productId) {
@@ -387,7 +410,7 @@ function Products() {
           </div>
         </div>
 
-        <section className="products-filter-card">
+        <section className="products-filter-card" ref={filtersRef}>
           <div className="products-filter-grid products-filter-grid-with-sort">
             <label className="products-filter-field products-filter-search">
               <span>{text("Suche", "بحث", "Search")}</span>
@@ -403,123 +426,46 @@ function Products() {
               />
             </label>
 
-            <div
-              className="products-filter-field city-filter-field"
-              ref={cityDropdownRef}
-            >
-              <span>{text("Stadt", "المدينة", "City")}</span>
-
-              <button
-                className={`city-filter-button ${
-                  isCityDropdownOpen ? "open" : ""
-                }`}
-                type="button"
-                onClick={() =>
-                  setIsCityDropdownOpen((currentValue) => !currentValue)
-                }
-              >
-                <span>
-                  {cityFilter ||
-                    text("Alle Städte", "كل المدن", "All cities")}
-                </span>
-
-                <span aria-hidden="true">▾</span>
-              </button>
-
-              {isCityDropdownOpen && (
-                <div className="city-filter-menu">
-                  <button
-                    className={`city-filter-option ${
-                      cityFilter === "" ? "active" : ""
-                    }`}
-                    type="button"
-                    onClick={() => handleCitySelect("")}
-                  >
-                    {text("Alle Städte", "كل المدن", "All cities")}
-                  </button>
-
-                  {GERMAN_CITIES.map((city) => (
-                    <button
-                      className={`city-filter-option ${
-                        cityFilter === city ? "active" : ""
-                      }`}
-                      type="button"
-                      key={city}
-                      onClick={() => handleCitySelect(city)}
-                    >
-                      {city}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <label className="products-filter-field">
-              <span>{text("Kategorie", "الفئة", "Category")}</span>
-              <select
-                value={categoryFilter}
-                onChange={(event) => setCategoryFilter(event.target.value)}
-              >
-                <option value="">
-                  {text("Alle Kategorien", "كل الفئات", "All categories")}
-                </option>
-
-                {getCategoryOptions().map((category) => (
-                  <option value={category.id} key={category.id}>
-                    {category.label}
-                  </option>
-                ))}
-              </select>
+            <label className="products-filter-field products-city-input">
+              <span>{text("Ort oder PLZ", "المدينة أو الرمز", "City or ZIP")}</span>
+              <input
+                type="text"
+                value={cityFilter}
+                onChange={(event) => setCityFilter(event.target.value)}
+                placeholder={text(
+                  "z. B. Leipzig",
+                  "مثلاً Leipzig",
+                  "e.g. Leipzig"
+                )}
+              />
             </label>
 
-            <label className="products-filter-field">
-              <span>{text("Zustand", "الحالة", "Condition")}</span>
-              <select
-                value={conditionFilter}
-                onChange={(event) => setConditionFilter(event.target.value)}
-              >
-                <option value="">
-                  {text("Alle Zustände", "كل الحالات", "All conditions")}
-                </option>
-                <option value="NEW">{text("Neu", "جديد", "New")}</option>
-                <option value="LIKE_NEW">
-                  {text("Wie neu", "شبه جديد", "Like new")}
-                </option>
-                <option value="GOOD">{text("Gut", "جيد", "Good")}</option>
-                <option value="ACCEPTABLE">
-                  {text("Akzeptabel", "مقبول", "Acceptable")}
-                </option>
-                <option value="USED">
-                  {text("Gebraucht", "مستعمل", "Used")}
-                </option>
-              </select>
-            </label>
+            <CustomDropdown
+              id="category"
+              label={text("Kategorie", "الفئة", "Category")}
+              value={categoryFilter}
+              fallback={text("Alle Kategorien", "كل الفئات", "All categories")}
+              options={getCategoryOptions()}
+              onChange={setCategoryFilter}
+            />
 
-            <label className="products-filter-field">
-              <span>{text("Sortieren", "ترتيب", "Sort")}</span>
-              <select
-                value={sortOption}
-                onChange={(event) => setSortOption(event.target.value)}
-              >
-                <option value="newest">
-                  {text("Neueste zuerst", "الأحدث أولاً", "Newest first")}
-                </option>
-                <option value="price-asc">
-                  {text(
-                    "Preis aufsteigend",
-                    "السعر من الأقل للأعلى",
-                    "Price low to high"
-                  )}
-                </option>
-                <option value="price-desc">
-                  {text(
-                    "Preis absteigend",
-                    "السعر من الأعلى للأقل",
-                    "Price high to low"
-                  )}
-                </option>
-              </select>
-            </label>
+            <CustomDropdown
+              id="condition"
+              label={text("Zustand", "الحالة", "Condition")}
+              value={conditionFilter}
+              fallback={text("Alle Zustände", "كل الحالات", "All conditions")}
+              options={getConditionOptions()}
+              onChange={setConditionFilter}
+            />
+
+            <CustomDropdown
+              id="sort"
+              label={text("Sortieren", "ترتيب", "Sort")}
+              value={sortOption}
+              fallback={text("Neueste zuerst", "الأحدث أولاً", "Newest first")}
+              options={getSortOptions()}
+              onChange={(value) => setSortOption(value || "newest")}
+            />
           </div>
 
           <div className="products-filter-footer">
@@ -600,7 +546,7 @@ function Products() {
         )}
 
         {!isLoading && !error && visibleProducts.length > 0 && (
-          <div className="my-products-grid">
+          <div className="my-products-grid products-results-grid">
             {visibleProducts.map((product) => {
               const isFavorite = favoriteIds.includes(product.id);
               const isFavoriteLoading = favoriteLoadingId === product.id;
@@ -608,7 +554,7 @@ function Products() {
 
               return (
                 <Link
-                  className="product-card my-product-card product-card-link"
+                  className="product-card my-product-card product-card-link products-compact-card"
                   key={product.id}
                   to={`/products/${product.id}`}
                 >
