@@ -5,6 +5,8 @@ import com.hayding.category.repository.CategoryRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
 public class CategoryDataInitializer implements CommandLineRunner {
 
@@ -16,27 +18,48 @@ public class CategoryDataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        createCategoryIfMissing(
-                "Sonstiges",
-                "أخرى",
-                "Others",
-                "others"
-        );
+        fixOtherCategory();
     }
 
-    private void createCategoryIfMissing(String nameDe,
-                                         String nameAr,
-                                         String nameEn,
-                                         String slug) {
-        if (categoryRepository.existsBySlug(slug)) {
+    private void fixOtherCategory() {
+        Optional<Category> otherCategory = categoryRepository.findBySlug("other");
+        Optional<Category> othersCategory = categoryRepository.findBySlug("others");
+
+        if (otherCategory.isPresent()) {
+            Category category = otherCategory.get();
+
+            category.setNameDe("Sonstiges");
+            category.setNameAr("أخرى");
+            category.setNameEn("Others");
+            category.setActive(true);
+
+            categoryRepository.save(category);
+
+            if (othersCategory.isPresent()) {
+                categoryRepository.delete(othersCategory.get());
+            }
+
+            return;
+        }
+
+        if (othersCategory.isPresent()) {
+            Category category = othersCategory.get();
+
+            category.setNameDe("Sonstiges");
+            category.setNameAr("أخرى");
+            category.setNameEn("Others");
+            category.setSlug("other");
+            category.setActive(true);
+
+            categoryRepository.save(category);
             return;
         }
 
         Category category = new Category(
-                nameDe,
-                nameAr,
-                nameEn,
-                slug
+                "Sonstiges",
+                "أخرى",
+                "Others",
+                "other"
         );
 
         categoryRepository.save(category);
