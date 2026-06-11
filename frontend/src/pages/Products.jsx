@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import {
   addFavorite,
+  getCategories,
   getFavorites,
   getProducts,
   removeFavorite,
@@ -18,6 +19,7 @@ function Products() {
   const [searchParams] = useSearchParams();
 
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [favoriteIds, setFavoriteIds] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [favoriteLoadingId, setFavoriteLoadingId] = useState(null);
@@ -68,6 +70,12 @@ function Products() {
     );
   }
 
+  function getCategoryName(category) {
+    if (isArabic) return category.nameAr;
+    if (language === "EN") return category.nameEn;
+    return category.nameDe;
+  }
+
   function getConditionLabel(conditionStatus) {
     const labels = {
       NEW: text("Neu", "جديد", "New"),
@@ -81,18 +89,10 @@ function Products() {
   }
 
   function getCategoryOptions() {
-    return [
-      { value: "1", label: text("Elektronik", "إلكترونيات", "Electronics") },
-      { value: "2", label: text("Möbel", "أثاث", "Furniture") },
-      { value: "3", label: text("Kleidung", "ملابس", "Clothing") },
-      { value: "4", label: text("Schuhe", "أحذية", "Shoes") },
-      { value: "5", label: text("Haushalt", "أدوات منزلية", "Household") },
-      { value: "6", label: text("Bücher", "كتب", "Books") },
-      { value: "7", label: text("Spielzeug", "ألعاب", "Toys") },
-      { value: "8", label: text("Sport", "رياضة", "Sports") },
-      { value: "9", label: text("Kinder", "أطفال", "Kids") },
-      { value: "10", label: text("Sonstiges", "أخرى", "Others") },
-    ];
+    return categories.map((category) => ({
+      value: String(category.id),
+      label: getCategoryName(category),
+    }));
   }
 
   function getConditionOptions() {
@@ -217,11 +217,20 @@ function Products() {
   }
 
   useEffect(() => {
-    async function loadProducts() {
+    async function loadProductsPageData() {
       try {
-        const data = await getProducts();
-        const items = data?.data || data || [];
-        setProducts(Array.isArray(items) ? items : []);
+        setIsLoading(true);
+        setError("");
+
+        const categoriesData = await getCategories();
+        const categoryItems = categoriesData?.data || categoriesData || [];
+
+        setCategories(Array.isArray(categoryItems) ? categoryItems : []);
+
+        const productsData = await getProducts();
+        const productItems = productsData?.data || productsData || [];
+
+        setProducts(Array.isArray(productItems) ? productItems : []);
 
         if (isLoggedIn()) {
           const favoritesData = await getFavorites();
@@ -249,7 +258,7 @@ function Products() {
       }
     }
 
-    loadProducts();
+    loadProductsPageData();
   }, []);
 
   useEffect(() => {
@@ -339,7 +348,9 @@ function Products() {
     event.preventDefault();
     event.stopPropagation();
 
-    const product = products.find((item) => Number(item.id) === Number(productId));
+    const product = products.find(
+      (item) => Number(item.id) === Number(productId)
+    );
 
     if (isOwnProduct(product)) {
       return;
@@ -427,7 +438,9 @@ function Products() {
             </label>
 
             <label className="products-filter-field products-city-input">
-              <span>{text("Ort oder PLZ", "المدينة أو الرمز", "City or ZIP")}</span>
+              <span>
+                {text("Ort oder PLZ", "المدينة أو الرمز", "City or ZIP")}
+              </span>
               <input
                 type="text"
                 value={cityFilter}
