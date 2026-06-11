@@ -320,3 +320,9 @@ export function getProductFavoriteUsers(productId) {
     headers: getAuthHeaders(),
   });
 }
+
+export function getCategories() {
+  return request("/categories", {
+    method: "GET",
+  });
+}

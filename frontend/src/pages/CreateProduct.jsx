@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
-import { createProduct, uploadProductImage } from "../services/api";
+import {
+  createProduct,
+  getCategories,
+  uploadProductImage,
+} from "../services/api";
 import Navbar from "../components/Navbar";
 import "../App.css";
 
@@ -22,6 +26,7 @@ function CreateProduct() {
   const [selectedImages, setSelectedImages] = useState([]);
   const [selectedImagePreviews, setSelectedImagePreviews] = useState([]);
   const [activePreviewIndex, setActivePreviewIndex] = useState(0);
+  const [categories, setCategories] = useState([]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -36,10 +41,31 @@ function CreateProduct() {
     }
   }, [navigate]);
 
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const data = await getCategories();
+        const items = data?.data || data || [];
+
+        setCategories(Array.isArray(items) ? items : []);
+      } catch {
+        setCategories([]);
+      }
+    }
+
+    loadCategories();
+  }, []);
+
   function text(de, ar, en) {
     if (isArabic) return ar;
     if (language === "EN") return en;
     return de;
+  }
+
+  function getCategoryName(category) {
+    if (isArabic) return category.nameAr;
+    if (language === "EN") return category.nameEn;
+    return category.nameDe;
   }
 
   function getConditionLabel(conditionStatus) {
@@ -415,24 +441,12 @@ function CreateProduct() {
                     <option value="">
                       {text("Kategorie wählen", "اختر الفئة", "Choose category")}
                     </option>
-                    <option value="1">
-                      {text("Elektronik", "إلكترونيات", "Electronics")}
-                    </option>
-                    <option value="2">
-                      {text("Möbel", "أثاث", "Furniture")}
-                    </option>
-                    <option value="3">
-                      {text("Kleidung", "ملابس", "Clothing")}
-                    </option>
-                    <option value="5">
-                      {text("Haushalt", "منزل", "Home")}
-                    </option>
-                    <option value="6">
-                      {text("Bücher", "كتب", "Books")}
-                    </option>
-                    <option value="8">
-                      {text("Sport", "رياضة", "Sport")}
-                    </option>
+
+                    {categories.map((category) => (
+                      <option value={category.id} key={category.id}>
+                        {getCategoryName(category)}
+                      </option>
+                    ))}
                   </select>
                 </label>
 

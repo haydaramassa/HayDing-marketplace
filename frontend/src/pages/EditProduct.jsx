@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import {
+  getCategories,
   getProductById,
   updateProduct,
   uploadProductImage,
@@ -28,6 +29,8 @@ function EditProduct() {
     categoryId: "1",
   });
 
+  const [categories, setCategories] = useState([]);
+
   const [existingImagePaths, setExistingImagePaths] = useState([]);
   const [existingImagePreviews, setExistingImagePreviews] = useState([]);
   const [newImages, setNewImages] = useState([]);
@@ -46,9 +49,30 @@ function EditProduct() {
     return de;
   }
 
+  function getCategoryName(category) {
+    if (isArabic) return category.nameAr;
+    if (language === "EN") return category.nameEn;
+    return category.nameDe;
+  }
+
   const allImagePreviews = [...existingImagePreviews, ...newImagePreviews];
   const imageCount = allImagePreviews.length;
   const activePreviewImage = allImagePreviews[activeImageIndex] || "";
+
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const data = await getCategories();
+        const items = data?.data || data || [];
+
+        setCategories(Array.isArray(items) ? items : []);
+      } catch {
+        setCategories([]);
+      }
+    }
+
+    loadCategories();
+  }, []);
 
   useEffect(() => {
     async function loadProduct() {
@@ -71,7 +95,7 @@ function EditProduct() {
           conditionStatus:
             product.conditionStatus || product.condition || "GOOD",
           productStatus: product.productStatus || "ACTIVE",
-          categoryId: product.categoryId || product.category?.id || "1",
+          categoryId: String(product.categoryId || product.category?.id || "1"),
         });
 
         setExistingImagePaths(getProductImagePaths(product));
@@ -535,20 +559,21 @@ function EditProduct() {
                       value={formData.categoryId}
                       onChange={handleChange}
                     >
-                      <option value="1">
-                        {text("Elektronik", "إلكترونيات", "Electronics")}
-                      </option>
-                      <option value="2">
-                        {text("Möbel", "أثاث", "Furniture")}
-                      </option>
-                      <option value="3">
-                        {text("Kleidung", "ملابس", "Clothing")}
-                      </option>
-                      <option value="4">
-                        {text("Haushalt", "منزل", "Home")}
-                      </option>
-                      <option value="5">{text("Bücher", "كتب", "Books")}</option>
-                      <option value="6">{text("Sport", "رياضة", "Sport")}</option>
+                      {categories.length === 0 && (
+                        <option value={formData.categoryId}>
+                          {text(
+                            "Kategorie wird geladen...",
+                            "جارٍ تحميل الفئات...",
+                            "Loading category..."
+                          )}
+                        </option>
+                      )}
+
+                      {categories.map((category) => (
+                        <option value={category.id} key={category.id}>
+                          {getCategoryName(category)}
+                        </option>
+                      ))}
                     </select>
                   </label>
 
@@ -627,7 +652,9 @@ function EditProduct() {
                   )}
               </h3>
 
-              <p>{formData.city || text("Deine Stadt", "مدينتك", "Your city")}</p>
+              <p>
+                {formData.city || text("Deine Stadt", "مدينتك", "Your city")}
+              </p>
 
               <strong>{formData.price ? `${formData.price} €` : "0 €"}</strong>
             </div>
