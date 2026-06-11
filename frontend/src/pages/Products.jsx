@@ -85,9 +85,13 @@ function Products() {
       { value: "1", label: text("Elektronik", "إلكترونيات", "Electronics") },
       { value: "2", label: text("Möbel", "أثاث", "Furniture") },
       { value: "3", label: text("Kleidung", "ملابس", "Clothing") },
-      { value: "5", label: text("Haushalt", "منزل", "Home") },
+      { value: "4", label: text("Schuhe", "أحذية", "Shoes") },
+      { value: "5", label: text("Haushalt", "أدوات منزلية", "Household") },
       { value: "6", label: text("Bücher", "كتب", "Books") },
-      { value: "8", label: text("Sport", "رياضة", "Sport") },
+      { value: "7", label: text("Spielzeug", "ألعاب", "Toys") },
+      { value: "8", label: text("Sport", "رياضة", "Sports") },
+      { value: "9", label: text("Kinder", "أطفال", "Kids") },
+      { value: "10", label: text("Sonstiges", "أخرى", "Others") },
     ];
   }
 
