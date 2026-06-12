@@ -4,7 +4,6 @@ import { useLanguage } from "../context/LanguageContext";
 import {
   getConversationMessages,
   getConversations,
-  getNotifications,
   markConversationNotificationsAsRead,
   sendConversationMessage,
 } from "../services/api";
@@ -20,7 +19,6 @@ function Conversations() {
   const [selectedConversationId, setSelectedConversationId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [messageText, setMessageText] = useState("");
-  const [unreadMessageCounts, setUnreadMessageCounts] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isSending, setIsSending] = useState(false);
@@ -74,49 +72,20 @@ function Conversations() {
     );
   }
 
-  function getNotificationConversationId(notification) {
-    return (
-      notification?.conversation?.id ||
-      notification?.conversationId ||
-      notification?.conversation?.conversationId ||
-      notification?.conversation
-    );
-  }
-
-  function isNotificationUnread(notification) {
-    return (
-      notification?.read === false ||
-      notification?.isRead === false ||
-      (!notification?.readAt && notification?.read !== true)
-    );
-  }
-
-  function getUnreadCountForConversation(conversationId) {
-    return Number(unreadMessageCounts[conversationId] || 0);
+  function getUnreadCountForConversation(conversation) {
+    return Number(conversation?.unreadCount || 0);
   }
 
   function getLastMessageText(conversation) {
     return (
-      conversation.lastMessage?.content ||
-      conversation.lastMessageContent ||
-      conversation.lastMessagePreview ||
+      conversation?.lastMessageContent ||
+      conversation?.lastMessage?.content ||
+      conversation?.lastMessagePreview ||
       ""
     );
   }
 
-  function getConversationPreview(conversation, unreadCount) {
-    if (unreadCount > 0) {
-      if (unreadCount === 1) {
-        return text("1 neue Nachricht", "رسالة جديدة واحدة", "1 new message");
-      }
-
-      return text(
-        `${unreadCount} neue Nachrichten`,
-        `${unreadCount} رسائل جديدة`,
-        `${unreadCount} new messages`
-      );
-    }
-
+  function getConversationPreview(conversation) {
     return (
       getLastMessageText(conversation) ||
       text("Keine Vorschau", "لا توجد معاينة", "No preview")
@@ -141,6 +110,16 @@ function Conversations() {
     }, 80);
   }
 
+  function markConversationAsReadInState(conversationId) {
+    setConversations((currentConversations) =>
+      currentConversations.map((conversation) =>
+        Number(conversation.id) === Number(conversationId)
+          ? { ...conversation, unreadCount: 0 }
+          : conversation
+      )
+    );
+  }
+
   async function loadConversationMessages(conversationId, markAsRead = true) {
     if (!conversationId) return;
 
@@ -154,17 +133,13 @@ function Conversations() {
       setMessages(Array.isArray(loadedMessages) ? loadedMessages : []);
 
       if (markAsRead) {
+        markConversationAsReadInState(conversationId);
+
         try {
           await markConversationNotificationsAsRead(conversationId);
-
-          setUnreadMessageCounts((currentCounts) => ({
-            ...currentCounts,
-            [conversationId]: 0,
-          }));
-
           notifyNavbarToRefreshNotifications();
         } catch {
-          // Silent fail: the chat should still open even if marking read fails.
+          // Silent fail: backend getMessages already marks message read.
         }
       }
 
@@ -195,45 +170,16 @@ function Conversations() {
       const items = conversationsData?.data || conversationsData || [];
       const loadedConversations = Array.isArray(items) ? items : [];
 
-      const notificationsData = await getNotifications();
-      const notifications = notificationsData?.data || notificationsData || [];
-
-      const nextUnreadMessageCounts = {};
-
-      if (Array.isArray(notifications)) {
-        notifications
-          .filter(
-            (notification) =>
-              notification?.type === "MESSAGE" &&
-              isNotificationUnread(notification)
-          )
-          .forEach((notification) => {
-            const conversationId = Number(
-              getNotificationConversationId(notification)
-            );
-
-            if (!conversationId) return;
-
-            nextUnreadMessageCounts[conversationId] =
-              (nextUnreadMessageCounts[conversationId] || 0) + 1;
-          });
-      }
-
-      setUnreadMessageCounts(nextUnreadMessageCounts);
       setConversations(loadedConversations);
 
       setSelectedConversationId((currentSelectedId) => {
         if (currentSelectedId) return currentSelectedId;
 
         const firstUnreadConversation = loadedConversations.find(
-          (conversation) => nextUnreadMessageCounts[conversation.id] > 0
+          (conversation) => getUnreadCountForConversation(conversation) > 0
         );
 
-        return (
-          firstUnreadConversation?.id ||
-          loadedConversations[0]?.id ||
-          null
-        );
+        return firstUnreadConversation?.id || loadedConversations[0]?.id || null;
       });
     } catch (err) {
       setError(
@@ -288,6 +234,7 @@ function Conversations() {
 
   async function handleSelectConversation(conversationId) {
     setSelectedConversationId(conversationId);
+    markConversationAsReadInState(conversationId);
   }
 
   async function handleSendMessage(event) {
@@ -315,6 +262,7 @@ function Conversations() {
       }
 
       setMessageText("");
+
       await loadConversations(false);
       await loadConversationMessages(selectedConversationId, false);
     } catch (err) {
@@ -343,6 +291,11 @@ function Conversations() {
 
   const selectedProduct = selectedConversation?.product;
 
+  const totalUnreadCount = conversations.reduce(
+    (total, conversation) => total + getUnreadCountForConversation(conversation),
+    0
+  );
+
   return (
     <div
       className={`create-page ${isArabic ? "rtl" : ""}`}
@@ -362,13 +315,7 @@ function Conversations() {
                 <h1>{text("Inbox", "صندوق الرسائل", "Inbox")}</h1>
               </div>
 
-              <span>
-                {text(
-                  `${conversations.length}`,
-                  `${conversations.length}`,
-                  `${conversations.length}`
-                )}
-              </span>
+              {totalUnreadCount > 0 && <span>{totalUnreadCount}</span>}
             </header>
 
             {isLoading && (
@@ -397,9 +344,8 @@ function Conversations() {
                 {conversations.map((conversation) => {
                   const product = conversation.product;
                   const otherUser = getOtherUser(conversation);
-                  const unreadCount = getUnreadCountForConversation(
-                    conversation.id
-                  );
+                  const unreadCount =
+                    getUnreadCountForConversation(conversation);
                   const isUnread = unreadCount > 0;
                   const isActive =
                     Number(selectedConversationId) === Number(conversation.id);
@@ -438,7 +384,7 @@ function Conversations() {
                         </p>
 
                         <p className="inbox-item-preview">
-                          {getConversationPreview(conversation, unreadCount)}
+                          {getConversationPreview(conversation)}
                         </p>
                       </div>
 
@@ -559,7 +505,10 @@ function Conversations() {
                   <div ref={messagesEndRef} />
                 </div>
 
-                <form className="inbox-message-form" onSubmit={handleSendMessage}>
+                <form
+                  className="inbox-message-form"
+                  onSubmit={handleSendMessage}
+                >
                   <textarea
                     value={messageText}
                     onChange={(event) => setMessageText(event.target.value)}
