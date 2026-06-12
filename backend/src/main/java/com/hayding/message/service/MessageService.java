@@ -62,7 +62,7 @@ public class MessageService {
                 .findByProductIdAndBuyerIdAndSellerId(product.getId(), buyer.getId(), seller.getId())
                 .orElseGet(() -> conversationRepository.save(new Conversation(product, buyer, seller)));
 
-        return toConversationResponse(conversation);
+        return toConversationResponse(conversation, buyer);
     }
 
     @Transactional(readOnly = true)
@@ -70,9 +70,9 @@ public class MessageService {
         User user = getUserByEmail(userEmail);
 
         return conversationRepository
-                .findByBuyerIdOrSellerIdOrderByUpdatedAtDesc(user.getId(), user.getId())
+                .findMyConversationsOrderByLastActivity(user.getId())
                 .stream()
-                .map(this::toConversationResponse)
+                .map((conversation) -> toConversationResponse(conversation, user))
                 .toList();
     }
 
@@ -83,6 +83,7 @@ public class MessageService {
 
         validateParticipant(conversation, user);
 
+        messageRepository.markIncomingMessagesAsRead(conversationId, user.getId());
         notificationService.markConversationNotificationsAsRead(conversationId, user);
 
         return messageRepository.findByConversationIdOrderByCreatedAtAsc(conversationId)
@@ -127,10 +128,21 @@ public class MessageService {
         }
     }
 
-    private ConversationResponse toConversationResponse(Conversation conversation) {
+    private ConversationResponse toConversationResponse(Conversation conversation, User currentUser) {
+        Message lastMessage = messageRepository
+                .findFirstByConversationIdOrderByCreatedAtDesc(conversation.getId())
+                .orElse(null);
+
+        long unreadCount = messageRepository.countByConversationIdAndReadFalseAndSenderIdNot(
+                conversation.getId(),
+                currentUser.getId()
+        );
+
         return ConversationResponse.fromEntity(
                 conversation,
-                toProductResponse(conversation.getProduct())
+                toProductResponse(conversation.getProduct()),
+                lastMessage,
+                unreadCount
         );
     }
 

@@ -1,6 +1,7 @@
 package com.hayding.message.dto;
 
 import com.hayding.message.model.Conversation;
+import com.hayding.message.model.Message;
 import com.hayding.product.dto.ProductResponse;
 import com.hayding.user.dto.UserResponse;
 
@@ -12,6 +13,9 @@ public class ConversationResponse {
     private ProductResponse product;
     private UserResponse buyer;
     private UserResponse seller;
+    private String lastMessageContent;
+    private LocalDateTime lastMessageAt;
+    private long unreadCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -22,17 +26,31 @@ public class ConversationResponse {
                                 ProductResponse product,
                                 UserResponse buyer,
                                 UserResponse seller,
+                                String lastMessageContent,
+                                LocalDateTime lastMessageAt,
+                                long unreadCount,
                                 LocalDateTime createdAt,
                                 LocalDateTime updatedAt) {
         this.id = id;
         this.product = product;
         this.buyer = buyer;
         this.seller = seller;
+        this.lastMessageContent = lastMessageContent;
+        this.lastMessageAt = lastMessageAt;
+        this.unreadCount = unreadCount;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
 
-    public static ConversationResponse fromEntity(Conversation conversation, ProductResponse productResponse) {
+    public static ConversationResponse fromEntity(Conversation conversation,
+                                                  ProductResponse productResponse) {
+        return fromEntity(conversation, productResponse, null, 0);
+    }
+
+    public static ConversationResponse fromEntity(Conversation conversation,
+                                                  ProductResponse productResponse,
+                                                  Message lastMessage,
+                                                  long unreadCount) {
         if (conversation == null) {
             return null;
         }
@@ -42,6 +60,9 @@ public class ConversationResponse {
                 productResponse,
                 UserResponse.fromEntity(conversation.getBuyer()),
                 UserResponse.fromEntity(conversation.getSeller()),
+                lastMessage != null ? lastMessage.getContent() : null,
+                lastMessage != null ? lastMessage.getCreatedAt() : null,
+                unreadCount,
                 conversation.getCreatedAt(),
                 conversation.getUpdatedAt()
         );
@@ -61,6 +82,18 @@ public class ConversationResponse {
 
     public UserResponse getSeller() {
         return seller;
+    }
+
+    public String getLastMessageContent() {
+        return lastMessageContent;
+    }
+
+    public LocalDateTime getLastMessageAt() {
+        return lastMessageAt;
+    }
+
+    public long getUnreadCount() {
+        return unreadCount;
     }
 
     public LocalDateTime getCreatedAt() {

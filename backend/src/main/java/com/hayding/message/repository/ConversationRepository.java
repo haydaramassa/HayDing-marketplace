@@ -21,6 +21,17 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
     );
 
     @Query("""
+            select c
+            from Conversation c
+            left join Message m on m.conversation = c
+            where c.buyer.id = :userId
+               or c.seller.id = :userId
+            group by c
+            order by coalesce(max(m.createdAt), c.updatedAt) desc
+            """)
+    List<Conversation> findMyConversationsOrderByLastActivity(Long userId);
+
+    @Query("""
             select c.id
             from Conversation c
             where c.buyer.id = :userId
