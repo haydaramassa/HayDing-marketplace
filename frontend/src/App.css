@@ -7538,7 +7538,6 @@ font-size: 1.05rem;
   }
 }
 
-/**/
 /* Inbox conversation list scroll */
 .inbox-list-panel {
   min-height: 0;
@@ -7550,3 +7549,4 @@ font-size: 1.05rem;
   overflow-y: auto;
   scrollbar-width: thin;
 }
+
