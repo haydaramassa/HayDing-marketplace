@@ -86,6 +86,10 @@ public class ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
 
+        if (product.getProductStatus() == ProductStatus.DELETED) {
+            throw new IllegalArgumentException("Product not found");
+        }
+
         return toProductResponse(product);
     }
 
@@ -118,10 +122,6 @@ public class ProductService {
 
         if (request.getConditionStatus() != null) {
             product.setConditionStatus(request.getConditionStatus());
-        }
-
-        if (request.getProductStatus() != null) {
-            product.setProductStatus(request.getProductStatus());
         }
 
         if (request.getCategoryId() != null) {
