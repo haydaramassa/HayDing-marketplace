@@ -25,6 +25,15 @@ function Conversations() {
   const [error, setError] = useState("");
 
   const messagesEndRef = useRef(null);
+  const messageFormRef = useRef(null);
+
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
+  const emojis = [
+  "😊", "😂", "😍", "🥰", "😎", "😢", "😡", "👍",
+  "👎", "🙏", "👏", "🔥", "❤️", "💔", "✅", "❌",
+  "🚲", "📦", "💬", "💰", "🎉", "⭐", "😅", "😉"
+  ];
 
   function text(de, ar, en) {
     if (isArabic) return ar;
@@ -232,9 +241,31 @@ function Conversations() {
     }
   }, [selectedConversationId]);
 
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        showEmojiPicker &&
+        messageFormRef.current &&
+        !messageFormRef.current.contains(event.target)
+      ) {
+        setShowEmojiPicker(false);
+      }
+    }
+  
+    document.addEventListener("mousedown", handleClickOutside);
+  
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showEmojiPicker]);
+
   async function handleSelectConversation(conversationId) {
     setSelectedConversationId(conversationId);
     markConversationAsReadInState(conversationId);
+  }
+
+  function addEmoji(emoji) {
+    setMessageText((currentText) => `${currentText}${emoji}`);
   }
 
   async function handleSendMessage(event) {
@@ -506,9 +537,33 @@ function Conversations() {
                 </div>
 
                 <form
+                  ref={messageFormRef}
                   className="inbox-message-form"
                   onSubmit={handleSendMessage}
-                >
+                  >
+                  <button
+  className="inbox-emoji-btn"
+  type="button"
+  onClick={() => setShowEmojiPicker((currentValue) => !currentValue)}
+  aria-label="Open emoji picker"
+>
+  😊
+</button>
+
+{showEmojiPicker && (
+  <div className="inbox-emoji-picker">
+    {emojis.map((emoji) => (
+      <button
+        type="button"
+        key={emoji}
+        onClick={() => addEmoji(emoji)}
+      >
+        {emoji}
+      </button>
+    ))}
+  </div>
+)}
+
                   <textarea
                     value={messageText}
                     onChange={(event) => setMessageText(event.target.value)}

@@ -7550,3 +7550,74 @@ font-size: 1.05rem;
   scrollbar-width: thin;
 }
 
+
+/* Inbox message form fixed layout */
+.inbox-message-form {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 130px;
+  align-items: center;
+  gap: 10px;
+}
+
+.inbox-message-form .inbox-emoji-btn {
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(36, 45, 40, 0.14);
+  border-radius: 16px;
+  background: #fff;
+  font-size: 1.35rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.inbox-message-form textarea {
+  width: 100%;
+  min-width: 0;
+  height: 48px;
+  min-height: 48px;
+  max-height: 48px;
+  resize: none;
+  overflow: hidden;
+  line-height: 1.35;
+}
+
+.inbox-message-form .btn.btn-primary {
+  width: 130px;
+  min-width: 130px;
+  height: 48px;
+  padding: 0 18px;
+}
+
+.inbox-message-form {
+  position: relative;
+}
+
+.inbox-emoji-picker {
+  position: absolute;
+  left: 0;
+  bottom: 62px;
+  width: 260px;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  background: #fff;
+  border: 1px solid rgba(36, 45, 40, 0.14);
+  border-radius: 18px;
+  box-shadow: 0 18px 45px rgba(35, 31, 24, 0.14);
+  z-index: 20;
+}
+
+.inbox-emoji-picker button {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.inbox-emoji-picker button:hover {
+  background: #f7f2e8;
+}
