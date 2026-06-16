@@ -329,7 +329,7 @@ function Conversations() {
 
   return (
     <div
-      className={`create-page ${isArabic ? "rtl" : ""}`}
+      className={`create-page inbox-shell-page ${isArabic ? "rtl" : ""}`}
       dir={isArabic ? "rtl" : "ltr"}
     >
       <Navbar variant="app" />
