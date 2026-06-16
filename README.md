@@ -188,9 +188,454 @@ This was added to improve message usability and match behavior from the older co
 
 ---
 
-### Notifications
-
+## Notifications
+ 
 Conversation notifications are refreshed through a browser event:
-
+ 
 ```js
 window.dispatchEvent(new Event("hayding-notifications-updated"));
+```
+ 
+This allows the navbar and conversation list to stay in sync after messages are read.
+ 
+---
+ 
+## Multilingual Support
+ 
+The frontend supports:
+ 
+- German
+- English
+- Arabic
+ 
+Arabic pages use RTL direction.
+ 
+Many UI labels are handled with a helper function similar to:
+ 
+```js
+function text(de, ar, en) {
+  if (isArabic) return ar;
+  if (language === "EN") return en;
+  return de;
+}
+```
+ 
+---
+ 
+## Tech Stack
+ 
+### Backend
+ 
+- Java
+- Spring Boot
+- Spring Web
+- Spring Security
+- Jakarta Validation
+- Spring Data JPA
+- Transactional service layer
+- Repository pattern
+ 
+### Frontend
+ 
+- React
+- React Router
+- Context-based language handling
+- CSS in `App.css`
+- Local storage for authentication token and current user data
+ 
+---
+ 
+## Backend Structure
+ 
+Important backend areas include:
+ 
+```text
+product/controller/ProductController.java
+product/service/ProductService.java
+product/repository/ProductRepository.java
+product/repository/ProductImageRepository.java
+product/dto/ProductCreateRequest.java
+product/dto/ProductUpdateRequest.java
+product/dto/ProductResponse.java
+product/model/Product.java
+product/model/ProductImage.java
+```
+ 
+---
+ 
+## Product API Overview
+ 
+### Get active products
+ 
+```http
+GET /api/products
+```
+ 
+Returns active products.
+ 
+---
+ 
+### Get my products
+ 
+```http
+GET /api/products/my
+```
+ 
+Returns the authenticated seller's products, excluding deleted products.
+ 
+---
+ 
+### Get product by ID
+ 
+```http
+GET /api/products/{id}
+```
+ 
+Returns one product by ID.
+ 
+Deleted products should return an error such as `Product not found`.
+ 
+---
+ 
+### Create product
+ 
+```http
+POST /api/products
+```
+ 
+Creates a product for the authenticated user.
+ 
+---
+ 
+### Update product
+ 
+```http
+PUT /api/products/{id}
+```
+ 
+Updates an existing product.
+ 
+Only the owner should be allowed to update the product.
+ 
+Regular updates should not freely change `productStatus`.
+ 
+---
+ 
+### Mark product as sold
+ 
+```http
+PATCH /api/products/{id}/mark-sold
+```
+ 
+Marks the product as sold.
+ 
+Only the product owner should be allowed to do this.
+ 
+---
+ 
+### Delete product
+ 
+```http
+DELETE /api/products/{id}
+```
+ 
+Soft deletes the product by setting status to `DELETED`.
+ 
+Only the product owner should be allowed to do this.
+ 
+---
+ 
+## Important Backend Rules
+ 
+### Do not expose deleted products
+ 
+In `ProductService.getProductById`, deleted products should be blocked:
+ 
+```java
+if (product.getProductStatus() == ProductStatus.DELETED) {
+    throw new IllegalArgumentException("Product not found");
+}
+```
+ 
+---
+ 
+### Do not allow product status changes from normal update
+ 
+In `updateProduct`, avoid this kind of direct status update:
+ 
+```java
+if (request.getProductStatus() != null) {
+    product.setProductStatus(request.getProductStatus());
+}
+```
+ 
+Product status should be changed only by dedicated service methods.
+ 
+---
+ 
+### Validate product owner
+ 
+Before update, delete, or mark sold:
+ 
+```java
+private void validateProductOwner(Product product, User seller) {
+    if (!product.getSeller().getId().equals(seller.getId())) {
+        throw new IllegalArgumentException("You are not allowed to manage this product");
+    }
+}
+```
+ 
+---
+ 
+## Frontend Structure
+ 
+Important frontend areas include:
+ 
+```text
+frontend/src/pages/Conversations.jsx
+frontend/src/pages/ProductDetails.jsx
+frontend/src/pages/PublicUserProfile.jsx
+frontend/src/components/Navbar.jsx
+frontend/src/components/UserAvatar.jsx
+frontend/src/components/ProductCardImage.jsx
+frontend/src/services/api.js
+frontend/src/context/LanguageContext.jsx
+frontend/src/App.css
+```
+ 
+---
+ 
+## Conversation UI Notes
+ 
+The active inbox page is:
+ 
+```text
+/conversations
+```
+ 
+There may also be an older or separate route like:
+ 
+```text
+/conversations/:id
+```
+ 
+Important note:
+ 
+If different browsers show different layouts, confirm that they are on the same route before debugging.
+ 
+For example:
+ 
+- `/conversations`
+- `/conversations/4`
+ 
+These may render different components or layouts.
+ 
+---
+ 
+## Known UI Lessons
+ 
+Some UI areas are sensitive and should be changed carefully:
+ 
+- Public seller profile layout
+- Product cards
+- Inbox message form
+- Listings section spacing
+- Mobile and desktop responsive behavior
+ 
+Small CSS changes can affect layout unexpectedly, especially if existing CSS already targets shared classes.
+ 
+Recommended approach:
+ 
+- Make focused changes only.
+- Avoid large layout rewrites.
+- Prefer adding scoped classes.
+- Test in Chrome and Firefox.
+- Test German and Arabic layout direction.
+- Take screenshots before and after UI changes.
+ 
+---
+ 
+## Current Completed Work Summary
+ 
+Work completed so far includes:
+ 
+- Product controller and service logic
+- Product image handling
+- Active product listing
+- My products listing
+- Product owner validation
+- Soft delete support
+- Mark product as sold
+- Product image responses
+- Conversation inbox page
+- Conversation message loading
+- Conversation sending
+- Unread count handling
+- Notification refresh event
+- Inbox scrolling behavior
+- Message preview handling
+- Emoji picker behavior in inbox
+- Basic backend hardening for product status handling
+ 
+---
+ 
+## Recommended Next Steps
+ 
+### 1. Stabilize Conversation UI
+ 
+Make sure the inbox works consistently in:
+ 
+- Chrome
+- Firefox
+- German
+- Arabic
+- Mobile width
+- Desktop width
+ 
+Check:
+ 
+- Emoji picker opens correctly
+- Emoji picker closes when clicking outside
+- Message send works
+- Scroll stays usable
+- Unread count updates
+- Navbar notifications refresh
+ 
+---
+ 
+### 2. Improve Backend Error Handling
+ 
+Currently, many errors use `IllegalArgumentException`.
+ 
+A cleaner future improvement would be adding custom exceptions such as:
+ 
+- `NotFoundException`
+- `ForbiddenException`
+- `BadRequestException`
+ 
+Then map them to proper HTTP status codes:
+ 
+- `404 Not Found`
+- `403 Forbidden`
+- `400 Bad Request`
+ 
+---
+ 
+### 3. Add Product Search and Filters
+ 
+Useful marketplace filters:
+ 
+- Category
+- City
+- Price range
+- Condition
+- Keyword search
+- Newest first
+ 
+---
+ 
+### 4. Improve Product Location Input
+ 
+The product city field can later become:
+ 
+```text
+Ort oder PLZ
+```
+ 
+Recommended validation:
+ 
+- Required
+- Minimum 2 characters
+- Accept city, village, or German postal code
+ 
+---
+ 
+### 5. Improve Product Details
+ 
+Possible improvements:
+ 
+- Show category clearly
+- Show seller info in a compact way
+- Add contact seller button
+- Add favorite button
+- Improve image gallery
+ 
+---
+ 
+### 6. Add Tests
+ 
+Recommended backend tests:
+ 
+- Product owner can update product
+- Non-owner cannot update product
+- Deleted product cannot be opened
+- Product owner can mark product as sold
+- Non-owner cannot mark product as sold
+- Product owner can delete product
+- Non-owner cannot delete product
+ 
+Recommended frontend checks:
+ 
+- Inbox renders conversations
+- Selecting conversation loads messages
+- Sending message clears input
+- Emoji picker inserts emoji
+- Emoji picker closes on outside click
+ 
+---
+ 
+## Development Notes
+ 
+Before making changes:
+ 
+```bash
+git status
+```
+ 
+After a stable change:
+ 
+```bash
+git add .
+git commit -m "Describe the change"
+git push
+```
+ 
+Recommended commit messages:
+ 
+```text
+Secure product status updates
+Add emoji picker to inbox
+Improve inbox unread previews
+Fix conversation notification refresh
+```
+ 
+---
+ 
+## Run Checklist
+ 
+Before considering a feature done:
+ 
+- App builds successfully
+- No console errors
+- Backend starts successfully
+- Main flow works manually
+- Chrome tested
+- Firefox tested
+- Arabic layout checked
+- Logged-in and logged-out behavior checked
+- Changes committed and pushed
+ 
+---
+ 
+## Project Goal
+ 
+The goal of HayDing is to become a clean, practical, multilingual local marketplace where users can list items, discover products, save favorites, and communicate safely with sellers.
+ 
+The project should prioritize:
+ 
+- Stability
+- Clear user experience
+- Secure backend rules
+- Simple maintainable code
+- Careful UI changes
+- Multilingual accessibility
