@@ -639,3 +639,8 @@ The project should prioritize:
 - Simple maintainable code
 - Careful UI changes
 - Multilingual accessibility
+
+
+## Designed and Developed 
+
+       by **Haydara Massa**.
