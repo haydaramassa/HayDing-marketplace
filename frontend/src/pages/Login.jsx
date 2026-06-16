@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { loginUser } from "../services/api";
@@ -16,17 +16,13 @@ function Login() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (searchParams.get("sessionExpired") === "true") {
-      setError(
-        isArabic
-          ? "انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى."
-          : "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an."
-      );
-    }
-  }, [searchParams, isArabic]);
+  const [error, setError] = useState(() =>
+    searchParams.get("sessionExpired") === "true"
+      ? isArabic
+        ? "انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى."
+        : "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an."
+      : ""
+  );
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -70,6 +66,7 @@ function Login() {
       }
 
       localStorage.setItem("hayding-token", token);
+      window.dispatchEvent(new Event("hayding-auth-updated"));
 
       setMessage(
         isArabic

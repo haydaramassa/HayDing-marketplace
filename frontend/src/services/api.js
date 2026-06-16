@@ -1,15 +1,111 @@
 const API_BASE_URL = "http://localhost:8080/api";
 
-function handleAuthExpired() {
-  localStorage.removeItem("hayding-token");
-  localStorage.removeItem("hayding-user");
+const AUTH_TOKEN_KEY = "hayding-token";
+const AUTH_USER_KEY = "hayding-user";
+
+function getTokenExpirationMs(token) {
+  if (!token) return null;
+
+  try {
+    const tokenPayload = token.split(".")[1];
+    const base64 = tokenPayload.replace(/-/g, "+").replace(/_/g, "/");
+    const paddedBase64 = base64.padEnd(
+      base64.length + ((4 - (base64.length % 4)) % 4),
+      "="
+    );
+    const payload = JSON.parse(atob(paddedBase64));
+
+    return typeof payload.exp === "number" ? payload.exp * 1000 : null;
+  } catch {
+    return null;
+  }
+}
+
+export function isAuthTokenExpired() {
+  const token = localStorage.getItem(AUTH_TOKEN_KEY);
+  const expirationMs = getTokenExpirationMs(token);
+
+  return Boolean(expirationMs && expirationMs <= Date.now());
+}
+
+export function handleAuthExpired() {
+  localStorage.removeItem(AUTH_TOKEN_KEY);
+  localStorage.removeItem(AUTH_USER_KEY);
 
   if (window.location.pathname !== "/login") {
     window.location.href = "/login?sessionExpired=true";
   }
 }
 
+export function startAuthSessionWatcher() {
+  let timeoutId = null;
+  let intervalId = null;
+
+  function clearTimers() {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      timeoutId = null;
+    }
+
+    if (intervalId) {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
+  }
+
+  function checkSession() {
+    if (isAuthTokenExpired()) {
+      clearTimers();
+      handleAuthExpired();
+    }
+  }
+
+  function scheduleSessionExpiry() {
+    clearTimers();
+
+    const token = localStorage.getItem(AUTH_TOKEN_KEY);
+    const expirationMs = getTokenExpirationMs(token);
+
+    if (!expirationMs) return;
+
+    const delayMs = expirationMs - Date.now();
+
+    if (delayMs <= 0) {
+      handleAuthExpired();
+      return;
+    }
+
+    timeoutId = setTimeout(checkSession, Math.min(delayMs, 2147483647));
+    intervalId = setInterval(checkSession, 60000);
+  }
+
+  function handleVisibilityOrFocus() {
+    checkSession();
+    scheduleSessionExpiry();
+  }
+
+  scheduleSessionExpiry();
+
+  window.addEventListener("focus", handleVisibilityOrFocus);
+  window.addEventListener("storage", scheduleSessionExpiry);
+  window.addEventListener("hayding-auth-updated", scheduleSessionExpiry);
+  document.addEventListener("visibilitychange", handleVisibilityOrFocus);
+
+  return () => {
+    clearTimers();
+    window.removeEventListener("focus", handleVisibilityOrFocus);
+    window.removeEventListener("storage", scheduleSessionExpiry);
+    window.removeEventListener("hayding-auth-updated", scheduleSessionExpiry);
+    document.removeEventListener("visibilitychange", handleVisibilityOrFocus);
+  };
+}
+
 async function request(path, options = {}) {
+  if (isAuthTokenExpired()) {
+    handleAuthExpired();
+    throw new Error("Session expired. Please log in again.");
+  }
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: {
@@ -18,7 +114,7 @@ async function request(path, options = {}) {
     },
   });
 
-  let data = null;
+  let data;
 
   try {
     data = await response.json();
@@ -27,7 +123,7 @@ async function request(path, options = {}) {
   }
 
   if (!response.ok) {
-    if (response.status === 401 || response.status === 403) {
+    if (response.status === 401) {
       handleAuthExpired();
     }
 
@@ -43,7 +139,7 @@ async function request(path, options = {}) {
 }
 
 function getAuthHeaders() {
-  const token = localStorage.getItem("hayding-token");
+  const token = localStorage.getItem(AUTH_TOKEN_KEY);
 
   return {
     Authorization: `Bearer ${token}`,
@@ -135,7 +231,12 @@ export function updateProduct(productId, productData) {
 }
 
 export async function uploadProductImage(file) {
-  const token = localStorage.getItem("hayding-token");
+  if (isAuthTokenExpired()) {
+    handleAuthExpired();
+    throw new Error("Session expired. Please log in again.");
+  }
+
+  const token = localStorage.getItem(AUTH_TOKEN_KEY);
 
   const formData = new FormData();
   formData.append("file", file);
@@ -148,7 +249,7 @@ export async function uploadProductImage(file) {
     body: formData,
   });
 
-  let data = null;
+  let data;
 
   try {
     data = await response.json();
@@ -157,7 +258,7 @@ export async function uploadProductImage(file) {
   }
 
   if (!response.ok) {
-    if (response.status === 401 || response.status === 403) {
+    if (response.status === 401) {
       handleAuthExpired();
     }
 
@@ -256,7 +357,12 @@ export function getPublicUserProfile(userId) {
 }
 
 export async function uploadProfileImage(file) {
-  const token = localStorage.getItem("hayding-token");
+  if (isAuthTokenExpired()) {
+    handleAuthExpired();
+    throw new Error("Session expired. Please log in again.");
+  }
+
+  const token = localStorage.getItem(AUTH_TOKEN_KEY);
   const formData = new FormData();
 
   formData.append("file", file);
@@ -269,7 +375,7 @@ export async function uploadProfileImage(file) {
     body: formData,
   });
 
-  let data = null;
+  let data;
 
   try {
     data = await response.json();
@@ -278,7 +384,7 @@ export async function uploadProfileImage(file) {
   }
 
   if (!response.ok) {
-    if (response.status === 401 || response.status === 403) {
+    if (response.status === 401) {
       handleAuthExpired();
     }
 

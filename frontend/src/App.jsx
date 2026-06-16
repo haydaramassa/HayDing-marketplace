@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { LanguageProvider } from "./context/LanguageContext";
+import { startAuthSessionWatcher } from "./services/api";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -17,6 +19,8 @@ import PublicUserProfile from "./pages/PublicUserProfile";
 import NotFound from "./pages/NotFound";
 
 function App() {
+  useEffect(() => startAuthSessionWatcher(), []);
+
   return (
     <LanguageProvider>
       <BrowserRouter>
