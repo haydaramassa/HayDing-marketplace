@@ -7805,3 +7805,22 @@ font-size: 1.05rem;
 .inbox-shell-page .inbox-product-link {
   display: none;
 }
+
+/********************/
+/* Preserve typed message formatting and mixed-language direction */
+.inbox-shell-page .inbox-message-form textarea {
+  unicode-bidi: plaintext;
+  text-align: start;
+  white-space: pre-wrap;
+}
+
+.inbox-shell-page .inbox-message-bubble p {
+  white-space: pre-wrap;
+  unicode-bidi: plaintext;
+  margin: 0;
+}
+
+.inbox-shell-page .inbox-message-bubble time {
+  direction: ltr;
+  unicode-bidi: isolate;
+}

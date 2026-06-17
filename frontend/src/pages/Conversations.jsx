@@ -23,23 +23,38 @@ function Conversations() {
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState("");
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const messagesEndRef = useRef(null);
   const messageFormRef = useRef(null);
   const messageTextareaRef = useRef(null);
 
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-
   const emojis = [
-  "😊", "😂", "😍", "🥰", "😎", "😢", "😡", "👍",
-  "👎", "🙏", "👏", "🔥", "❤️", "💔", "✅", "❌",
-  "🚲", "📦", "💬", "💰", "🎉", "⭐", "😅", "😉"
+    "😊", "😂", "😍", "🥰", "😎", "😢", "😡", "👍",
+    "👎", "🙏", "👏", "🔥", "❤️", "💔", "✅", "❌",
+    "🚲", "📦", "💬", "💰", "🎉", "⭐", "😅", "😉",
   ];
 
   function text(de, ar, en) {
     if (isArabic) return ar;
     if (language === "EN") return en;
     return de;
+  }
+
+  function getTextDirection(value) {
+    const cleanValue = value || "";
+
+    for (const character of cleanValue) {
+      if (/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/.test(character)) {
+        return "rtl";
+      }
+
+      if (/[A-Za-zÀ-ÖØ-öø-ÿ]/.test(character)) {
+        return "ltr";
+      }
+    }
+
+    return isArabic ? "rtl" : "ltr";
   }
 
   function getCurrentUser() {
@@ -120,11 +135,9 @@ function Conversations() {
     }, 80);
   }
 
-  function resizeMessageTextarea() {
-    const textarea = messageTextareaRef.current;
-  
+  function resizeMessageTextarea(textarea = messageTextareaRef.current) {
     if (!textarea) return;
-  
+
     textarea.style.height = "48px";
     textarea.style.height = `${Math.min(textarea.scrollHeight, 116)}px`;
   }
@@ -261,9 +274,9 @@ function Conversations() {
         setShowEmojiPicker(false);
       }
     }
-  
+
     document.addEventListener("mousedown", handleClickOutside);
-  
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -276,7 +289,7 @@ function Conversations() {
 
   function addEmoji(emoji) {
     setMessageText((currentText) => `${currentText}${emoji}`);
-  
+
     setTimeout(() => {
       resizeMessageTextarea();
       messageTextareaRef.current?.focus();
@@ -347,6 +360,8 @@ function Conversations() {
     (total, conversation) => total + getUnreadCountForConversation(conversation),
     0
   );
+
+  
 
   return (
     <div
@@ -494,7 +509,6 @@ function Conversations() {
                       </p>
                     </div>
                   </div>
-
                 </header>
 
                 <div className="inbox-chat-messages">
@@ -526,6 +540,7 @@ function Conversations() {
                     messages.map((message) => {
                       const isMine =
                         Number(message.sender?.id) === Number(currentUser?.id);
+                      
 
                       return (
                         <div
@@ -534,13 +549,13 @@ function Conversations() {
                           }`}
                           key={message.id}
                         >
-                          <div className="inbox-message-bubble">
-                            <p>{message.content}</p>
+                         <div className="inbox-message-bubble" dir="auto">
+                              <p dir="auto">{message.content}</p>
 
-                            <time dateTime={message.createdAt || ""}>
-                              {formatDate(message.createdAt)}
-                            </time>
-                          </div>
+                              <time dir="ltr" dateTime={message.createdAt || ""}>
+                                {formatDate(message.createdAt)}
+                              </time>
+                            </div>
                         </div>
                       );
                     })}
@@ -552,44 +567,47 @@ function Conversations() {
                   ref={messageFormRef}
                   className="inbox-message-form"
                   onSubmit={handleSendMessage}
-                  >
+                >
                   <button
-  className="inbox-emoji-btn"
-  type="button"
-  onClick={() => setShowEmojiPicker((currentValue) => !currentValue)}
-  aria-label="Open emoji picker"
->
-  😊
-</button>
+                    className="inbox-emoji-btn"
+                    type="button"
+                    onClick={() =>
+                      setShowEmojiPicker((currentValue) => !currentValue)
+                    }
+                    aria-label="Open emoji picker"
+                  >
+                    😊
+                  </button>
 
-{showEmojiPicker && (
-  <div className="inbox-emoji-picker">
-    {emojis.map((emoji) => (
-      <button
-        type="button"
-        key={emoji}
-        onClick={() => addEmoji(emoji)}
-      >
-        {emoji}
-      </button>
-    ))}
-  </div>
-)}
+                  {showEmojiPicker && (
+                    <div className="inbox-emoji-picker">
+                      {emojis.map((emoji) => (
+                        <button
+                          type="button"
+                          key={emoji}
+                          onClick={() => addEmoji(emoji)}
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  )}
 
                   <textarea
-  ref={messageTextareaRef}
-  value={messageText}
-  onChange={(event) => {
-    setMessageText(event.target.value);
-    resizeMessageTextarea();
-  }}
-  placeholder={text(
-    "Schreibe hier deine Nachricht",
-    "اكتب رسالتك هنا",
-    "Write your message here"
-  )}
-  rows="1"
-/>
+                    ref={messageTextareaRef}
+                    value={messageText}
+                    dir="auto"
+                    onChange={(event) => {
+                      setMessageText(event.target.value);
+                      resizeMessageTextarea(event.target);
+                    }}
+                    placeholder={text(
+                      "Schreibe hier deine Nachricht",
+                      "اكتب رسالتك هنا",
+                      "Write your message here"
+                    )}
+                    rows="1"
+                  />
 
                   <button
                     className="btn btn-primary"
