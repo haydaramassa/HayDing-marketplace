@@ -26,6 +26,7 @@ function Conversations() {
 
   const messagesEndRef = useRef(null);
   const messageFormRef = useRef(null);
+  const messageTextareaRef = useRef(null);
 
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
@@ -117,6 +118,15 @@ function Conversations() {
     setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, 80);
+  }
+
+  function resizeMessageTextarea() {
+    const textarea = messageTextareaRef.current;
+  
+    if (!textarea) return;
+  
+    textarea.style.height = "48px";
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 116)}px`;
   }
 
   function markConversationAsReadInState(conversationId) {
@@ -266,6 +276,11 @@ function Conversations() {
 
   function addEmoji(emoji) {
     setMessageText((currentText) => `${currentText}${emoji}`);
+  
+    setTimeout(() => {
+      resizeMessageTextarea();
+      messageTextareaRef.current?.focus();
+    }, 0);
   }
 
   async function handleSendMessage(event) {
@@ -293,6 +308,12 @@ function Conversations() {
       }
 
       setMessageText("");
+
+      setTimeout(() => {
+        if (messageTextareaRef.current) {
+          messageTextareaRef.current.style.height = "48px";
+        }
+      }, 0);
 
       await loadConversations(false);
       await loadConversationMessages(selectedConversationId, false);
@@ -474,15 +495,6 @@ function Conversations() {
                     </div>
                   </div>
 
-                  {selectedProduct?.id && (
-                    <button
-                      className="btn btn-secondary inbox-product-link"
-                      type="button"
-                      onClick={() => navigate(`/products/${selectedProduct.id}`)}
-                    >
-                      {text("Anzeige", "الإعلان", "Listing")}
-                    </button>
-                  )}
                 </header>
 
                 <div className="inbox-chat-messages">
@@ -565,15 +577,19 @@ function Conversations() {
 )}
 
                   <textarea
-                    value={messageText}
-                    onChange={(event) => setMessageText(event.target.value)}
-                    placeholder={text(
-                      "Schreibe hier deine Nachricht",
-                      "اكتب رسالتك هنا",
-                      "Write your message here"
-                    )}
-                    rows="1"
-                  />
+  ref={messageTextareaRef}
+  value={messageText}
+  onChange={(event) => {
+    setMessageText(event.target.value);
+    resizeMessageTextarea();
+  }}
+  placeholder={text(
+    "Schreibe hier deine Nachricht",
+    "اكتب رسالتك هنا",
+    "Write your message here"
+  )}
+  rows="1"
+/>
 
                   <button
                     className="btn btn-primary"

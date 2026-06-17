@@ -7742,3 +7742,66 @@ font-size: 1.05rem;
     max-width: min(70%, 500px);
   }
 }
+
+/* Final message composer polish */
+.inbox-shell-page .inbox-message-form {
+  align-items: end;
+}
+
+.inbox-shell-page .inbox-message-form textarea {
+  height: 48px;
+  min-height: 48px;
+  max-height: 116px;
+  resize: none;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  line-height: 1.35;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(32, 38, 36, 0.28) transparent;
+}
+
+.inbox-shell-page .inbox-message-form textarea::-webkit-scrollbar {
+  width: 7px;
+}
+
+.inbox-shell-page .inbox-message-form textarea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.inbox-shell-page .inbox-message-form textarea::-webkit-scrollbar-thumb {
+  background: rgba(32, 38, 36, 0.24);
+  border-radius: 999px;
+}
+
+.inbox-shell-page .inbox-message-form textarea::-webkit-scrollbar-thumb:hover {
+  background: rgba(32, 38, 36, 0.36);
+}
+
+.inbox-shell-page .inbox-chat-messages {
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(32, 38, 36, 0.28) transparent;
+}
+
+.inbox-shell-page .inbox-chat-messages::-webkit-scrollbar {
+  width: 8px;
+}
+
+.inbox-shell-page .inbox-chat-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.inbox-shell-page .inbox-chat-messages::-webkit-scrollbar-thumb {
+  background: rgba(32, 38, 36, 0.22);
+  border-radius: 999px;
+}
+
+.inbox-shell-page .inbox-chat-messages::-webkit-scrollbar-thumb:hover {
+  background: rgba(32, 38, 36, 0.34);
+}
+
+.inbox-shell-page .inbox-product-link {
+  display: none;
+}
