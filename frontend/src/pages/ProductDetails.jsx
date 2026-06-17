@@ -50,6 +50,22 @@ function ProductDetails() {
     return de;
   }
 
+  function getTextDirection(value) {
+    const cleanValue = value || "";
+  
+    for (const character of cleanValue) {
+      if (/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/.test(character)) {
+        return "rtl";
+      }
+  
+      if (/[A-Za-zÀ-ÖØ-öø-ÿ]/.test(character)) {
+        return "ltr";
+      }
+    }
+  
+    return isArabic ? "rtl" : "ltr";
+  }
+
   function isLoggedIn() {
     return Boolean(localStorage.getItem("hayding-token"));
   }
@@ -577,7 +593,7 @@ function ProductDetails() {
               <section className="product-details-info">
                 <p className="eyebrow">{text("Anzeige", "إعلان", "Listing")}</p>
 
-                <h1>{product.title}</h1>
+                <h1 dir={getTextDirection(product.title)}>{product.title}</h1>
 
                 <div className="details-price-row">
                   <strong className="details-price">{product.price} €</strong>
@@ -654,7 +670,7 @@ function ProductDetails() {
                 <div className="details-section">
                   <h2>{text("Beschreibung", "الوصف", "Description")}</h2>
 
-                  <p>
+                  <p dir={getTextDirection(product.description)}>
                     {product.description ||
                       text(
                         "Keine Beschreibung vorhanden.",

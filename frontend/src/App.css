@@ -7806,7 +7806,6 @@ font-size: 1.05rem;
   display: none;
 }
 
-/********************/
 /* Preserve typed message formatting and mixed-language direction */
 .inbox-shell-page .inbox-message-form textarea {
   unicode-bidi: plaintext;
@@ -7823,4 +7822,24 @@ font-size: 1.05rem;
 .inbox-shell-page .inbox-message-bubble time {
   direction: ltr;
   unicode-bidi: isolate;
+}
+
+/******************************************/
+
+/* Preserve product details text formatting and direction */
+.product-details-info h1[dir="rtl"],
+.details-section p[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+}
+
+.product-details-info h1[dir="ltr"],
+.details-section p[dir="ltr"] {
+  direction: ltr;
+  text-align: left;
+}
+
+.details-section p {
+  white-space: pre-wrap;
+  unicode-bidi: plaintext;
 }
