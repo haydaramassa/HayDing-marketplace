@@ -124,6 +124,10 @@ public class ProductService {
             product.setConditionStatus(request.getConditionStatus());
         }
 
+        if (request.getProductStatus() != null && request.getProductStatus() != ProductStatus.DELETED) {
+            product.setProductStatus(request.getProductStatus());
+        }
+
         if (request.getCategoryId() != null) {
             Category category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new IllegalArgumentException("Category not found"));

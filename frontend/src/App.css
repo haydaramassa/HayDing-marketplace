@@ -7824,7 +7824,6 @@ font-size: 1.05rem;
   unicode-bidi: isolate;
 }
 
-/******************************************/
 
 /* Preserve product details text formatting and direction */
 .product-details-info h1[dir="rtl"],
