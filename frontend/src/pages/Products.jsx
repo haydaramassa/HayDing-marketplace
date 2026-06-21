@@ -16,7 +16,7 @@ import "../App.css";
 function Products() {
   const { isArabic, language } = useLanguage();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -270,6 +270,43 @@ function Products() {
   }, [searchParams]);
 
   useEffect(() => {
+    const params = new URLSearchParams();
+  
+    const cleanSearchTerm = searchTerm.trim();
+    const cleanCityFilter = cityFilter.trim();
+  
+    if (cleanSearchTerm) {
+      params.set("search", cleanSearchTerm);
+    }
+  
+    if (cleanCityFilter) {
+      params.set("city", cleanCityFilter);
+    }
+  
+    if (conditionFilter) {
+      params.set("condition", conditionFilter);
+    }
+  
+    if (categoryFilter) {
+      params.set("category", categoryFilter);
+    }
+  
+    if (sortOption && sortOption !== "newest") {
+      params.set("sort", sortOption);
+    }
+  
+    setSearchParams(params, { replace: true });
+  }, [
+    searchTerm,
+    cityFilter,
+    conditionFilter,
+    categoryFilter,
+    sortOption,
+    setSearchParams,
+  ]);
+
+
+  useEffect(() => {
     function handleClickOutside(event) {
       if (filtersRef.current && !filtersRef.current.contains(event.target)) {
         setOpenDropdown(null);
@@ -336,13 +373,14 @@ function Products() {
   );
 
   function clearFilters() {
-    setSearchTerm("");
-    setCityFilter("");
-    setConditionFilter("");
-    setCategoryFilter("");
-    setSortOption("newest");
-    setOpenDropdown(null);
-  }
+  setSearchTerm("");
+  setCityFilter("");
+  setConditionFilter("");
+  setCategoryFilter("");
+  setSortOption("newest");
+  setOpenDropdown(null);
+  setSearchParams({}, { replace: true });
+}
 
   async function handleFavoriteClick(event, productId) {
     event.preventDefault();
