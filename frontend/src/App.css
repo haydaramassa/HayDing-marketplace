@@ -7982,7 +7982,6 @@ font-size: 1.05rem;
   }
 }
 
-/**************************************************************************************************/
 /* Compact products filters layout */
 .products-filter-card {
   padding: 20px;
@@ -8107,3 +8106,38 @@ font-size: 1.05rem;
     width: 100%;
   }
 }
+/*****************************/
+/* Navbar brand image mark */
+.logo {
+  text-decoration: none;
+}
+/*
+.logo-image-mark {
+  overflow: hidden;
+  padding: 0;
+  background: #ffffff;
+  border: 1px solid rgba(230, 222, 209, 0.95);
+  box-shadow:
+    0 12px 30px rgba(32, 38, 36, 0.14),
+    0 0 18px rgba(201, 154, 46, 0.12);
+}*/
+
+.logo-image-mark {
+  overflow: hidden;
+  padding: 0;
+  background: #ffffff;
+  border: 1px solid rgba(230, 222, 209, 0.9);
+  box-shadow:
+    0 10px 24px rgba(32, 38, 36, 0.12),
+    0 0 14px rgba(201, 154, 46, 0.1);
+}
+
+.logo-image-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: translate(-2px, 1px) scale(1.28);
+  transform-origin: center;
+}
+
