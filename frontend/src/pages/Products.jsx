@@ -28,10 +28,16 @@ function Products() {
   const [searchTerm, setSearchTerm] = useState(
     searchParams.get("search") || ""
   );
-  const [cityFilter, setCityFilter] = useState(searchParams.get("city") || "");
-  const [conditionFilter, setConditionFilter] = useState(
-    searchParams.get("condition") || ""
-  );
+   const [cityFilter, setCityFilter] = useState(searchParams.get("city") || "");
+    const [minPriceFilter, setMinPriceFilter] = useState(
+      searchParams.get("minPrice") || ""
+    );
+    const [maxPriceFilter, setMaxPriceFilter] = useState(
+      searchParams.get("maxPrice") || ""
+    );
+    const [conditionFilter, setConditionFilter] = useState(
+      searchParams.get("condition") || ""
+    );
   const [categoryFilter, setCategoryFilter] = useState(
     searchParams.get("category") || ""
   );
@@ -264,6 +270,8 @@ function Products() {
   useEffect(() => {
     setSearchTerm(searchParams.get("search") || "");
     setCityFilter(searchParams.get("city") || "");
+    setMinPriceFilter(searchParams.get("minPrice") || "");
+    setMaxPriceFilter(searchParams.get("maxPrice") || "");
     setConditionFilter(searchParams.get("condition") || "");
     setCategoryFilter(searchParams.get("category") || "");
     setSortOption(searchParams.get("sort") || "newest");
@@ -274,6 +282,8 @@ function Products() {
   
     const cleanSearchTerm = searchTerm.trim();
     const cleanCityFilter = cityFilter.trim();
+    const cleanMinPrice = minPriceFilter.trim();
+    const cleanMaxPrice = maxPriceFilter.trim();
   
     if (cleanSearchTerm) {
       params.set("search", cleanSearchTerm);
@@ -281,6 +291,14 @@ function Products() {
   
     if (cleanCityFilter) {
       params.set("city", cleanCityFilter);
+    }
+  
+    if (cleanMinPrice) {
+      params.set("minPrice", cleanMinPrice);
+    }
+  
+    if (cleanMaxPrice) {
+      params.set("maxPrice", cleanMaxPrice);
     }
   
     if (conditionFilter) {
@@ -295,13 +313,21 @@ function Products() {
       params.set("sort", sortOption);
     }
   
-    setSearchParams(params, { replace: true });
+    const nextSearch = params.toString();
+    const currentSearch = searchParams.toString();
+  
+    if (nextSearch !== currentSearch) {
+      setSearchParams(params, { replace: true });
+    }
   }, [
     searchTerm,
     cityFilter,
+    minPriceFilter,
+    maxPriceFilter,
     conditionFilter,
     categoryFilter,
     sortOption,
+    searchParams,
     setSearchParams,
   ]);
 
@@ -323,6 +349,10 @@ function Products() {
   const filteredProducts = useMemo(() => {
     const cleanSearch = searchTerm.trim().toLowerCase();
     const cleanCity = cityFilter.trim().toLowerCase();
+    const minPrice = Number(minPriceFilter);
+    const maxPrice = Number(maxPriceFilter);
+    const hasMinPrice = minPriceFilter.trim() !== "" && !Number.isNaN(minPrice);
+    const hasMaxPrice = maxPriceFilter.trim() !== "" && !Number.isNaN(maxPrice);
 
     return products.filter((product) => {
       const title = product.title?.toLowerCase() || "";
@@ -330,6 +360,7 @@ function Products() {
       const city = product.city?.toLowerCase() || "";
       const condition = product.conditionStatus || product.condition || "";
       const categoryId = getProductCategoryId(product);
+      const price = getPriceValue(product);
 
       const matchesSearch =
         !cleanSearch ||
@@ -341,12 +372,30 @@ function Products() {
       const matchesCondition =
         !conditionFilter || condition === conditionFilter;
 
-      const matchesCategory =
+        const matchesCategory =
         !categoryFilter || categoryId === String(categoryFilter);
-
-      return matchesSearch && matchesCity && matchesCondition && matchesCategory;
+      
+      const matchesMinPrice = !hasMinPrice || price >= minPrice;
+      const matchesMaxPrice = !hasMaxPrice || price <= maxPrice;
+      
+      return (
+        matchesSearch &&
+        matchesCity &&
+        matchesCondition &&
+        matchesCategory &&
+        matchesMinPrice &&
+        matchesMaxPrice
+      );
     });
-  }, [products, searchTerm, cityFilter, conditionFilter, categoryFilter]);
+  }, [
+    products,
+    searchTerm,
+    cityFilter,
+    minPriceFilter,
+    maxPriceFilter,
+    conditionFilter,
+    categoryFilter,
+  ]);
 
   const visibleProducts = useMemo(() => {
     const sortedProducts = [...filteredProducts];
@@ -367,20 +416,24 @@ function Products() {
   const hasActiveFilters = Boolean(
     searchTerm.trim() ||
       cityFilter.trim() ||
+      minPriceFilter.trim() ||
+      maxPriceFilter.trim() ||
       conditionFilter ||
       categoryFilter ||
       sortOption !== "newest"
   );
 
   function clearFilters() {
-  setSearchTerm("");
-  setCityFilter("");
-  setConditionFilter("");
-  setCategoryFilter("");
-  setSortOption("newest");
-  setOpenDropdown(null);
-  setSearchParams({}, { replace: true });
-}
+    setSearchTerm("");
+    setCityFilter("");
+    setMinPriceFilter("");
+    setMaxPriceFilter("");
+    setConditionFilter("");
+    setCategoryFilter("");
+    setSortOption("newest");
+    setOpenDropdown(null);
+    setSearchParams({}, { replace: true });
+  }
 
   async function handleFavoriteClick(event, productId) {
     event.preventDefault();
@@ -490,6 +543,30 @@ function Products() {
                 )}
               />
             </label>
+
+            <div className="products-filter-field products-price-range">
+            <span>{text("Preis", "السعر", "Price")}</span>
+
+            <div className="products-price-range-box">
+              <input
+                type="number"
+                min="0"
+                value={minPriceFilter}
+                onChange={(event) => setMinPriceFilter(event.target.value)}
+                placeholder={text("Von", "من", "From")}
+              />
+
+              <span className="products-price-separator">–</span>
+
+              <input
+                type="number"
+                min="0"
+                value={maxPriceFilter}
+                onChange={(event) => setMaxPriceFilter(event.target.value)}
+                placeholder={text("Bis", "إلى", "To")}
+              />
+            </div>
+          </div>
 
             <CustomDropdown
               id="category"
