@@ -24,10 +24,10 @@ function Register() {
     if (language === "EN") return en;
     return de;
   }
-  
+
   function getRegisterErrorMessage(err) {
     const rawMessage = String(err?.message || "").toLowerCase();
-  
+
     const isEmailAlreadyUsed =
       rawMessage.includes("email") ||
       rawMessage.includes("already") ||
@@ -35,7 +35,7 @@ function Register() {
       rawMessage.includes("duplicate") ||
       rawMessage.includes("bad request") ||
       rawMessage.includes("400");
-  
+
     if (isEmailAlreadyUsed) {
       return text(
         "Diese E-Mail-Adresse ist bereits registriert. Bitte melde dich an oder verwende eine andere E-Mail-Adresse.",
@@ -43,7 +43,7 @@ function Register() {
         "This email is already registered. Please sign in or use another email."
       );
     }
-  
+
     return (
       err.message ||
       text(
@@ -104,7 +104,10 @@ function Register() {
     >
       <div className="auth-card">
         <Link className="logo auth-logo" to="/">
-          <span className="logo-mark">H</span>
+          <span className="logo-mark logo-image-mark">
+            <img src="/icon/hayding-mark.png" alt="" aria-hidden="true" />
+          </span>
+
           <span>HayDing</span>
         </Link>
 
@@ -168,11 +171,13 @@ function Register() {
           {message && <p className="auth-message auth-success">{message}</p>}
 
           <button className="btn btn-primary" type="submit" disabled={isLoading}>
-          
-          {isLoading
-            ? text("Konto wird erstellt...", "جارٍ إنشاء الحساب...", "Creating account...")
-            : t.registerButton}
-
+            {isLoading
+              ? text(
+                  "Konto wird erstellt...",
+                  "جارٍ إنشاء الحساب...",
+                  "Creating account..."
+                )
+              : t.registerButton}
           </button>
         </form>
 

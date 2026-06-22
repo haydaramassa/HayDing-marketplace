@@ -96,7 +96,10 @@ function Login() {
     >
       <div className="auth-card">
         <Link className="logo auth-logo" to="/">
-          <span className="logo-mark">H</span>
+          <span className="logo-mark logo-image-mark">
+            <img src="/icon/hayding-mark.png" alt="" aria-hidden="true" />
+          </span>
+
           <span>HayDing</span>
         </Link>
 
