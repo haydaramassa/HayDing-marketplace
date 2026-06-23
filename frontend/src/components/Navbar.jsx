@@ -121,6 +121,9 @@ function Navbar({ variant = "home" }) {
   function handleLogout() {
     localStorage.removeItem("hayding-token");
     localStorage.removeItem("hayding-user");
+
+    window.dispatchEvent(new Event("hayding-auth-updated"));
+
     setIsAccountMenuOpen(false);
     setIsMobileMenuOpen(false);
     navigate("/");
