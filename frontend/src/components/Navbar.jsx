@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { getNotifications, getUnreadNotificationCount } from "../services/api";
 import UserAvatar from "./UserAvatar";
@@ -7,9 +7,11 @@ import UserAvatar from "./UserAvatar";
 function Navbar({ variant = "home" }) {
   const { language, setLanguage, isArabic } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
   const isLoggedIn = Boolean(localStorage.getItem("hayding-token"));
 
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
   const [unreadMessageNotificationCount, setUnreadMessageNotificationCount] =
     useState(0);
@@ -56,6 +58,11 @@ function Navbar({ variant = "home" }) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+    setIsAccountMenuOpen(false);
+  }, [location.pathname]);
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -115,11 +122,12 @@ function Navbar({ variant = "home" }) {
     localStorage.removeItem("hayding-token");
     localStorage.removeItem("hayding-user");
     setIsAccountMenuOpen(false);
+    setIsMobileMenuOpen(false);
     navigate("/");
   }
 
   return (
-    <header className="navbar">
+    <header className={`navbar ${isMobileMenuOpen ? "mobile-menu-open" : ""}`}>
       <Link className="logo" to="/">
         <span className="logo-mark logo-image-mark">
           <img src="/icon/hayding-mark.png" alt="" aria-hidden="true" />
@@ -127,6 +135,27 @@ function Navbar({ variant = "home" }) {
 
         <span>HayDing</span>
       </Link>
+
+      <button
+        className="mobile-menu-toggle"
+        type="button"
+        onClick={() => setIsMobileMenuOpen((current) => !current)}
+        aria-label={text("Menü öffnen", "فتح القائمة", "Open menu")}
+        aria-expanded={isMobileMenuOpen}
+      >
+        <span />
+        <span />
+        <span />
+      </button>
+
+      {isMobileMenuOpen && (
+        <button
+          className="mobile-menu-backdrop"
+          type="button"
+          aria-label={text("Menü schließen", "إغلاق القائمة", "Close menu")}
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
 
       <nav className="nav-links">
         {variant === "home" ? (
@@ -229,10 +258,7 @@ function Navbar({ variant = "home" }) {
               </button>
 
               <div className="account-menu-list">
-                <Link
-                  to="/account"
-                  onClick={() => setIsAccountMenuOpen(false)}
-                >
+                <Link to="/account" onClick={() => setIsAccountMenuOpen(false)}>
                   {text("Konto", "حسابي", "Account")}
                 </Link>
 
@@ -300,6 +326,84 @@ function Navbar({ variant = "home" }) {
               {text("Anzeige erstellen", "إضافة إعلان", "Create listing")}
             </Link>
           </>
+        )}
+      </div>
+
+      <div className="mobile-drawer" aria-hidden={!isMobileMenuOpen}>
+        <div className="mobile-drawer-section">
+          <p className="mobile-drawer-label">
+            {text("Sprache", "اللغة", "Language")}
+          </p>
+
+          <div className="language-switcher mobile-drawer-languages">
+            {["DE", "EN", "AR"].map((lang) => (
+              <button
+                className={`language-btn ${language === lang ? "active" : ""}`}
+                type="button"
+                key={lang}
+                onClick={() => setLanguage(lang)}
+                aria-pressed={language === lang}
+              >
+                {lang}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <Link
+          className="mobile-drawer-primary"
+          to={isLoggedIn ? "/create-product" : "/register"}
+        >
+          {text("Anzeige erstellen", "إضافة إعلان", "Create listing")}
+        </Link>
+
+        <nav className="mobile-drawer-links">
+          <Link to="/products">{text("Entdecken", "استكشف", "Explore")}</Link>
+
+          {isLoggedIn && (
+            <Link to="/conversations">
+              {text("Nachrichten", "الرسائل", "Messages")}
+            </Link>
+          )}
+
+          {isLoggedIn && (
+            <Link to="/favorites">
+              {text("Favoriten", "المفضلة", "Favorites")}
+            </Link>
+          )}
+
+          {isLoggedIn && (
+            <Link to="/my-products">
+              {text("Meine Anzeigen", "إعلاناتي", "My listings")}
+            </Link>
+          )}
+
+          {isLoggedIn && (
+            <Link to="/notifications">
+              {text("Benachrichtigungen", "الإشعارات", "Notifications")}
+            </Link>
+          )}
+
+          {isLoggedIn && (
+            <Link to="/account">{text("Konto", "حسابي", "Account")}</Link>
+          )}
+
+          {!isLoggedIn && (
+            <Link to="/login">{text("Login", "تسجيل الدخول", "Login")}</Link>
+          )}
+        </nav>
+
+        {isLoggedIn && (
+          <div className="mobile-drawer-user">
+            <UserAvatar user={currentUser} size="small" />
+
+            <div>
+              <strong>{accountLabel}</strong>
+              <button type="button" onClick={handleLogout}>
+                {text("Logout", "تسجيل الخروج", "Logout")}
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </header>
