@@ -18,6 +18,7 @@ function Home() {
   const [productsError, setProductsError] = useState("");
   const [activeShowcaseIndex, setActiveShowcaseIndex] = useState(0);
   const [isShowcasePaused, setIsShowcasePaused] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   function text(de, ar, en) {
     if (isArabic) return ar;
@@ -33,19 +34,12 @@ function Home() {
       titleLine3: "jemand.",
       heroText:
         "HayDing verbindet Menschen, Dinge und Möglichkeiten. Verkaufe, kaufe oder entdecke gebrauchte und neue Artikel in deiner Nähe.",
+      mobileTitle: "Was suchst du heute?",
+      mobileText: "Finde Angebote in deiner Nähe.",
       searchPlaceholder: "Was suchst du heute?",
       locationPlaceholder: "Ort oder PLZ",
       searchButton: "Suchen",
-      statMarketTitle: "Deutschland",
-      statMarketText: "Startmarkt",
-      statLanguagesTitle: "3 Sprachen",
-      statLanguagesText: "DE · EN · AR",
-      statAccountTitle: "Ein Konto",
-      statAccountText: "Kaufen & verkaufen",
       newAd: "Neue Anzeige",
-      previewTitle: "Schöne Dinge finden ein neues Zuhause",
-      previewText:
-        "Einfach einstellen, lokal entdecken und direkt Kontakt aufnehmen.",
       liveEyebrow: "Live auf HayDing",
       liveTitle: "Aktuelle Anzeigen auf der Plattform",
       liveText:
@@ -56,7 +50,7 @@ function Home() {
         "Sobald Nutzer Anzeigen veröffentlichen, werden sie hier lebendig angezeigt.",
       createFirstListing: "Erste Anzeige erstellen",
       categoriesEyebrow: "Kategorien",
-      categoriesTitle: "Entdecke, was in deiner Nähe angeboten wird",
+      categoriesTitle: "Entdecke Kategorien",
       productsEyebrow: "Aktuell",
       productsTitle: "Neueste Anzeigen",
       loadingProducts: "Anzeigen werden geladen...",
@@ -93,18 +87,12 @@ function Home() {
       titleLine3: "شخص آخر.",
       heroText:
         "HayDing يربط الناس بالأشياء والفرص. بِع، اشترِ أو اكتشف منتجات جديدة ومستعملة بالقرب منك.",
+      mobileTitle: "عن ماذا تبحث اليوم؟",
+      mobileText: "اكتشف إعلانات قريبة منك.",
       searchPlaceholder: "ماذا تبحث اليوم؟",
       locationPlaceholder: "المدينة أو الرمز البريدي",
       searchButton: "بحث",
-      statMarketTitle: "ألمانيا",
-      statMarketText: "السوق الأول",
-      statLanguagesTitle: "3 لغات",
-      statLanguagesText: "DE · EN · AR",
-      statAccountTitle: "حساب واحد",
-      statAccountText: "للبيع والشراء",
       newAd: "إعلان جديد",
-      previewTitle: "غرض لا تحتاجه، فرصة يحتاجها غيرك",
-      previewText: "اعرض غرضك بسهولة، ودع المهتمين يتواصلون معك مباشرة.",
       liveEyebrow: "مباشر على HayDing",
       liveTitle: "إعلانات حقيقية من المنصة",
       liveText:
@@ -115,7 +103,7 @@ function Home() {
         "بمجرد أن ينشر المستخدمون إعلاناتهم، ستظهر هنا بشكل حي وجذاب.",
       createFirstListing: "أضف أول إعلان",
       categoriesEyebrow: "الفئات",
-      categoriesTitle: "اكتشف ما يُعرض بالقرب منك",
+      categoriesTitle: "تصفح الفئات",
       productsEyebrow: "الأحدث",
       productsTitle: "أحدث الإعلانات",
       loadingProducts: "جارٍ تحميل الإعلانات...",
@@ -148,18 +136,12 @@ function Home() {
       titleLine3: "is looking for.",
       heroText:
         "HayDing connects people, things and opportunities. Sell, buy or discover new and used items near you.",
+      mobileTitle: "What are you looking for?",
+      mobileText: "Find listings near you.",
       searchPlaceholder: "What are you looking for?",
       locationPlaceholder: "City or ZIP code",
       searchButton: "Search",
-      statMarketTitle: "Germany",
-      statMarketText: "First market",
-      statLanguagesTitle: "3 languages",
-      statLanguagesText: "DE · EN · AR",
-      statAccountTitle: "One account",
-      statAccountText: "Buy & sell",
       newAd: "New listing",
-      previewTitle: "Beautiful things find a new home",
-      previewText: "List easily, discover locally and contact directly.",
       liveEyebrow: "Live on HayDing",
       liveTitle: "Real listings from the platform",
       liveText:
@@ -170,7 +152,7 @@ function Home() {
         "As soon as users publish listings, they will appear here in a lively showcase.",
       createFirstListing: "Create the first listing",
       categoriesEyebrow: "Categories",
-      categoriesTitle: "Discover what is offered near you",
+      categoriesTitle: "Browse categories",
       productsEyebrow: "Latest",
       productsTitle: "Newest listings",
       loadingProducts: "Loading listings...",
@@ -199,6 +181,22 @@ function Home() {
 
   const t = content[language] || content.DE;
   const categoryIds = ["1", "2", "3", "5", "6", "8"];
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 760px)");
+
+    function updateMobileState() {
+      setIsMobile(mediaQuery.matches);
+    }
+
+    updateMobileState();
+
+    mediaQuery.addEventListener("change", updateMobileState);
+
+    return () => {
+      mediaQuery.removeEventListener("change", updateMobileState);
+    };
+  }, []);
 
   useEffect(() => {
     async function loadLatestProducts() {
@@ -243,8 +241,8 @@ function Home() {
   }, [latestProducts]);
 
   const newestProducts = useMemo(() => {
-    return sortedActiveProducts.slice(0, 3);
-  }, [sortedActiveProducts]);
+    return sortedActiveProducts.slice(0, isMobile ? 6 : 3);
+  }, [sortedActiveProducts, isMobile]);
 
   const showcaseProducts = useMemo(() => {
     return sortedActiveProducts.slice(0, 6);
@@ -308,8 +306,8 @@ function Home() {
       return t.liveText;
     }
 
-    if (description.length > 110) {
-      return `${description.slice(0, 107)}...`;
+    if (description.length > 70) {
+      return `${description.slice(0, 67)}...`;
     }
 
     return description;
@@ -333,8 +331,267 @@ function Home() {
     navigate(queryString ? `/products?${queryString}` : "/products");
   }
 
-  const activeShowcaseProduct =
-    showcaseProducts[activeShowcaseIndex] || null;
+  const activeShowcaseProduct = showcaseProducts[activeShowcaseIndex] || null;
+
+  function renderSearchForm(extraClassName = "") {
+    return (
+      <form className={`search-box ${extraClassName}`} onSubmit={handleSearch}>
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
+          placeholder={t.searchPlaceholder}
+          aria-label="Search products"
+        />
+
+        <input
+          type="text"
+          value={searchCity}
+          onChange={(event) => setSearchCity(event.target.value)}
+          placeholder={t.locationPlaceholder}
+          aria-label="Search location"
+        />
+
+        <button type="submit">{t.searchButton}</button>
+      </form>
+    );
+  }
+
+  function renderCategories(sectionClassName = "") {
+    return (
+      <section className={`section ${sectionClassName}`} id="categories">
+        <div className="section-header">
+          <p className="eyebrow">{t.categoriesEyebrow}</p>
+          <h2>{t.categoriesTitle}</h2>
+        </div>
+
+        <div className="categories-grid">
+          {t.categories.map((category, index) => (
+            <button
+              className="category-card"
+              type="button"
+              key={category}
+              onClick={() => navigate(`/products?category=${categoryIds[index]}`)}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  function renderLatestProducts(sectionClassName = "") {
+    return (
+      <section className={`section ${sectionClassName}`} id="products">
+        <div className="section-header section-header-with-action">
+          <div>
+            <p className="eyebrow">{t.productsEyebrow}</p>
+            <h2>{t.productsTitle}</h2>
+          </div>
+
+          <Link className="btn btn-secondary" to="/products">
+            {t.exploreAll}
+          </Link>
+        </div>
+
+        {isProductsLoading && (
+          <p className="auth-message auth-success">{t.loadingProducts}</p>
+        )}
+
+        {productsError && (
+          <p className="auth-message auth-error">{productsError}</p>
+        )}
+
+        {!isProductsLoading && !productsError && newestProducts.length === 0 && (
+          <div className="empty-state">
+            <div className="empty-icon">📦</div>
+            <h2>{t.noProductsTitle}</h2>
+            <p>{t.noProductsText}</p>
+            <Link className="btn btn-primary" to="/create-product">
+              {t.newAd}
+            </Link>
+          </div>
+        )}
+
+        {!isProductsLoading && !productsError && newestProducts.length > 0 && (
+          <div className="products-grid">
+            {newestProducts.map((product) => (
+              <Link
+                className="product-card product-card-link"
+                key={product.id}
+                to={`/products/${product.id}`}
+              >
+                <ProductCardImage product={product} />
+
+                <div className="product-info">
+                  <span className="product-tag">
+                    {getConditionLabel(product.conditionStatus || product.condition) ||
+                      t.newAd}
+                  </span>
+
+                  <h3>{product.title}</h3>
+
+                  <p>{product.city}</p>
+
+                  <strong>{product.price} €</strong>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
+    );
+  }
+
+  function renderShowcase(sectionClassName = "") {
+    return (
+      <section className={`section ${sectionClassName}`}>
+        <div
+          className="hero-card live-hero-card"
+          onMouseEnter={() => setIsShowcasePaused(true)}
+          onMouseLeave={() => setIsShowcasePaused(false)}
+        >
+          <div className="hero-card-header live-hero-card-header">
+            <span className="status-dot live-status-dot"></span>
+            <span>{t.liveEyebrow}</span>
+          </div>
+
+          {isProductsLoading && (
+            <div className="showcase-card showcase-card-loading">
+              <div className="showcase-image-skeleton"></div>
+
+              <div className="showcase-content">
+                <h3>{t.liveTitle}</h3>
+                <p>{t.loadingProducts}</p>
+              </div>
+            </div>
+          )}
+
+          {!isProductsLoading && productsError && (
+            <div className="showcase-card showcase-fallback-card">
+              <div className="showcase-fallback-icon">⚡</div>
+              <h3>{t.liveTitle}</h3>
+              <p>{productsError}</p>
+            </div>
+          )}
+
+          {!isProductsLoading && !productsError && activeShowcaseProduct && (
+            <div className="showcase-card">
+              <Link
+                className="showcase-image-link"
+                to={`/products/${activeShowcaseProduct.id}`}
+              >
+                {getProductImage(activeShowcaseProduct) ? (
+                  <img
+                    className="showcase-image"
+                    src={getProductImage(activeShowcaseProduct)}
+                    alt={activeShowcaseProduct.title}
+                  />
+                ) : (
+                  <div className="showcase-image-placeholder">📦</div>
+                )}
+
+                <span className="showcase-glow"></span>
+              </Link>
+
+              <div className="showcase-content">
+                <div className="showcase-meta-row">
+                  <span className="product-tag">
+                    {getConditionLabel(
+                      activeShowcaseProduct.conditionStatus ||
+                        activeShowcaseProduct.condition
+                    ) || t.newAd}
+                  </span>
+
+                  <span className="showcase-city">
+                    {activeShowcaseProduct.city ||
+                      text("Ort", "المدينة", "City")}
+                  </span>
+                </div>
+
+                <h3>{activeShowcaseProduct.title}</h3>
+
+                <p>{getProductDescription(activeShowcaseProduct)}</p>
+
+                <div className="showcase-footer">
+                  <strong>{activeShowcaseProduct.price} €</strong>
+
+                  <Link
+                    className="btn btn-primary showcase-cta"
+                    to={`/products/${activeShowcaseProduct.id}`}
+                  >
+                    {t.showListing}
+                  </Link>
+                </div>
+
+                {showcaseProducts.length > 1 && (
+                  <div className="showcase-dots" aria-label="Showcase pages">
+                    {showcaseProducts.map((product, index) => (
+                      <button
+                        type="button"
+                        key={product.id}
+                        className={`showcase-dot ${
+                          activeShowcaseIndex === index ? "active" : ""
+                        }`}
+                        onClick={() => setActiveShowcaseIndex(index)}
+                        aria-label={`${t.showListing} ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {!isProductsLoading &&
+            !productsError &&
+            showcaseProducts.length === 0 && (
+              <div className="showcase-card showcase-fallback-card">
+                <div className="showcase-fallback-icon">✨</div>
+                <h3>{t.noLiveListingsTitle}</h3>
+                <p>{t.noLiveListingsText}</p>
+
+                <Link className="btn btn-primary showcase-cta" to="/create-product">
+                  {t.createFirstListing}
+                </Link>
+              </div>
+            )}
+        </div>
+      </section>
+    );
+  }
+
+  function renderHowItWorks() {
+    return (
+      <section className="how-it-works" id="how-it-works">
+        <div>
+          <p className="eyebrow">{t.howEyebrow}</p>
+          <h2>{t.howTitle}</h2>
+        </div>
+
+        <div className="steps">
+          <div className="step">
+            <span>1</span>
+            <h3>{t.step1Title}</h3>
+            <p>{t.step1Text}</p>
+          </div>
+
+          <div className="step">
+            <span>2</span>
+            <h3>{t.step2Title}</h3>
+            <p>{t.step2Text}</p>
+          </div>
+
+          <div className="step">
+            <span>3</span>
+            <h3>{t.step3Title}</h3>
+            <p>{t.step3Text}</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <div
@@ -343,266 +600,61 @@ function Home() {
     >
       <Navbar variant="home" />
 
-      <main>
-        <section className="hero">
-          <div className="hero-content">
-            <p className="eyebrow">{t.eyebrow}</p>
-
-            <h1>
-              {t.titleLine1}
-              <br />
-              {t.titleLine2}
-              <br />
-              {t.titleLine3}
-            </h1>
-
-            <p className="hero-text">{t.heroText}</p>
-
-            <form className="search-box" onSubmit={handleSearch}>
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-                placeholder={t.searchPlaceholder}
-                aria-label="Search products"
-              />
-
-              <input
-                type="text"
-                value={searchCity}
-                onChange={(event) => setSearchCity(event.target.value)}
-                placeholder={t.locationPlaceholder}
-                aria-label="Search location"
-              />
-
-              <button type="submit">{t.searchButton}</button>
-            </form>
-          </div>
-
-          <div
-            className="hero-card live-hero-card"
-            onMouseEnter={() => setIsShowcasePaused(true)}
-            onMouseLeave={() => setIsShowcasePaused(false)}
-          >
-            <div className="hero-card-header live-hero-card-header">
-              <span className="status-dot live-status-dot"></span>
-              <span>{t.liveEyebrow}</span>
-            </div>
-
-            {isProductsLoading && (
-              <div className="showcase-card showcase-card-loading">
-                <div className="showcase-image-skeleton"></div>
-
-                <div className="showcase-content">
-                  <h3>{t.liveTitle}</h3>
-                  <p>{t.loadingProducts}</p>
-                </div>
+      <main className={isMobile ? "mobile-home-main" : "desktop-home-main"}>
+        {isMobile ? (
+          <>
+            <section className="section mobile-home-search-section">
+              <div className="section-header">
+                <p className="eyebrow">HayDing</p>
+                <h2>{t.mobileTitle}</h2>
+                <p className="hero-text">{t.mobileText}</p>
               </div>
-            )}
 
-            {!isProductsLoading && productsError && (
-              <div className="showcase-card showcase-fallback-card">
-                <div className="showcase-fallback-icon">⚡</div>
-                <h3>{t.liveTitle}</h3>
-                <p>{productsError}</p>
+              {renderSearchForm("mobile-home-search-box")}
+            </section>
+
+            {renderCategories("mobile-home-categories-section")}
+
+            {renderLatestProducts("mobile-home-products-section")}
+
+            {renderShowcase("mobile-home-live-section")}
+          </>
+        ) : (
+          <>
+            <section className="hero">
+              <div className="hero-content">
+                <p className="eyebrow">{t.eyebrow}</p>
+
+                <h1>
+                  {t.titleLine1}
+                  <br />
+                  {t.titleLine2}
+                  <br />
+                  {t.titleLine3}
+                </h1>
+
+                <p className="hero-text">{t.heroText}</p>
+
+                {renderSearchForm()}
               </div>
-            )}
 
-            {!isProductsLoading && !productsError && activeShowcaseProduct && (
-              <div className="showcase-card">
-                <Link
-                  className="showcase-image-link"
-                  to={`/products/${activeShowcaseProduct.id}`}
-                >
-                  {getProductImage(activeShowcaseProduct) ? (
-                    <img
-                      className="showcase-image"
-                      src={getProductImage(activeShowcaseProduct)}
-                      alt={activeShowcaseProduct.title}
-                    />
-                  ) : (
-                    <div className="showcase-image-placeholder">📦</div>
-                  )}
+              {renderShowcase("desktop-live-section")}
+            </section>
 
-                  <span className="showcase-glow"></span>
-                </Link>
+            {renderCategories()}
 
-                <div className="showcase-content">
-                  <div className="showcase-meta-row">
-                    <span className="product-tag">
-                      {getConditionLabel(
-                        activeShowcaseProduct.conditionStatus ||
-                          activeShowcaseProduct.condition
-                      ) || t.newAd}
-                    </span>
+            {renderLatestProducts()}
 
-                    <span className="showcase-city">
-                      {activeShowcaseProduct.city ||
-                        text("Ort", "المدينة", "City")}
-                    </span>
-                  </div>
-
-                  <h3>{activeShowcaseProduct.title}</h3>
-
-                  <p>{getProductDescription(activeShowcaseProduct)}</p>
-
-                  <div className="showcase-footer">
-                    <strong>{activeShowcaseProduct.price} €</strong>
-
-                    <Link
-                      className="btn btn-primary showcase-cta"
-                      to={`/products/${activeShowcaseProduct.id}`}
-                    >
-                      {t.showListing}
-                    </Link>
-                  </div>
-
-                  {showcaseProducts.length > 1 && (
-                    <div className="showcase-dots" aria-label="Showcase pages">
-                      {showcaseProducts.map((product, index) => (
-                        <button
-                          type="button"
-                          key={product.id}
-                          className={`showcase-dot ${
-                            activeShowcaseIndex === index ? "active" : ""
-                          }`}
-                          onClick={() => setActiveShowcaseIndex(index)}
-                          aria-label={`${t.showListing} ${index + 1}`}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {!isProductsLoading &&
-              !productsError &&
-              showcaseProducts.length === 0 && (
-                <div className="showcase-card showcase-fallback-card">
-                  <div className="showcase-fallback-icon">✨</div>
-                  <h3>{t.noLiveListingsTitle}</h3>
-                  <p>{t.noLiveListingsText}</p>
-
-                  <Link className="btn btn-primary showcase-cta" to="/create-product">
-                    {t.createFirstListing}
-                  </Link>
-                </div>
-              )}
-          </div>
-        </section>
-
-        <section className="section" id="categories">
-          <div className="section-header">
-            <p className="eyebrow">{t.categoriesEyebrow}</p>
-            <h2>{t.categoriesTitle}</h2>
-          </div>
-
-          <div className="categories-grid">
-            {t.categories.map((category, index) => (
-              <button
-                className="category-card"
-                type="button"
-                key={category}
-                onClick={() => navigate(`/products?category=${categoryIds[index]}`)}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-        </section>
-
-        <section className="section" id="products">
-          <div className="section-header section-header-with-action">
-            <div>
-              <p className="eyebrow">{t.productsEyebrow}</p>
-              <h2>{t.productsTitle}</h2>
-            </div>
-
-            <Link className="btn btn-secondary" to="/products">
-              {t.exploreAll}
-            </Link>
-          </div>
-
-          {isProductsLoading && (
-            <p className="auth-message auth-success">{t.loadingProducts}</p>
-          )}
-
-          {productsError && (
-            <p className="auth-message auth-error">{productsError}</p>
-          )}
-
-          {!isProductsLoading && !productsError && newestProducts.length === 0 && (
-            <div className="empty-state">
-              <div className="empty-icon">📦</div>
-              <h2>{t.noProductsTitle}</h2>
-              <p>{t.noProductsText}</p>
-              <Link className="btn btn-primary" to="/create-product">
-                {t.newAd}
-              </Link>
-            </div>
-          )}
-
-          {!isProductsLoading && !productsError && newestProducts.length > 0 && (
-            <div className="products-grid">
-              {newestProducts.map((product) => (
-                <Link
-                  className="product-card product-card-link"
-                  key={product.id}
-                  to={`/products/${product.id}`}
-                >
-                  <ProductCardImage product={product} />
-
-                  <div className="product-info">
-                    <span className="product-tag">
-                      {getConditionLabel(
-                        product.conditionStatus || product.condition
-                      ) || t.newAd}
-                    </span>
-
-                    <h3>{product.title}</h3>
-
-                    <p>{product.city}</p>
-
-                    <strong>{product.price} €</strong>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </section>
-
-        <section className="how-it-works" id="how-it-works">
-          <div>
-            <p className="eyebrow">{t.howEyebrow}</p>
-            <h2>{t.howTitle}</h2>
-          </div>
-
-          <div className="steps">
-            <div className="step">
-              <span>1</span>
-              <h3>{t.step1Title}</h3>
-              <p>{t.step1Text}</p>
-            </div>
-
-            <div className="step">
-              <span>2</span>
-              <h3>{t.step2Title}</h3>
-              <p>{t.step2Text}</p>
-            </div>
-
-            <div className="step">
-              <span>3</span>
-              <h3>{t.step3Title}</h3>
-              <p>{t.step3Text}</p>
-            </div>
-          </div>
-        </section>
+            {renderHowItWorks()}
+          </>
+        )}
       </main>
 
       <footer className="footer">
         <div className="logo">
-          <span className="logo-mark">H</span>
+          <span className="logo-mark logo-image-mark">
+            <img src="/icon/hayding-mark.png" alt="" aria-hidden="true" />
+          </span>
           <span>HayDing</span>
         </div>
 
