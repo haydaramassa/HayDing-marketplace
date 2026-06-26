@@ -14,6 +14,9 @@ function ProductCardImage({ product, children, showFavoriteButton = false }) {
   const hasMultipleImages = images.length > 1;
   const currentImage = images[currentImageIndex];
 
+  const isFirstImage = currentImageIndex === 0;
+  const isLastImage = currentImageIndex === images.length - 1;
+
   function goToPreviousImage(event) {
     event.preventDefault();
     event.stopPropagation();
@@ -29,19 +32,15 @@ function ProductCardImage({ product, children, showFavoriteButton = false }) {
   }
 
   function showPreviousImage() {
-    if (!hasMultipleImages) return;
+    if (!hasMultipleImages || isFirstImage) return;
 
-    setCurrentImageIndex((currentIndex) =>
-      currentIndex === 0 ? images.length - 1 : currentIndex - 1
-    );
+    setCurrentImageIndex((currentIndex) => currentIndex - 1);
   }
 
   function showNextImage() {
-    if (!hasMultipleImages) return;
+    if (!hasMultipleImages || isLastImage) return;
 
-    setCurrentImageIndex((currentIndex) =>
-      currentIndex === images.length - 1 ? 0 : currentIndex + 1
-    );
+    setCurrentImageIndex((currentIndex) => currentIndex + 1);
   }
 
   function handleTouchStart(event) {
@@ -61,7 +60,8 @@ function ProductCardImage({ product, children, showFavoriteButton = false }) {
     const deltaX = touch.clientX - touchStartXRef.current;
     const deltaY = touch.clientY - touchStartYRef.current;
 
-    const isHorizontalSwipe = Math.abs(deltaX) > 34 && Math.abs(deltaX) > Math.abs(deltaY) + 10;
+    const isHorizontalSwipe =
+      Math.abs(deltaX) > 34 && Math.abs(deltaX) > Math.abs(deltaY) + 10;
 
     if (!isHorizontalSwipe) return;
 
@@ -106,26 +106,26 @@ function ProductCardImage({ product, children, showFavoriteButton = false }) {
         />
       )}
 
-      {hasMultipleImages && (
-        <>
-          <button
-            className="card-image-arrow card-image-arrow-left"
-            type="button"
-            onClick={goToPreviousImage}
-            aria-label="Previous image"
-          >
-            ‹
-          </button>
+      {hasMultipleImages && !isFirstImage && (
+        <button
+          className="card-image-arrow card-image-arrow-left"
+          type="button"
+          onClick={goToPreviousImage}
+          aria-label="Previous image"
+        >
+          ‹
+        </button>
+      )}
 
-          <button
-            className="card-image-arrow card-image-arrow-right"
-            type="button"
-            onClick={goToNextImage}
-            aria-label="Next image"
-          >
-            ›
-          </button>
-        </>
+      {hasMultipleImages && !isLastImage && (
+        <button
+          className="card-image-arrow card-image-arrow-right"
+          type="button"
+          onClick={goToNextImage}
+          aria-label="Next image"
+        >
+          ›
+        </button>
       )}
 
       {hasImages && (
@@ -141,7 +141,9 @@ function ProductCardImage({ product, children, showFavoriteButton = false }) {
           }`}
           type="button"
           onClick={toggleFavorite}
-          aria-label={isLocallyFavorite ? "Remove from favorites" : "Add to favorites"}
+          aria-label={
+            isLocallyFavorite ? "Remove from favorites" : "Add to favorites"
+          }
           aria-pressed={isLocallyFavorite}
         >
           {isLocallyFavorite ? "♥" : "♡"}
