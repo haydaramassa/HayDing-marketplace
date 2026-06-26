@@ -401,9 +401,11 @@ function Home() {
             <h2>{t.productsTitle}</h2>
           </div>
 
-          <Link className="btn btn-secondary" to="/products">
-            {t.exploreAll}
-          </Link>
+          {!isMobile && (
+            <Link className="btn btn-secondary" to="/products">
+              {t.exploreAll}
+            </Link>
+          )}
         </div>
 
         {isProductsLoading && (
@@ -452,16 +454,24 @@ function Home() {
               ))}
             </div>
 
-            {hasMoreMobileProducts && (
-              <button
-                className="btn btn-secondary mobile-show-more-products"
-                type="button"
-                onClick={() =>
-                  setMobileVisibleCount((currentCount) => currentCount + 10)
-                }
-              >
-                {t.showMore}
-              </button>
+            {isMobile && (
+              <div className="mobile-products-actions">
+                {hasMoreMobileProducts ? (
+                  <button
+                    className="btn btn-secondary mobile-show-more-products"
+                    type="button"
+                    onClick={() =>
+                      setMobileVisibleCount((currentCount) => currentCount + 10)
+                    }
+                  >
+                    {t.showMore}
+                  </button>
+                ) : (
+                  <Link className="btn btn-secondary mobile-show-more-products" to="/products">
+                    {t.exploreAll}
+                  </Link>
+                )}
+              </div>
             )}
           </>
         )}

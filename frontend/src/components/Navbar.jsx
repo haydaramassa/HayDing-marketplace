@@ -12,11 +12,13 @@ function Navbar({ variant = "home" }) {
 
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileNavbarHidden, setIsMobileNavbarHidden] = useState(false);
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
   const [unreadMessageNotificationCount, setUnreadMessageNotificationCount] =
     useState(0);
 
   const accountMenuRef = useRef(null);
+  const lastScrollYRef = useRef(0);
 
   function text(de, ar, en) {
     if (isArabic) return ar;
@@ -62,7 +64,50 @@ function Navbar({ variant = "home" }) {
   useEffect(() => {
     setIsMobileMenuOpen(false);
     setIsAccountMenuOpen(false);
+    setIsMobileNavbarHidden(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      setIsMobileNavbarHidden(false);
+    }
+  }, [isMobileMenuOpen]);
+
+  useEffect(() => {
+    function handleMobileNavbarVisibility() {
+      const isMobileViewport = window.innerWidth <= 760;
+
+      if (!isMobileViewport || isMobileMenuOpen) {
+        setIsMobileNavbarHidden(false);
+        lastScrollYRef.current = window.scrollY || 0;
+        return;
+      }
+
+      const currentScrollY = Math.max(window.scrollY || 0, 0);
+      const isScrollingDown = currentScrollY > lastScrollYRef.current;
+      const isScrollingUp = currentScrollY < lastScrollYRef.current;
+
+      if (currentScrollY < 36 || isScrollingUp) {
+        setIsMobileNavbarHidden(false);
+      } else if (isScrollingDown && currentScrollY > 118) {
+        setIsMobileNavbarHidden(true);
+      }
+
+      lastScrollYRef.current = currentScrollY;
+    }
+
+    handleMobileNavbarVisibility();
+
+    window.addEventListener("scroll", handleMobileNavbarVisibility, {
+      passive: true,
+    });
+    window.addEventListener("resize", handleMobileNavbarVisibility);
+
+    return () => {
+      window.removeEventListener("scroll", handleMobileNavbarVisibility);
+      window.removeEventListener("resize", handleMobileNavbarVisibility);
+    };
+  }, [isMobileMenuOpen, location.pathname]);
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -130,7 +175,11 @@ function Navbar({ variant = "home" }) {
   }
 
   return (
-    <header className={`navbar ${isMobileMenuOpen ? "mobile-menu-open" : ""}`}>
+    <header
+      className={`navbar ${isMobileMenuOpen ? "mobile-menu-open" : ""} ${
+        isMobileNavbarHidden ? "mobile-navbar-hidden" : "mobile-navbar-visible"
+      }`}
+    >
       <Link className="logo" to="/">
         <span className="logo-mark logo-image-mark">
           <img src="/icon/hayding-mark.png" alt="" aria-hidden="true" />
