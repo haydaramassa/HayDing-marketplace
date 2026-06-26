@@ -8647,7 +8647,7 @@ font-size: 1.05rem;
 
   .mobile-home-search-section {
     width: min(100% - 22px, 420px) !important;
-    padding-top: 122px !important;
+    padding-top: 10px !important;
     padding-bottom: 18px !important;
   }
 
