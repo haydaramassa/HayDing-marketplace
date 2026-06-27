@@ -184,6 +184,33 @@ function Home() {
   };
 
   const t = content[language] || content.DE;
+
+  const currentUser = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("hayding-user") || "{}");
+    } catch {
+      return {};
+    }
+  })();
+  
+  const currentUserId = currentUser?.id || currentUser?.userId || currentUser?._id;
+  
+  function isOwnProduct(product) {
+    const productOwnerId =
+      product?.userId ||
+      product?.sellerId ||
+      product?.ownerId ||
+      product?.user?.id ||
+      product?.seller?.id ||
+      product?.owner?.id;
+  
+    return Boolean(
+      currentUserId &&
+        productOwnerId &&
+        String(currentUserId) === String(productOwnerId)
+    );
+  }
+
   const categoryIds = ["1", "2", "3", "5", "6", "8"];
 
   useEffect(() => {
@@ -436,7 +463,10 @@ function Home() {
                   key={product.id}
                   to={`/products/${product.id}`}
                 >
-                  <ProductCardImage product={product} showFavoriteButton />
+                  <ProductCardImage
+                    product={product}
+                    showFavoriteButton={!isOwnProduct(product)}
+                  />
 
                   <div className="product-info">
                     <span className="product-tag">
