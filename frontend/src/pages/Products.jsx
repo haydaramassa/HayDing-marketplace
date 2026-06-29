@@ -531,7 +531,7 @@ function Products() {
               <span>{text("Filter", "الفلاتر", "Filters")}</span>
 
               <span className="products-mobile-filter-count">
-                {hasActiveFilters ? "•" : ""}
+                {visibleProducts.length} {text("Anzeigen", "إعلانات", "listings")}
               </span>
 
               <span aria-hidden="true">
