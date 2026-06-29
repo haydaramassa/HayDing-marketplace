@@ -580,7 +580,7 @@ function Products() {
                   min="0"
                   value={minPriceFilter}
                   onChange={(event) => setMinPriceFilter(event.target.value)}
-                  placeholder={text("Preis von", "السعر من", "Price from")}
+                  placeholder={text("Von", "من", "From")}
                 />
 
                 <span className="products-price-separator">–</span>
@@ -590,7 +590,7 @@ function Products() {
                   min="0"
                   value={maxPriceFilter}
                   onChange={(event) => setMaxPriceFilter(event.target.value)}
-                  placeholder={text("Preis bis", "السعر إلى", "Price to")}
+                  placeholder={text("Bis", "إلى", "To")}
                 />
               </div>
             </div>
