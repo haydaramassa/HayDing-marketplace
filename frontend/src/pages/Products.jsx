@@ -47,6 +47,7 @@ function Products() {
   );
 
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const filtersRef = useRef(null);
 
   function text(de, ar, en) {
@@ -432,6 +433,7 @@ function Products() {
     setCategoryFilter("");
     setSortOption("newest");
     setOpenDropdown(null);
+    setIsMobileFiltersOpen(false);
     setSearchParams({}, { replace: true });
   }
 
@@ -512,7 +514,32 @@ function Products() {
           </div>
         </div>
 
-        <section className="products-filter-card" ref={filtersRef}>
+        <section
+          className={`products-filter-card ${
+            isMobileFiltersOpen ? "mobile-filters-open" : ""
+          }`}
+          ref={filtersRef}
+        >
+          <div className="products-mobile-filter-bar">
+            <button
+              className="products-mobile-filter-toggle"
+              type="button"
+              onClick={() =>
+                setIsMobileFiltersOpen((currentValue) => !currentValue)
+              }
+            >
+              <span>{text("Filter", "الفلاتر", "Filters")}</span>
+
+              <span className="products-mobile-filter-count">
+                {hasActiveFilters ? "•" : ""}
+              </span>
+
+              <span aria-hidden="true">
+                {isMobileFiltersOpen ? "×" : "☰"}
+              </span>
+            </button>
+          </div>
+
           <div className="products-filter-grid products-filter-grid-with-sort">
             <label className="products-filter-field products-filter-search">
               <span>{text("Suche", "بحث", "Search")}</span>
