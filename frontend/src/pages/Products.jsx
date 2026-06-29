@@ -12,6 +12,7 @@ import ProductCardImage from "../components/ProductCardImage";
 import Navbar from "../components/Navbar";
 import UserAvatar from "../components/UserAvatar";
 import "../App.css";
+import "./Products.css";
 
 function Products() {
   const { isArabic, language } = useLanguage();
@@ -28,16 +29,16 @@ function Products() {
   const [searchTerm, setSearchTerm] = useState(
     searchParams.get("search") || ""
   );
-   const [cityFilter, setCityFilter] = useState(searchParams.get("city") || "");
-    const [minPriceFilter, setMinPriceFilter] = useState(
-      searchParams.get("minPrice") || ""
-    );
-    const [maxPriceFilter, setMaxPriceFilter] = useState(
-      searchParams.get("maxPrice") || ""
-    );
-    const [conditionFilter, setConditionFilter] = useState(
-      searchParams.get("condition") || ""
-    );
+  const [cityFilter, setCityFilter] = useState(searchParams.get("city") || "");
+  const [minPriceFilter, setMinPriceFilter] = useState(
+    searchParams.get("minPrice") || ""
+  );
+  const [maxPriceFilter, setMaxPriceFilter] = useState(
+    searchParams.get("maxPrice") || ""
+  );
+  const [conditionFilter, setConditionFilter] = useState(
+    searchParams.get("condition") || ""
+  );
   const [categoryFilter, setCategoryFilter] = useState(
     searchParams.get("category") || ""
   );
@@ -279,43 +280,43 @@ function Products() {
 
   useEffect(() => {
     const params = new URLSearchParams();
-  
+
     const cleanSearchTerm = searchTerm.trim();
     const cleanCityFilter = cityFilter.trim();
     const cleanMinPrice = minPriceFilter.trim();
     const cleanMaxPrice = maxPriceFilter.trim();
-  
+
     if (cleanSearchTerm) {
       params.set("search", cleanSearchTerm);
     }
-  
+
     if (cleanCityFilter) {
       params.set("city", cleanCityFilter);
     }
-  
+
     if (cleanMinPrice) {
       params.set("minPrice", cleanMinPrice);
     }
-  
+
     if (cleanMaxPrice) {
       params.set("maxPrice", cleanMaxPrice);
     }
-  
+
     if (conditionFilter) {
       params.set("condition", conditionFilter);
     }
-  
+
     if (categoryFilter) {
       params.set("category", categoryFilter);
     }
-  
+
     if (sortOption && sortOption !== "newest") {
       params.set("sort", sortOption);
     }
-  
+
     const nextSearch = params.toString();
     const currentSearch = searchParams.toString();
-  
+
     if (nextSearch !== currentSearch) {
       setSearchParams(params, { replace: true });
     }
@@ -330,7 +331,6 @@ function Products() {
     searchParams,
     setSearchParams,
   ]);
-
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -372,12 +372,12 @@ function Products() {
       const matchesCondition =
         !conditionFilter || condition === conditionFilter;
 
-        const matchesCategory =
+      const matchesCategory =
         !categoryFilter || categoryId === String(categoryFilter);
-      
+
       const matchesMinPrice = !hasMinPrice || price >= minPrice;
       const matchesMaxPrice = !hasMaxPrice || price <= maxPrice;
-      
+
       return (
         matchesSearch &&
         matchesCity &&
@@ -482,13 +482,13 @@ function Products() {
 
   return (
     <div
-      className={`create-page ${isArabic ? "rtl" : ""}`}
+      className={`products-page ${isArabic ? "rtl" : ""}`}
       dir={isArabic ? "rtl" : "ltr"}
     >
       <Navbar variant="app" />
 
-      <main className="my-products-page">
-        <div className="my-products-header">
+      <main className="products-page-main">
+        <div className="products-page-header">
           <div>
             <p className="eyebrow">
               {text("Entdecken", "استكشف", "Explore")}
@@ -545,28 +545,28 @@ function Products() {
             </label>
 
             <div className="products-filter-field products-price-range">
-            <span>{text("Preis", "السعر", "Price")}</span>
+              <span>{text("Preis", "السعر", "Price")}</span>
 
-            <div className="products-price-range-box">
-              <input
-                type="number"
-                min="0"
-                value={minPriceFilter}
-                onChange={(event) => setMinPriceFilter(event.target.value)}
-                placeholder={text("Von", "من", "From")}
-              />
+              <div className="products-price-range-box">
+                <input
+                  type="number"
+                  min="0"
+                  value={minPriceFilter}
+                  onChange={(event) => setMinPriceFilter(event.target.value)}
+                  placeholder={text("Von", "من", "From")}
+                />
 
-              <span className="products-price-separator">–</span>
+                <span className="products-price-separator">–</span>
 
-              <input
-                type="number"
-                min="0"
-                value={maxPriceFilter}
-                onChange={(event) => setMaxPriceFilter(event.target.value)}
-                placeholder={text("Bis", "إلى", "To")}
-              />
+                <input
+                  type="number"
+                  min="0"
+                  value={maxPriceFilter}
+                  onChange={(event) => setMaxPriceFilter(event.target.value)}
+                  placeholder={text("Bis", "إلى", "To")}
+                />
+              </div>
             </div>
-          </div>
 
             <CustomDropdown
               id="category"
@@ -674,7 +674,7 @@ function Products() {
         )}
 
         {!isLoading && !error && visibleProducts.length > 0 && (
-          <div className="my-products-grid products-results-grid">
+          <div className="products-page-grid">
             {visibleProducts.map((product) => {
               const isFavorite = favoriteIds.includes(product.id);
               const isFavoriteLoading = favoriteLoadingId === product.id;
@@ -682,7 +682,7 @@ function Products() {
 
               return (
                 <Link
-                  className="product-card my-product-card product-card-link products-compact-card"
+                  className="products-page-card product-card-link"
                   key={product.id}
                   to={`/products/${product.id}`}
                 >
