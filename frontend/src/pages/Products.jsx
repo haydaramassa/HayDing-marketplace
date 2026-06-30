@@ -564,9 +564,9 @@ function Products() {
                 value={cityFilter}
                 onChange={(event) => setCityFilter(event.target.value)}
                 placeholder={text(
-                  "z. B. Leipzig",
-                  "مثلاً Leipzig",
-                  "e.g. Leipzig"
+                  "z. B. Berlin",
+                  "مثلاً Berlin",
+                  "e.g. Berlin"
                 )}
               />
             </label>
