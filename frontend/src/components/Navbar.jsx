@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { getNotifications, getUnreadNotificationCount } from "../services/api";
 import UserAvatar from "./UserAvatar";
+import BrandLogo from "./BrandLogo";
 
 function Navbar({ variant = "home" }) {
   const { language, setLanguage, isArabic } = useLanguage();
@@ -180,13 +181,7 @@ function Navbar({ variant = "home" }) {
         isMobileNavbarHidden ? "mobile-navbar-hidden" : "mobile-navbar-visible"
       }`}
     >
-      <Link className="logo" to="/">
-        <span className="logo-mark logo-image-mark">
-          <img src="/icon/hayding-mark.png" alt="" aria-hidden="true" />
-        </span>
-
-        <span>HayDing</span>
-      </Link>
+      <BrandLogo />
 
       <button
         className="mobile-menu-toggle"

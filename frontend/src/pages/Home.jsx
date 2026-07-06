@@ -5,6 +5,8 @@ import { getProducts } from "../services/api";
 import { getProductImages } from "../utils/productImages";
 import Navbar from "../components/Navbar";
 import ProductCardImage from "../components/ProductCardImage";
+import BrandLogo from "../components/BrandLogo";
+import logoSlogan from "../assets/branding/logo-slogan.png";
 import "../App.css";
 
 function Home() {
@@ -715,15 +717,14 @@ function Home() {
         )}
       </main>
 
-      <footer className="footer">
-        <div className="logo">
-          <span className="logo-mark logo-image-mark">
-            <img src="/icon/hayding-mark.png" alt="" aria-hidden="true" />
-          </span>
-          <span>HayDing</span>
-        </div>
+      <footer className="footer home-brand-footer">
+        <BrandLogo className="footer-brand-logo" />
 
-        <p>{t.footerText}</p>
+        <img
+          className="footer-slogan-image"
+          src={logoSlogan}
+          alt={t.footerText}
+        />
       </footer>
     </div>
   );

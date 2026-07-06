@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { loginUser } from "../services/api";
+import BrandLogo from "../components/BrandLogo";
 import "../App.css";
 
 function Login() {
@@ -95,13 +96,7 @@ function Login() {
       dir={isArabic ? "rtl" : "ltr"}
     >
       <div className="auth-card">
-        <Link className="logo auth-logo" to="/">
-          <span className="logo-mark logo-image-mark">
-            <img src="/icon/hayding-mark.png" alt="" aria-hidden="true" />
-          </span>
-
-          <span>HayDing</span>
-        </Link>
+      <BrandLogo className="auth-logo" />
 
         <p className="eyebrow">{t.loginEyebrow}</p>
 

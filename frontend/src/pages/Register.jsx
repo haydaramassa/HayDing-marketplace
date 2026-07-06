@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { registerUser } from "../services/api";
+import BrandLogo from "../components/BrandLogo";
 import "../App.css";
 
 function Register() {
@@ -103,13 +104,7 @@ function Register() {
       dir={isArabic ? "rtl" : "ltr"}
     >
       <div className="auth-card">
-        <Link className="logo auth-logo" to="/">
-          <span className="logo-mark logo-image-mark">
-            <img src="/icon/hayding-mark.png" alt="" aria-hidden="true" />
-          </span>
-
-          <span>HayDing</span>
-        </Link>
+      <BrandLogo className="auth-logo" />
 
         <p className="eyebrow">{t.registerEyebrow}</p>
 
