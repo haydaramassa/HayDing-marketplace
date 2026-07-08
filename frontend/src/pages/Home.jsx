@@ -6,7 +6,9 @@ import { getProductImages } from "../utils/productImages";
 import Navbar from "../components/Navbar";
 import ProductCardImage from "../components/ProductCardImage";
 import BrandLogo from "../components/BrandLogo";
-import logoSlogan from "../assets/branding/logo-slogan.png";
+import logoSloganDe from "../assets/branding/logo-slogan-de.png";
+import logoSloganEn from "../assets/branding/logo-slogan-en.png";
+import logoSloganAr from "../assets/branding/logo-slogan-ar.png";
 import "../App.css";
 
 function Home() {
@@ -186,6 +188,11 @@ function Home() {
   };
 
   const t = content[language] || content.DE;
+  const footerSloganImage = isArabic
+  ? logoSloganAr
+  : language === "EN"
+    ? logoSloganEn
+    : logoSloganDe;
 
   const currentUser = (() => {
     try {
@@ -722,7 +729,7 @@ function Home() {
 
         <img
           className="footer-slogan-image"
-          src={logoSlogan}
+          src={footerSloganImage}
           alt={t.footerText}
         />
       </footer>
