@@ -170,7 +170,6 @@ button {
   grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
   align-items: center;
   gap: 42px;
-  /*padding: 44px 0 70px;*/
   padding: 32px 0 60px;
 }
 
@@ -187,7 +186,6 @@ button {
   margin: 0;
   max-width: 760px;
   font-size: clamp(3.3rem, 5.7vw, 5.35rem);
-  /*font-size: clamp(3.7rem, 6.4vw, 6rem);*/
   line-height: 1.08;
   letter-spacing: -0.045em;
   color: #2f332f;
@@ -199,9 +197,7 @@ button {
 
 .hero-text {
   max-width: 660px;
- /* margin: 28px 0;*/
   color: #4f4a45;
-  /*font-size: 1.12rem;*/
   line-height: 1.8;
   margin: 24px 0;
 font-size: 1.05rem;
@@ -297,7 +293,6 @@ font-size: 1.05rem;
 }
 
 .preview-image {
-  /*height: 230px;*/
   height: 200px;
   border-radius: 24px;
   background:
@@ -1831,8 +1826,8 @@ font-size: 1.05rem;
   opacity: 0.7;
 }
 
-.rtl /* Favorite button */
-.favorite-btn {
+/* Favorite button RTL override */
+.rtl .favorite-btn {
   position: absolute;
   top: 14px;
   right: 14px;
@@ -8839,19 +8834,48 @@ font-size: 1.05rem;
     max-width: 145px;
   }
 
-  .footer-brand-logo .brand-logo-wordmark {
-    height: 27px;
-    max-width: 150px;
+  .mobile-home-main {
+    padding-bottom: 0 !important;
   }
 
-  .home-brand-footer {
-    margin-top: 8px;
-    padding: 10px 0 12px;
-    gap: 6px;
+  .mobile-home-live-section {
+    padding-bottom: 4px !important;
   }
 
-  .footer-slogan-image {
-    width: min(260px, 78%);
-    margin-top: 0;
+  .footer.home-brand-footer {
+    width: min(100% - 28px, 360px) !important;
+    margin: 0 auto !important;
+    padding: 6px 0 0 !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 0 !important;
+    border-top: 1px solid rgba(80, 54, 34, 0.08);
+  }
+
+  .footer.home-brand-footer .footer-brand-logo {
+    margin: 0 0 -2px !important;
+    justify-content: center;
+    gap: 7px;
+  }
+
+  .footer.home-brand-footer .footer-brand-logo .logo-mark {
+    width: 30px;
+    height: 30px;
+    border-radius: 11px;
+  }
+
+  .footer.home-brand-footer .footer-brand-logo .brand-logo-wordmark {
+    height: 20px;
+    max-width: 112px;
+  }
+
+  .footer.home-brand-footer .footer-slogan-image {
+    width: min(210px, 68%);
+    margin: -4px auto 0 !important;
+    display: block;
+    opacity: 0.95;
   }
 }
