@@ -2,7 +2,15 @@ import "../App.css";
 
 function UserAvatar({ user, name, email, size = "medium", className = "" }) {
   const displayName = name || user?.fullName || user?.email || email || "H";
-  const rawImageUrl = user?.profileImageUrl || user?.avatarUrl || "";
+
+  const rawImageUrl =
+    user?.profileImageUrl ||
+    user?.profileImage ||
+    user?.avatarUrl ||
+    user?.avatar ||
+    user?.imageUrl ||
+    user?.photoUrl ||
+    "";
 
   function getInitials(value) {
     return (

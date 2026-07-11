@@ -390,6 +390,7 @@ function ProductDetails() {
   const selectedImage = productImages[selectedImageIndex] || "";
   const hasMultipleImages = productImages.length > 1;
   const seller = product?.seller;
+  console.log("SELLER DATA:", seller);
 
   function goToPreviousImage() {
     if (!hasMultipleImages) return;
@@ -614,7 +615,21 @@ function ProductDetails() {
                   )}
                 </div>
 
-                <div className="details-meta">
+                <div className="details-meta details-meta-inline">
+                  {seller && (
+                    <Link
+                      className="details-seller-avatar-link"
+                      to={`/users/${seller.id}`}
+                      aria-label={text("Verkäufer", "البائع", "Seller")}
+                      title={
+                        seller.fullName ||
+                        text("Unbekannt", "غير معروف", "Unknown")
+                      }
+                    >
+                      <UserAvatar user={seller} size="tiny" />
+                    </Link>
+                  )}
+
                   <div>
                     <span>{text("Stadt", "المدينة", "City")}</span>
                     <strong>
@@ -639,33 +654,6 @@ function ProductDetails() {
                     </strong>
                   </div>
                 </div>
-
-                {seller && (
-                  <Link
-                    className="seller-card seller-card-link"
-                    to={`/users/${seller.id}`}
-                  >
-                    <UserAvatar user={seller} size="medium" />
-
-                    <div>
-                      <span>{text("Verkäufer", "البائع", "Seller")}</span>
-
-                      <strong>
-                        {seller.fullName ||
-                          text("Unbekannt", "غير معروف", "Unknown")}
-                      </strong>
-
-                      <p>
-                        {seller.city ||
-                          text(
-                            "Ort nicht angegeben",
-                            "المدينة غير محددة",
-                            "City not specified"
-                          )}
-                      </p>
-                    </div>
-                  </Link>
-                )}
 
                 <div className="details-section">
                   <h2>{text("Beschreibung", "الوصف", "Description")}</h2>
