@@ -390,7 +390,6 @@ function ProductDetails() {
   const selectedImage = productImages[selectedImageIndex] || "";
   const hasMultipleImages = productImages.length > 1;
   const seller = product?.seller;
-  console.log("SELLER DATA:", seller);
 
   function goToPreviousImage() {
     if (!hasMultipleImages) return;
