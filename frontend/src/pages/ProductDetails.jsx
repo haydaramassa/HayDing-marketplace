@@ -246,7 +246,7 @@ function ProductDetails() {
 
                 return dateB - dateA;
               })
-              .slice(0, 3)
+              .slice(0, 12)
           : [];
 
         setSimilarProducts(relatedProducts);
@@ -798,19 +798,7 @@ function ProductDetails() {
                       "Similar listings"
                     )}
                   </p>
-
-                  <h2>
-                    {text(
-                      "Vielleicht interessiert dich auch",
-                      "قد يعجبك أيضاً",
-                      "You might also like"
-                    )}
-                  </h2>
                 </div>
-
-                <Link className="btn btn-secondary" to="/products">
-                  {text("Alle anzeigen", "عرض الكل", "View all")}
-                </Link>
               </div>
 
               {isSimilarLoading && (
@@ -846,32 +834,44 @@ function ProductDetails() {
               )}
 
               {!isSimilarLoading && similarProducts.length > 0 && (
-                <div className="my-products-grid similar-listings-grid" ref={similarScrollRef}>
-                  {similarProducts.map((similarProduct) => (
-                    <Link
-                      className="product-card my-product-card product-card-link"
-                      key={similarProduct.id}
-                      to={`/products/${similarProduct.id}`}
-                    >
-                      <ProductCardImage product={similarProduct} />
+                <>
+                  <div
+                    className="my-products-grid similar-listings-grid"
+                    ref={similarScrollRef}
+                  >
+                    {similarProducts.map((similarProduct) => (
+                      <Link
+                        className="product-card my-product-card product-card-link"
+                        key={similarProduct.id}
+                        to={`/products/${similarProduct.id}`}
+                      >
+                        <ProductCardImage product={similarProduct} />
 
-                      <div className="product-info">
-                        <span className="product-tag">
-                          {getConditionLabel(
-                            similarProduct.conditionStatus ||
-                              similarProduct.condition
-                          ) || text("Aktiv", "نشط", "Active")}
-                        </span>
+                        <div className="product-info">
+                          <span className="product-tag">
+                            {getConditionLabel(
+                              similarProduct.conditionStatus ||
+                                similarProduct.condition
+                            ) || text("Aktiv", "نشط", "Active")}
+                          </span>
 
-                        <h3>{similarProduct.title}</h3>
+                          <h3>{similarProduct.title}</h3>
 
-                        <p>{similarProduct.city}</p>
+                          <p>{similarProduct.city}</p>
 
-                        <strong>{similarProduct.price} €</strong>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
+                          <strong>{similarProduct.price} €</strong>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+
+                  <Link
+                    className="btn btn-secondary similar-listings-view-all"
+                    to="/products"
+                  >
+                    {text("Alle anzeigen", "عرض الكل", "View all")}
+                  </Link>
+                </>
               )}
             </section>
           </>

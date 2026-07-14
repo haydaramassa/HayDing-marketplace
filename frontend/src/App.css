@@ -9181,26 +9181,22 @@ font-size: 1.05rem;
   }
 
   .similar-listings-header {
-    display: grid !important;
-    gap: 8px !important;
+    display: block !important;
+    margin-bottom: 8px !important;
   }
-
+  
   .similar-listings-header .eyebrow {
-    margin-bottom: 4px !important;
-    font-size: 0.64rem !important;
-  }
-
-  .similar-listings-header h2 {
     margin: 0 !important;
-    font-size: 1.02rem !important;
-    line-height: 1.15 !important;
-    letter-spacing: -0.02em !important;
+    font-size: 0.66rem !important;
+    line-height: 1 !important;
   }
-
+  
+  .similar-listings-header h2 {
+    display: none !important;
+  }
+  
   .similar-listings-header .btn {
-    min-height: 36px !important;
-    padding: 9px 12px !important;
-    font-size: 0.84rem !important;
+    display: none !important;
   }
 
   .similar-empty-state {
@@ -9344,6 +9340,15 @@ font-size: 1.05rem;
   .similar-listings-grid::-webkit-scrollbar-thumb {
     background: rgba(32, 38, 36, 0.22) !important;
     border-radius: 999px !important;
+  }
+
+  .similar-listings-view-all {
+    width: min(260px, 92%) !important;
+    min-height: 36px !important;
+    margin: 10px auto 0 !important;
+    padding: 9px 12px !important;
+    display: flex !important;
+    font-size: 0.84rem !important;
   }
 
 }
