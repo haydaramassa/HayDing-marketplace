@@ -8905,6 +8905,8 @@ font-size: 1.05rem;
 }
 /**********************/
 
+
+
 /* Product details mobile final compact layout */
 @media (max-width: 760px) {
   .product-details-page {
@@ -9169,6 +9171,7 @@ font-size: 1.05rem;
   }
 
   .similar-listings-section {
+    position: relative !important;
     margin-top: 8px !important;
     padding: 10px !important;
     border: 1px solid var(--border) !important;
@@ -9227,32 +9230,38 @@ font-size: 1.05rem;
     font-size: 0.78rem !important;
     line-height: 1.35 !important;
   }
-
   .similar-listings-grid {
     margin-top: 10px !important;
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 8px !important;
+    display: flex !important;
+    gap: 9px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding: 2px 14px 10px !important;
+    scroll-snap-type: x proximity !important;
+    scroll-behavior: smooth !important;
   }
-  
+
   .similar-listings-grid .product-card {
-    min-width: 0 !important;
+    flex: 0 0 132px !important;
+    width: 132px !important;
+    min-width: 132px !important;
     border-radius: 16px !important;
     overflow: hidden !important;
+    scroll-snap-align: start !important;
     box-shadow: 0 10px 24px rgba(32, 38, 36, 0.055) !important;
   }
-  
+
   .similar-listings-grid .product-image,
   .similar-listings-grid .my-product-image {
-    height: 126px !important;
-    min-height: 126px !important;
+    height: 122px !important;
+    min-height: 122px !important;
     border-radius: 16px 16px 0 0 !important;
   }
-  
+
   .similar-listings-grid .product-info {
     padding: 9px !important;
   }
-  
+
   .similar-listings-grid .product-tag {
     max-width: 100% !important;
     padding: 4px 7px !important;
@@ -9262,7 +9271,7 @@ font-size: 1.05rem;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
   }
-  
+
   .similar-listings-grid .product-info h3 {
     margin: 7px 0 4px !important;
     min-height: 2.35em !important;
@@ -9270,22 +9279,71 @@ font-size: 1.05rem;
     line-height: 1.18 !important;
     letter-spacing: -0.01em !important;
   }
-  
+
   .similar-listings-grid .product-info p {
     margin: 0 0 4px !important;
     font-size: 0.74rem !important;
     line-height: 1.2 !important;
   }
-  
+
   .similar-listings-grid .product-info strong {
     font-size: 0.94rem !important;
     line-height: 1.1 !important;
   }
-  
+
   .similar-listings-grid .image-counter {
     right: 7px !important;
     bottom: 7px !important;
     padding: 3px 6px !important;
     font-size: 0.64rem !important;
   }
+
+  .similar-scroll-arrow {
+    position: absolute !important;
+    top: 63% !important;
+    z-index: 8 !important;
+    width: 22px !important;
+    height: 22px !important;
+    border: 1px solid rgba(230, 222, 209, 0.85) !important;
+    border-radius: 999px !important;
+    background: rgba(255, 255, 255, 0.92) !important;
+    color: rgba(32, 38, 36, 0.68) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    font-size: 1.05rem !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    box-shadow: 0 7px 18px rgba(32, 38, 36, 0.12) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+  }
+
+  .similar-scroll-arrow-left {
+    left: 6px !important;
+  }
+
+  .similar-scroll-arrow-right {
+    right: 6px !important;
+  }
+
+  .similar-scroll-arrow:active {
+    transform: scale(0.94) !important;
+  }
+
+  .similar-listings-grid::-webkit-scrollbar {
+    height: 6px !important;
+  }
+
+  .similar-listings-grid::-webkit-scrollbar-track {
+    background: rgba(230, 222, 209, 0.45) !important;
+    border-radius: 999px !important;
+  }
+
+  .similar-listings-grid::-webkit-scrollbar-thumb {
+    background: rgba(32, 38, 36, 0.22) !important;
+    border-radius: 999px !important;
+  }
+
 }

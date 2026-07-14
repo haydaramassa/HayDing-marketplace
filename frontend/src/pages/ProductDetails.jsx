@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import {
@@ -43,6 +43,10 @@ function ProductDetails() {
   const [isStartingConversation, setIsStartingConversation] = useState(false);
   const [error, setError] = useState("");
   const [notFound, setNotFound] = useState(false);
+
+  const similarScrollRef = useRef(null);
+  const [showSimilarLeftArrow, setShowSimilarLeftArrow] = useState(false);
+  const [showSimilarRightArrow, setShowSimilarRightArrow] = useState(false);
 
   function text(de, ar, en) {
     if (isArabic) return ar;
@@ -279,6 +283,7 @@ function ProductDetails() {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [isLightboxOpen, selectedImageIndex, product]);
+  
 
   async function handleFavoriteClick() {
     if (isOwner) {
@@ -411,6 +416,62 @@ function ProductDetails() {
     if (!selectedImage) return;
     setIsLightboxOpen(true);
   }
+
+  function updateSimilarScrollArrows() {
+    const scrollBox = similarScrollRef.current;
+
+    if (!scrollBox) {
+      setShowSimilarLeftArrow(false);
+      setShowSimilarRightArrow(false);
+      return;
+    }
+
+    const canScroll = scrollBox.scrollWidth > scrollBox.clientWidth + 4;
+    const isAtStart = scrollBox.scrollLeft <= 3;
+    const isAtEnd =
+      scrollBox.scrollLeft + scrollBox.clientWidth >= scrollBox.scrollWidth - 3;
+
+    setShowSimilarLeftArrow(canScroll && !isAtStart);
+    setShowSimilarRightArrow(canScroll && !isAtEnd);
+  }
+
+  function scrollSimilarListings(direction) {
+    const scrollBox = similarScrollRef.current;
+
+    if (!scrollBox) return;
+
+    const scrollAmount = Math.max(130, Math.floor(scrollBox.clientWidth * 0.72));
+
+    scrollBox.scrollBy({
+      left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth",
+    });
+  }
+
+  useEffect(() => {
+    updateSimilarScrollArrows();
+
+    const scrollBox = similarScrollRef.current;
+
+    if (!scrollBox) return;
+
+    function handleSimilarScroll() {
+      updateSimilarScrollArrows();
+    }
+
+    scrollBox.addEventListener("scroll", handleSimilarScroll, {
+      passive: true,
+    });
+    window.addEventListener("resize", handleSimilarScroll);
+
+    const timer = window.setTimeout(handleSimilarScroll, 120);
+
+    return () => {
+      scrollBox.removeEventListener("scroll", handleSimilarScroll);
+      window.removeEventListener("resize", handleSimilarScroll);
+      window.clearTimeout(timer);
+    };
+  }, [similarProducts, isSimilarLoading]);
 
   return (
     <div
@@ -698,6 +759,36 @@ function ProductDetails() {
             </div>
 
             <section className="similar-listings-section">
+              {showSimilarLeftArrow && (
+                <button
+                  className="similar-scroll-arrow similar-scroll-arrow-left"
+                  type="button"
+                  onClick={() => scrollSimilarListings("left")}
+                  aria-label={text(
+                    "Nach links scrollen",
+                    "تمرير لليسار",
+                    "Scroll left"
+                  )}
+                >
+                  ‹
+                </button>
+              )}
+
+              {showSimilarRightArrow && (
+                <button
+                  className="similar-scroll-arrow similar-scroll-arrow-right"
+                  type="button"
+                  onClick={() => scrollSimilarListings("right")}
+                  aria-label={text(
+                    "Nach rechts scrollen",
+                    "تمرير لليمين",
+                    "Scroll right"
+                  )}
+                >
+                  ›
+                </button>
+              )}
+
               <div className="similar-listings-header">
                 <div>
                   <p className="eyebrow">
@@ -755,7 +846,7 @@ function ProductDetails() {
               )}
 
               {!isSimilarLoading && similarProducts.length > 0 && (
-                <div className="my-products-grid similar-listings-grid">
+                <div className="my-products-grid similar-listings-grid" ref={similarScrollRef}>
                   {similarProducts.map((similarProduct) => (
                     <Link
                       className="product-card my-product-card product-card-link"
