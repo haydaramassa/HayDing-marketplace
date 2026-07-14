@@ -9182,7 +9182,7 @@ font-size: 1.05rem;
 
   .similar-listings-header {
     display: block !important;
-    margin: 0 0 5px !important;
+    margin: 0 0 0px !important;
     padding: 0 !important;
     border: 0 !important;
     border-radius: 0 !important;
@@ -9233,7 +9233,7 @@ font-size: 1.05rem;
   }
 
   .similar-listings-grid {
-    margin-top: 6px !important;
+    margin-top: 3px !important;
     display: flex !important;
     gap: 9px !important;
     overflow-x: auto !important;
