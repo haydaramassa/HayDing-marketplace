@@ -9379,7 +9379,7 @@ font-size: 1.05rem;
   }
 
   .my-products-header {
-    margin-top: 10px !important;
+    margin-top: 35px !important; 
     padding: 16px !important;
     border-radius: 22px !important;
     display: grid !important;
@@ -9461,15 +9461,15 @@ font-size: 1.05rem;
   }
 
   .my-products-page .product-tag,
-  .my-products-page .status-pill {
-    max-width: calc(50% - 3px) !important;
-    padding: 4px 7px !important;
-    font-size: 0.64rem !important;
-    line-height: 1 !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
+.my-products-page .status-pill {
+  max-width: calc(50% - 2px) !important;
+  padding: 4px 5px !important;
+  font-size: 0.58rem !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
 
   .my-products-page .product-info h3 {
     margin: 8px 0 4px !important;
