@@ -9233,7 +9233,7 @@ font-size: 1.05rem;
   }
 
   .similar-listings-grid {
-    margin-top: 3px !important;
+    margin-top: 6px !important;
     display: flex !important;
     gap: 9px !important;
     overflow-x: auto !important;
@@ -9365,5 +9365,164 @@ font-size: 1.05rem;
     display: flex !important;
     font-size: 0.84rem !important;
   }
+  
+}
 
+/* My products mobile compact layout */
+@media (max-width: 760px) {
+  .my-products-page {
+    width: min(100% - 18px, 420px) !important;
+    margin: 0 auto !important;
+    padding: 12px 0 18px !important;
+    gap: 12px !important;
+    overflow: visible !important;
+  }
+
+  .my-products-header {
+    margin-top: 10px !important;
+    padding: 16px !important;
+    border-radius: 22px !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px !important;
+    box-shadow: 0 10px 24px rgba(32, 38, 36, 0.045) !important;
+  }
+
+  .my-products-header .eyebrow {
+    margin: 0 0 6px !important;
+    font-size: 0.64rem !important;
+    line-height: 1 !important;
+    letter-spacing: 0.055em !important;
+  }
+
+  .my-products-header h1 {
+    margin: 0 !important;
+    font-size: 1.62rem !important;
+    line-height: 1.04 !important;
+    letter-spacing: -0.04em !important;
+  }
+
+  .my-products-header p:last-child {
+    max-width: 100% !important;
+    margin: 8px 0 0 !important;
+    font-size: 0.84rem !important;
+    line-height: 1.45 !important;
+  }
+
+  .my-products-header .btn {
+    width: 100% !important;
+    min-height: 36px !important;
+    padding: 9px 12px !important;
+    font-size: 0.84rem !important;
+  }
+
+  .my-products-page .my-products-grid {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 9px !important;
+  }
+
+  .my-products-page .my-management-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    border-radius: 18px !important;
+    overflow: hidden !important;
+    box-shadow: 0 10px 24px rgba(32, 38, 36, 0.055) !important;
+  }
+
+  .my-products-page .my-management-card:hover {
+    transform: none !important;
+    box-shadow: 0 10px 24px rgba(32, 38, 36, 0.055) !important;
+  }
+
+  .my-products-page .my-management-card .product-card-link {
+    width: 100% !important;
+    display: block !important;
+  }
+
+  .my-products-page .product-image,
+  .my-products-page .my-product-image {
+    height: 122px !important;
+    min-height: 122px !important;
+    border-radius: 18px 18px 0 0 !important;
+  }
+
+  .my-products-page .product-info {
+    padding: 9px !important;
+  }
+
+  .my-products-page .product-card-tags {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 5px !important;
+  }
+
+  .my-products-page .product-tag,
+  .my-products-page .status-pill {
+    max-width: calc(50% - 3px) !important;
+    padding: 4px 7px !important;
+    font-size: 0.64rem !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .my-products-page .product-info h3 {
+    margin: 8px 0 4px !important;
+    min-height: 2.35em !important;
+    font-size: 0.86rem !important;
+    line-height: 1.18 !important;
+    letter-spacing: -0.01em !important;
+  }
+
+  .my-products-page .product-info p {
+    margin: 0 0 5px !important;
+    font-size: 0.74rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .my-products-page .my-product-card-footer {
+    margin-top: 5px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 6px !important;
+  }
+
+  .my-products-page .my-product-card-footer strong {
+    font-size: 0.98rem !important;
+    line-height: 1.1 !important;
+  }
+
+  .my-products-page .my-product-favorite-count {
+    min-height: 26px !important;
+    padding: 4px 8px !important;
+    border-radius: 999px !important;
+    font-size: 0.72rem !important;
+  }
+
+  .my-products-page .card-menu {
+    top: 8px !important;
+    right: 8px !important;
+  }
+
+  .rtl .my-products-page .card-menu {
+    right: auto !important;
+    left: 8px !important;
+  }
+
+  .my-products-page .card-menu-button {
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 1rem !important;
+  }
+
+  .my-products-page .card-menu-list {
+    top: 36px !important;
+    min-width: 185px !important;
+  }
 }
