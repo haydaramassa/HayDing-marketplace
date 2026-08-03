@@ -9568,8 +9568,11 @@ font-size: 1.05rem;
 
   .form-section-header h2 {
     margin: 0 !important;
-    font-size: 1.2rem !important;
-    line-height: 1.1 !important;
+    color: #b74b3c !important;
+    font-size: 1.16rem !important;
+    font-weight: 800 !important;
+    line-height: 1.12 !important;
+    letter-spacing: -0.02em !important;
   }
 
   .form-section-header p {
@@ -9577,27 +9580,31 @@ font-size: 1.05rem;
   }
 
   .upload-box {
-    min-height: 140px !important;
-    padding: 16px !important;
+    min-height: 132px !important;
+    padding: 15px !important;
     border-radius: 20px !important;
   }
 
   .upload-icon {
-    width: 44px !important;
-    height: 44px !important;
+    width: 42px !important;
+    height: 42px !important;
     margin-bottom: 8px !important;
-    font-size: 1.35rem !important;
+    font-size: 1.28rem !important;
   }
 
   .upload-box h3 {
     margin: 0 0 5px !important;
-    font-size: 0.96rem !important;
+    color: #1f2a25 !important;
+    font-size: 0.94rem !important;
+    font-weight: 700 !important;
     line-height: 1.15 !important;
   }
 
   .upload-box p {
     margin: 0 !important;
-    font-size: 0.76rem !important;
+    color: #6f7973 !important;
+    font-size: 0.74rem !important;
+    font-weight: 500 !important;
     line-height: 1.35 !important;
   }
 
@@ -9624,7 +9631,10 @@ font-size: 1.05rem;
 
   .form-field {
     gap: 6px !important;
-    font-size: 0.86rem !important;
+    color: #526058 !important;
+    font-size: 0.84rem !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
   }
 
   .form-field input,
@@ -9632,12 +9642,52 @@ font-size: 1.05rem;
   .form-field select {
     min-height: 42px !important;
     padding: 11px 13px !important;
+    border: 1px solid rgba(123, 104, 76, 0.2) !important;
     border-radius: 16px !important;
-    font-size: 0.9rem !important;
+    background-color: rgba(255, 252, 247, 0.96) !important;
+    color: #1f2a25 !important;
+    font-size: 0.88rem !important;
+    font-weight: 500 !important;
+    line-height: 1.25 !important;
+    box-shadow: none !important;
   }
 
   .form-field textarea {
-    min-height: 104px !important;
+    min-height: 98px !important;
+    resize: vertical !important;
+  }
+
+  .form-field input::placeholder,
+  .form-field textarea::placeholder {
+    color: #7c8580 !important;
+    font-weight: 500 !important;
+    opacity: 1 !important;
+  }
+
+  .form-field input:focus::placeholder,
+  .form-field textarea:focus::placeholder {
+    color: transparent !important;
+  }
+
+  .form-field input:focus,
+  .form-field textarea:focus,
+  .form-field select:focus {
+    border-color: rgba(183, 75, 60, 0.55) !important;
+    background-color: #fffaf2 !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(183, 75, 60, 0.08) !important;
+  }
+
+  .form-field select {
+    cursor: pointer !important;
+    appearance: auto !important;
+  }
+
+  .form-field select option {
+    color: #1f2a25 !important;
+    background: #fffaf2 !important;
+    font-size: 0.9rem !important;
+    font-weight: 500 !important;
   }
 
   .form-actions {
