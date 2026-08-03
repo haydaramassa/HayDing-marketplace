@@ -9526,3 +9526,134 @@ font-size: 1.05rem;
     min-width: 185px !important;
   }
 }
+
+/**** creat product ***/
+/* Create product mobile compact layout */
+@media (max-width: 760px) {
+  .create-layout {
+    width: min(100% - 18px, 420px) !important;
+    margin: 0 auto !important;
+    padding: 12px 0 18px !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .create-main {
+    gap: 12px !important;
+  }
+
+  .create-title-block {
+    display: none !important;
+  }
+
+  .listing-form {
+    gap: 12px !important;
+  }
+
+  .form-section {
+    padding: 16px !important;
+    border-radius: 22px !important;
+    box-shadow: 0 10px 24px rgba(32, 38, 36, 0.045) !important;
+  }
+
+  .form-section-header {
+    margin-bottom: 12px !important;
+    display: block !important;
+  }
+
+  .form-section-header span {
+    display: none !important;
+  }
+
+  .form-section-header h2 {
+    margin: 0 !important;
+    font-size: 1.2rem !important;
+    line-height: 1.1 !important;
+  }
+
+  .form-section-header p {
+    display: none !important;
+  }
+
+  .upload-box {
+    min-height: 140px !important;
+    padding: 16px !important;
+    border-radius: 20px !important;
+  }
+
+  .upload-icon {
+    width: 44px !important;
+    height: 44px !important;
+    margin-bottom: 8px !important;
+    font-size: 1.35rem !important;
+  }
+
+  .upload-box h3 {
+    margin: 0 0 5px !important;
+    font-size: 0.96rem !important;
+    line-height: 1.15 !important;
+  }
+
+  .upload-box p {
+    margin: 0 !important;
+    font-size: 0.76rem !important;
+    line-height: 1.35 !important;
+  }
+
+  .upload-preview-image {
+    max-height: 185px !important;
+    border-radius: 18px !important;
+  }
+
+  .upload-thumbnails {
+    margin-top: 10px !important;
+    gap: 7px !important;
+  }
+
+  .upload-thumbnail {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 13px !important;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .form-field {
+    gap: 6px !important;
+    font-size: 0.86rem !important;
+  }
+
+  .form-field input,
+  .form-field textarea,
+  .form-field select {
+    min-height: 42px !important;
+    padding: 11px 13px !important;
+    border-radius: 16px !important;
+    font-size: 0.9rem !important;
+  }
+
+  .form-field textarea {
+    min-height: 104px !important;
+  }
+
+  .form-actions {
+    display: grid !important;
+    gap: 10px !important;
+    padding-top: 0 !important;
+  }
+
+  .form-actions .btn {
+    width: 100% !important;
+    min-height: 42px !important;
+    padding: 11px 14px !important;
+    font-size: 0.88rem !important;
+  }
+
+  .listing-preview {
+    display: none !important;
+  }
+}
