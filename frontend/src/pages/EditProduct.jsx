@@ -580,6 +580,7 @@ function EditProduct() {
                   <label className="form-field form-field-full">
                     {text("Beschreibung", "الوصف", "Description")}
                     <textarea
+                      dir="auto"
                       name="description"
                       value={formData.description}
                       onChange={handleChange}

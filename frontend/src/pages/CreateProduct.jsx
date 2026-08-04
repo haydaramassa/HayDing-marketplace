@@ -417,6 +417,7 @@ function CreateProduct() {
                 <label className="form-field form-field-full">
                   {text("Beschreibung", "الوصف", "Description")}
                   <textarea
+                    dir="auto"
                     name="description"
                     rows="5"
                     placeholder={text(
