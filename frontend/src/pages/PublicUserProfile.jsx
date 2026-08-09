@@ -4,6 +4,7 @@ import { useLanguage } from "../context/LanguageContext";
 import { getProducts, getPublicUserProfile } from "../services/api";
 import ProductCardImage from "../components/ProductCardImage";
 import UserAvatar from "../components/UserAvatar";
+import Navbar from "../components/Navbar";
 import "../App.css";
 
 function PublicUserProfile() {
@@ -160,7 +161,11 @@ function PublicUserProfile() {
       className={`create-page ${isArabic ? "rtl" : ""}`}
       dir={isArabic ? "rtl" : "ltr"}
     >
-      <header className="create-header">
+      <div className="public-profile-mobile-navbar">
+        <Navbar variant="app" />
+      </div>
+
+      <header className="create-header public-profile-desktop-header">
         <Link className="logo" to="/">
           <span className="logo-mark">H</span>
           <span>HayDing</span>

@@ -8911,7 +8911,7 @@ font-size: 1.05rem;
 @media (max-width: 760px) {
   .product-details-page {
     width: min(100% - 18px, 420px) !important;
-    padding: 0 0 18px !important;
+    padding: 42px 0 18px !important;
   }
 
   .product-details-layout {
@@ -10010,5 +10010,213 @@ font-size: 1.05rem;
     font-size: 0.8rem !important;
     font-weight: 600 !important;
     line-height: 1.3 !important;
+  }
+}
+
+/****************************************************************************************************/
+.public-profile-mobile-navbar {
+  display: none;
+}
+
+/* Public user profile mobile polish */
+@media (max-width: 760px) {
+  .public-profile-mobile-navbar {
+    display: block !important;
+    margin: 0 0 35px !important;
+  }
+
+  .create-page:has(.public-user-page) .public-profile-desktop-header {
+    display: none !important;
+  }
+
+  .public-user-page {
+    width: min(100% - 14px, 420px) !important;
+    margin: 0 auto !important;
+    padding: 10px 0 18px !important;
+    gap: 12px !important;
+  }
+
+  .public-profile-card {
+    padding: 14px !important;
+    border-radius: 22px !important;
+    display: grid !important;
+    grid-template-columns: 46px minmax(0, 1fr) !important;
+    align-items: start !important;
+    gap: 10px !important;
+    box-shadow: 0 10px 24px rgba(32, 38, 36, 0.045) !important;
+  }
+
+  .public-profile-avatar {
+    width: 44px !important;
+    height: 44px !important;
+    margin: 0 !important;
+  }
+
+  .public-profile-info {
+    display: contents !important;
+  }
+
+  .public-profile-info .eyebrow {
+    grid-column: 2 !important;
+    margin: 1px 0 4px !important;
+    color: #b74b3c !important;
+    font-size: 0.56rem !important;
+    line-height: 1 !important;
+    letter-spacing: 0.055em !important;
+  }
+
+  .public-profile-info h1 {
+    grid-column: 2 !important;
+    margin: 16px 0 0 !important;
+    font-size: 1.18rem !important;
+    line-height: 1.05 !important;
+    letter-spacing: -0.035em !important;
+  }
+
+  .public-profile-meta {
+    grid-column: 1 / -1 !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    margin-top: 2px !important;
+  }
+
+  .public-profile-meta > div {
+    min-width: 0 !important;
+    padding: 7px 7px !important;
+    border-radius: 14px !important;
+  }
+
+  .public-profile-meta span,
+  .public-profile-bio span {
+    font-size: 0.55rem !important;
+    line-height: 1 !important;
+  }
+
+  .public-profile-meta strong {
+    margin-top: 4px !important;
+    font-size: 0.72rem !important;
+    line-height: 1.12 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .public-profile-bio {
+    grid-column: 1 / -1 !important;
+    margin-top: 2px !important;
+    padding: 8px 9px !important;
+    border-radius: 14px !important;
+  }
+
+  .public-profile-bio p {
+    margin: 5px 0 0 !important;
+    font-size: 0.74rem !important;
+    line-height: 1.28 !important;
+  }
+
+  .public-profile-note {
+    grid-column: 1 / -1 !important;
+    margin: 2px 0 0 !important;
+    font-size: 0.76rem !important;
+    line-height: 1.3 !important;
+  }
+
+  .public-profile-listings {
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .public-profile-listings-header {
+    margin: 0 0 10px !important;
+    padding: 11px 13px !important;
+    border-radius: 20px !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    box-shadow: 0 10px 22px rgba(32, 38, 36, 0.04) !important;
+  }
+
+  .public-profile-listings-header .eyebrow {
+    display: none !important;
+  }
+
+  .public-profile-listings-header h2 {
+    margin: 0 !important;
+    font-size: 0.9rem !important;
+    line-height: 1.1 !important;
+    letter-spacing: -0.025em !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .public-profile-listings-header > span {
+    min-width: max-content !important;
+    padding: 5px 8px !important;
+    border-radius: 999px !important;
+    font-size: 0.64rem !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+  }
+
+  .public-profile-listings .my-products-grid {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 9px !important;
+  }
+
+  .public-profile-listings .product-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    border-radius: 18px !important;
+    overflow: hidden !important;
+    box-shadow: 0 10px 24px rgba(32, 38, 36, 0.055) !important;
+  }
+
+  .public-profile-listings .product-card:hover {
+    transform: none !important;
+  }
+
+  .public-profile-listings .product-image {
+    height: 122px !important;
+    min-height: 122px !important;
+    border-radius: 18px 18px 0 0 !important;
+  }
+
+  .public-profile-listings .product-info {
+    padding: 9px !important;
+  }
+
+  .public-profile-listings .product-tag {
+    max-width: 100% !important;
+    padding: 4px 7px !important;
+    font-size: 0.62rem !important;
+    line-height: 1 !important;
+  }
+
+  .public-profile-listings .product-info h3 {
+    margin: 8px 0 4px !important;
+    min-height: 2.35em !important;
+    font-size: 0.86rem !important;
+    line-height: 1.18 !important;
+  }
+
+  .public-profile-listings .product-info p {
+    margin: 0 0 5px !important;
+    font-size: 0.74rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .public-profile-listings .product-info strong {
+    font-size: 0.98rem !important;
+    line-height: 1.1 !important;
   }
 }
