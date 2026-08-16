@@ -19,6 +19,7 @@ function PublicUserProfile() {
   const [error, setError] = useState("");
   const [productsError, setProductsError] = useState("");
   const [notFound, setNotFound] = useState(false);
+  const [isBioExpanded, setIsBioExpanded] = useState(false);
 
   function text(de, ar, en) {
     if (isArabic) return ar;
@@ -68,6 +69,7 @@ function PublicUserProfile() {
         setError("");
         setNotFound(false);
         setProfile(null);
+        setIsBioExpanded(false);
 
         const data = await getPublicUserProfile(userId);
         const user = data?.data || data;
@@ -142,6 +144,8 @@ function PublicUserProfile() {
 
   const sellerDisplayName =
     profile?.fullName || text("Unbekannt", "غير معروف", "Unknown");
+
+  const shouldShowBioToggle = (profile?.bio || "").length > 45;
 
   const sortedSellerProducts = useMemo(() => {
     return [...sellerProducts].sort((a, b) => {
@@ -286,7 +290,24 @@ function PublicUserProfile() {
                 {profile.bio ? (
                   <div className="public-profile-bio">
                     <span>{text("Bio", "نبذة", "Bio")}</span>
-                    <p>{profile.bio}</p>
+
+                    <p className={isBioExpanded ? "expanded" : ""}>
+                      {profile.bio}
+                    </p>
+
+                    {shouldShowBioToggle && (
+                      <button
+                        className="public-profile-bio-toggle"
+                        type="button"
+                        onClick={() =>
+                          setIsBioExpanded((current) => !current)
+                        }
+                      >
+                        {isBioExpanded
+                          ? text("Weniger anzeigen", "عرض أقل", "Show less")
+                          : text("Mehr lesen", "رؤية المزيد", "See more")}
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <p className="public-profile-note">
