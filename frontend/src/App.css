@@ -10269,7 +10269,7 @@ font-size: 1.05rem;
 /* Favorites mobile heading polish */
 @media (max-width: 760px) {
   .my-products-page .favorites-mobile-heading {
-    margin: 39px 0 12px !important;
+    margin: 50px 0 12px !important;
     padding: 0 !important;
     background: transparent !important;
     border: 0 !important;
