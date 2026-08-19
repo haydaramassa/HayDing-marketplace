@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
-import { getProducts } from "../services/api";
+import {
+  addFavorite,
+  getFavorites,
+  getProducts,
+  removeFavorite,
+} from "../services/api";
 import { getProductImages } from "../utils/productImages";
 import Navbar from "../components/Navbar";
 import ProductCardImage from "../components/ProductCardImage";
@@ -20,6 +25,8 @@ function Home() {
   const [latestProducts, setLatestProducts] = useState([]);
   const [isProductsLoading, setIsProductsLoading] = useState(true);
   const [productsError, setProductsError] = useState("");
+  const [favoriteIds, setFavoriteIds] = useState([]);
+  const [favoriteLoadingId, setFavoriteLoadingId] = useState(null);
   const [activeShowcaseIndex, setActiveShowcaseIndex] = useState(0);
   const [isShowcasePaused, setIsShowcasePaused] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -189,10 +196,10 @@ function Home() {
 
   const t = content[language] || content.DE;
   const footerSloganImage = isArabic
-  ? logoSloganAr
-  : language === "EN"
-    ? logoSloganEn
-    : logoSloganDe;
+    ? logoSloganAr
+    : language === "EN"
+      ? logoSloganEn
+      : logoSloganDe;
 
   const currentUser = (() => {
     try {
@@ -201,9 +208,9 @@ function Home() {
       return {};
     }
   })();
-  
+
   const currentUserId = currentUser?.id || currentUser?.userId || currentUser?._id;
-  
+
   function isOwnProduct(product) {
     const productOwnerId =
       product?.userId ||
@@ -212,12 +219,97 @@ function Home() {
       product?.user?.id ||
       product?.seller?.id ||
       product?.owner?.id;
-  
+
     return Boolean(
       currentUserId &&
         productOwnerId &&
         String(currentUserId) === String(productOwnerId)
     );
+  }
+
+  function isLoggedIn() {
+    return Boolean(localStorage.getItem("hayding-token"));
+  }
+
+  function normalizeFavoriteId(value) {
+    const numberValue = Number(value);
+    return Number.isNaN(numberValue) ? null : numberValue;
+  }
+
+  function getFavoriteProductId(item) {
+    return normalizeFavoriteId(item?.productId || item?.product?.id || item?.id);
+  }
+
+  async function loadFavoriteIds() {
+    if (!isLoggedIn()) {
+      setFavoriteIds([]);
+      return;
+    }
+
+    try {
+      const favoritesData = await getFavorites();
+      const favorites = favoritesData?.data || favoritesData || [];
+
+      const ids = Array.isArray(favorites)
+        ? favorites.map(getFavoriteProductId).filter((id) => id !== null)
+        : [];
+
+      setFavoriteIds(ids);
+    } catch {
+      setFavoriteIds([]);
+    }
+  }
+
+  async function handleFavoriteClick(event, productId) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const normalizedProductId = normalizeFavoriteId(productId);
+
+    if (normalizedProductId === null) {
+      return;
+    }
+
+    const product = latestProducts.find(
+      (item) => normalizeFavoriteId(item.id) === normalizedProductId
+    );
+
+    if (isOwnProduct(product)) {
+      return;
+    }
+
+    if (!isLoggedIn()) {
+      navigate("/login");
+      return;
+    }
+
+    const isFavorite = favoriteIds.includes(normalizedProductId);
+
+    try {
+      setFavoriteLoadingId(normalizedProductId);
+
+      if (isFavorite) {
+        await removeFavorite(normalizedProductId);
+
+        setFavoriteIds((currentIds) =>
+          currentIds.filter(
+            (id) => normalizeFavoriteId(id) !== normalizedProductId
+          )
+        );
+      } else {
+        await addFavorite(normalizedProductId);
+
+        setFavoriteIds((currentIds) => {
+          if (currentIds.includes(normalizedProductId)) {
+            return currentIds;
+          }
+
+          return [...currentIds, normalizedProductId];
+        });
+      }
+    } finally {
+      setFavoriteLoadingId(null);
+    }
   }
 
   const categoryIds = ["1", "2", "3", "5", "6", "8"];
@@ -252,6 +344,8 @@ function Home() {
         const products = data?.data || data || [];
 
         setLatestProducts(Array.isArray(products) ? products : []);
+
+        await loadFavoriteIds();
       } catch (err) {
         setProductsError(
           err.message ||
@@ -466,31 +560,65 @@ function Home() {
         {!isProductsLoading && !productsError && newestProducts.length > 0 && (
           <>
             <div className="products-grid">
-              {newestProducts.map((product) => (
-                <Link
-                  className="product-card product-card-link"
-                  key={product.id}
-                  to={`/products/${product.id}`}
-                >
-                  <ProductCardImage
-                    product={product}
-                    showFavoriteButton={!isOwnProduct(product)}
-                  />
+              {newestProducts.map((product) => {
+                const normalizedProductId = normalizeFavoriteId(product.id);
+                const isFavorite = favoriteIds.includes(normalizedProductId);
+                const isFavoriteLoading =
+                  favoriteLoadingId === normalizedProductId;
+                const belongsToCurrentUser = isOwnProduct(product);
 
-                  <div className="product-info">
-                    <span className="product-tag">
-                      {getConditionLabel(product.conditionStatus || product.condition) ||
-                        t.newAd}
-                    </span>
+                return (
+                  <Link
+                    className="product-card product-card-link"
+                    key={product.id}
+                    to={`/products/${product.id}`}
+                  >
+                    <ProductCardImage product={product}>
+                      {!belongsToCurrentUser && (
+                        <button
+                          className={`favorite-btn ${
+                            isFavorite ? "active" : ""
+                          }`}
+                          type="button"
+                          onClick={(event) =>
+                            handleFavoriteClick(event, product.id)
+                          }
+                          disabled={isFavoriteLoading}
+                          aria-label={
+                            isFavorite
+                              ? text(
+                                  "Aus Favoriten entfernen",
+                                  "إزالة من المفضلة",
+                                  "Remove from favorites"
+                                )
+                              : text(
+                                  "Zu Favoriten hinzufügen",
+                                  "إضافة إلى المفضلة",
+                                  "Add to favorites"
+                                )
+                          }
+                        >
+                          {isFavorite ? "♥" : "♡"}
+                        </button>
+                      )}
+                    </ProductCardImage>
 
-                    <h3>{product.title}</h3>
+                    <div className="product-info">
+                      <span className="product-tag">
+                        {getConditionLabel(
+                          product.conditionStatus || product.condition
+                        ) || t.newAd}
+                      </span>
 
-                    <p>{product.city}</p>
+                      <h3>{product.title}</h3>
 
-                    <strong>{product.price} €</strong>
-                  </div>
-                </Link>
-              ))}
+                      <p>{product.city}</p>
+
+                      <strong>{product.price} €</strong>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
 
             {isMobile && (
@@ -506,7 +634,10 @@ function Home() {
                     {t.showMore}
                   </button>
                 ) : (
-                  <Link className="btn btn-secondary mobile-show-more-products" to="/products">
+                  <Link
+                    className="btn btn-secondary mobile-show-more-products"
+                    to="/products"
+                  >
                     {t.exploreAll}
                   </Link>
                 )}
@@ -626,7 +757,10 @@ function Home() {
                 <h3>{t.noLiveListingsTitle}</h3>
                 <p>{t.noLiveListingsText}</p>
 
-                <Link className="btn btn-primary showcase-cta" to="/create-product">
+                <Link
+                  className="btn btn-primary showcase-cta"
+                  to="/create-product"
+                >
                   {t.createFirstListing}
                 </Link>
               </div>

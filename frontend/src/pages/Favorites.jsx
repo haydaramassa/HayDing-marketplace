@@ -107,7 +107,7 @@ function Favorites() {
       <Navbar variant="app" />
 
       <main className="my-products-page">
-        <div className="my-products-header">
+      <div className="favorites-mobile-heading">
           <div>
             <p className="eyebrow">
               {text("Favoriten", "المفضلة", "Favorites")}
@@ -121,13 +121,7 @@ function Favorites() {
               )}
             </h1>
 
-            <p>
-              {text(
-                "Hier findest du alle Anzeigen, die du gespeichert hast.",
-                "هنا تجد كل الإعلانات التي حفظتها.",
-                "Find all the listings you saved here."
-              )}
-            </p>
+            
           </div>
         </div>
 
