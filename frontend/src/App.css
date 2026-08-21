@@ -10295,3 +10295,343 @@ font-size: 1.05rem;
     letter-spacing: -0.04em !important;
   }
 }
+/* Conversation details mobile clean chat layout */
+@media (max-width: 760px) {
+  .conversation-page {
+    width: min(100% - 18px, 420px) !important;
+    margin: 0 auto !important;
+    padding: 10px 0 16px !important;
+    gap: 10px !important;
+    overflow: visible !important;
+  }
+
+  .conversation-page > .my-products-header {
+    display: none !important;
+  }
+
+  .conversation-page .conversation-shell {
+    margin-top: 40px !important;
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    align-items: stretch !important;
+    overflow: visible !important;
+  }
+
+  .conversation-page .conversation-sidebar {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: block !important;
+  }
+
+  .conversation-page .conversation-product-card {
+    width: 100% !important;
+    min-height: 0 !important;
+    padding: 11px 13px !important;
+    border-radius: 20px !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid rgba(230, 222, 209, 0.9) !important;
+    box-shadow: 0 10px 24px rgba(32, 38, 36, 0.045) !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    column-gap: 10px !important;
+    row-gap: 3px !important;
+    text-decoration: none !important;
+  }
+
+  .conversation-page .conversation-product-card .conversation-label {
+    grid-column: 1 / -1 !important;
+    margin: 0 !important;
+    color: #b74b3c !important;
+    font-size: 0.58rem !important;
+    line-height: 1 !important;
+    letter-spacing: 0.065em !important;
+    font-weight: 850 !important;
+  }
+
+  .conversation-page .conversation-product-card h2 {
+    grid-column: 1 !important;
+    margin: 2px 0 0 !important;
+    min-width: 0 !important;
+    color: #17211c !important;
+    font-size: 0.98rem !important;
+    line-height: 1.12 !important;
+    letter-spacing: -0.02em !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .conversation-page .conversation-product-card p {
+    grid-column: 1 !important;
+    margin: 0 !important;
+    color: #6f7973 !important;
+    font-size: 0.72rem !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .conversation-page .conversation-product-card strong {
+    grid-column: 2 !important;
+    grid-row: 2 / 4 !important;
+    align-self: center !important;
+    color: #b74b3c !important;
+    font-size: 0.98rem !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+  }
+
+  .conversation-page .conversation-chat {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: min(64dvh, 520px) !important;
+    min-height: 430px !important;
+    border-radius: 22px !important;
+    background: rgba(255, 255, 255, 0.92) !important;
+    border: 1px solid rgba(230, 222, 209, 0.95) !important;
+    box-shadow: 0 14px 34px rgba(32, 38, 36, 0.065) !important;
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) auto !important;
+    overflow: hidden !important;
+  }
+
+  .conversation-page .conversation-chat-header {
+    padding: 11px 13px !important;
+    border-bottom: 1px solid rgba(230, 222, 209, 0.75) !important;
+    background: rgba(255, 252, 247, 0.94) !important;
+  }
+
+  .conversation-page .conversation-chat-header .conversation-label {
+    margin: 0 0 4px !important;
+    color: #b74b3c !important;
+    font-size: 0.56rem !important;
+    line-height: 1 !important;
+    letter-spacing: 0.065em !important;
+    font-weight: 850 !important;
+  }
+
+  .conversation-page .conversation-chat-header h2 {
+    margin: 0 !important;
+    color: #17211c !important;
+    font-size: 0.98rem !important;
+    line-height: 1.12 !important;
+    letter-spacing: -0.02em !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .conversation-page .conversation-messages {
+    min-height: 0 !important;
+    padding: 12px 10px !important;
+    overflow-y: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    background:
+      radial-gradient(circle at top left, rgba(201, 154, 46, 0.08), transparent 38%),
+      rgba(255, 250, 242, 0.45) !important;
+  }
+
+  .conversation-page .conversation-empty {
+    margin: auto !important;
+    padding: 18px 14px !important;
+    border-radius: 18px !important;
+    background: rgba(255, 255, 255, 0.72) !important;
+    box-shadow: none !important;
+  }
+
+  .conversation-page .conversation-empty .empty-icon {
+    font-size: 1.65rem !important;
+    margin-bottom: 8px !important;
+  }
+
+  .conversation-page .conversation-empty h2 {
+    margin: 0 0 6px !important;
+    font-size: 0.98rem !important;
+    line-height: 1.15 !important;
+  }
+
+  .conversation-page .conversation-empty p {
+    margin: 0 !important;
+    color: #6f7973 !important;
+    font-size: 0.76rem !important;
+    line-height: 1.35 !important;
+  }
+
+  .conversation-page .message-row {
+    width: 100% !important;
+    display: flex !important;
+    align-items: flex-end !important;
+    gap: 6px !important;
+  }
+
+  .conversation-page .message-row.mine {
+    justify-content: flex-end !important;
+  }
+
+  .conversation-page .message-row.theirs {
+    justify-content: flex-start !important;
+  }
+
+  .conversation-page .message-avatar-button {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .conversation-page .message-avatar-button .user-avatar,
+  .conversation-page .message-avatar-button img {
+    width: 26px !important;
+    height: 26px !important;
+  }
+
+  .conversation-page .message-bubble {
+    max-width: min(76%, 270px) !important;
+    padding: 8px 10px !important;
+    border-radius: 16px !important;
+    box-shadow: 0 8px 18px rgba(32, 38, 36, 0.045) !important;
+  }
+
+  .conversation-page .message-row.mine .message-bubble {
+    border-bottom-right-radius: 5px !important;
+    background: #17211c !important;
+    color: #fffaf2 !important;
+  }
+
+  .conversation-page .message-row.theirs .message-bubble {
+    border-bottom-left-radius: 5px !important;
+    background: #ffffff !important;
+    color: #17211c !important;
+    border: 1px solid rgba(230, 222, 209, 0.85) !important;
+  }
+
+  .rtl .conversation-page .message-row.mine .message-bubble {
+    border-bottom-right-radius: 16px !important;
+    border-bottom-left-radius: 5px !important;
+  }
+
+  .rtl .conversation-page .message-row.theirs .message-bubble {
+    border-bottom-left-radius: 16px !important;
+    border-bottom-right-radius: 5px !important;
+  }
+
+  .conversation-page .message-bubble p {
+    margin: 0 !important;
+    font-size: 0.82rem !important;
+    line-height: 1.42 !important;
+    font-weight: 500 !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .conversation-page .message-meta-line {
+    margin-top: 4px !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+  }
+
+  .conversation-page .message-meta-line time {
+    font-size: 0.58rem !important;
+    line-height: 1 !important;
+    opacity: 0.68 !important;
+    white-space: nowrap !important;
+  }
+
+  .conversation-page .conversation-form {
+    position: relative !important;
+    padding: 9px !important;
+    border-top: 1px solid rgba(230, 222, 209, 0.78) !important;
+    background: rgba(255, 252, 247, 0.96) !important;
+    display: grid !important;
+    grid-template-columns: 34px minmax(0, 1fr) auto !important;
+    gap: 7px !important;
+    align-items: end !important;
+  }
+
+  .conversation-page .conversation-input-tools {
+    position: relative !important;
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  .conversation-page .emoji-toggle {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 999px !important;
+    border: 1px solid rgba(230, 222, 209, 0.95) !important;
+    background: #ffffff !important;
+    color: #17211c !important;
+    font-size: 0.98rem !important;
+    box-shadow: none !important;
+  }
+
+  .conversation-page .emoji-picker {
+    position: absolute !important;
+    left: 0 !important;
+    bottom: 42px !important;
+    width: 226px !important;
+    max-height: 170px !important;
+    padding: 8px !important;
+    border-radius: 18px !important;
+    background: #ffffff !important;
+    border: 1px solid rgba(230, 222, 209, 0.95) !important;
+    box-shadow: 0 16px 34px rgba(32, 38, 36, 0.12) !important;
+    display: grid !important;
+    grid-template-columns: repeat(6, 1fr) !important;
+    gap: 5px !important;
+    overflow-y: auto !important;
+    z-index: 20 !important;
+  }
+
+  .rtl .conversation-page .emoji-picker {
+    left: auto !important;
+    right: 0 !important;
+  }
+
+  .conversation-page .emoji-picker button {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 10px !important;
+    border: 0 !important;
+    background: rgba(248, 245, 239, 0.9) !important;
+    font-size: 0.95rem !important;
+  }
+
+  .conversation-page .conversation-form textarea {
+    width: 100% !important;
+    min-height: 34px !important;
+    max-height: 86px !important;
+    padding: 9px 11px !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(230, 222, 209, 0.95) !important;
+    background: #ffffff !important;
+    color: #17211c !important;
+    font-size: 0.82rem !important;
+    line-height: 1.32 !important;
+    resize: none !important;
+    outline: none !important;
+    overflow-y: auto !important;
+  }
+
+  .conversation-page .conversation-form textarea:focus {
+    border-color: rgba(183, 75, 60, 0.48) !important;
+    box-shadow: 0 0 0 3px rgba(183, 75, 60, 0.08) !important;
+  }
+
+  .conversation-page .conversation-form .btn {
+    min-width: 58px !important;
+    min-height: 34px !important;
+    padding: 8px 10px !important;
+    border-radius: 999px !important;
+    font-size: 0.74rem !important;
+    line-height: 1 !important;
+    box-shadow: 0 10px 22px rgba(32, 38, 36, 0.14) !important;
+  }
+}
