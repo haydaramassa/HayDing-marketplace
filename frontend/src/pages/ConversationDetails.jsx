@@ -364,15 +364,25 @@ function ConversationDetails() {
             </aside>
 
             <section className="conversation-chat">
-              <div className="conversation-chat-header">
-                <div>
-                  <span className="conversation-label">
-                    {text("Chat", "الدردشة", "Chat")}
-                  </span>
+            <div className="conversation-chat-header">
+              <button
+                className="conversation-chat-user"
+                type="button"
+                onClick={() => goToUserProfile(otherUser)}
+                aria-label={text(
+                  "Profil öffnen",
+                  "فتح الملف الشخصي",
+                  "Open profile"
+                )}
+              >
+                <UserAvatar user={otherUser} size="small" />
 
-                  <h2>{getUserName(otherUser)}</h2>
-                </div>
-              </div>
+                <span>
+                  <strong>{getUserName(otherUser)}</strong>
+                  <small>{text("Unterhaltung", "محادثة", "Conversation")}</small>
+                </span>
+              </button>
+            </div>
 
               <div className="conversation-messages" ref={messagesContainerRef}>
                 {messages.length === 0 && (

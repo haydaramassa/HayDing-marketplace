@@ -10399,29 +10399,51 @@ font-size: 1.05rem;
   }
 
   .conversation-page .conversation-chat-header {
-    padding: 11px 13px !important;
+    padding: 10px 12px !important;
     border-bottom: 1px solid rgba(230, 222, 209, 0.75) !important;
     background: rgba(255, 252, 247, 0.94) !important;
   }
-
-  .conversation-page .conversation-chat-header .conversation-label {
-    margin: 0 0 4px !important;
-    color: #b74b3c !important;
-    font-size: 0.56rem !important;
-    line-height: 1 !important;
-    letter-spacing: 0.065em !important;
-    font-weight: 850 !important;
+  
+  .conversation-page .conversation-chat-user {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 9px !important;
+    text-align: start !important;
+    cursor: pointer !important;
   }
-
-  .conversation-page .conversation-chat-header h2 {
-    margin: 0 !important;
+  
+  .conversation-page .conversation-chat-user .user-avatar {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+  }
+  
+  .conversation-page .conversation-chat-user span {
+    min-width: 0 !important;
+    display: grid !important;
+    gap: 2px !important;
+  }
+  
+  .conversation-page .conversation-chat-user strong {
     color: #17211c !important;
-    font-size: 0.98rem !important;
-    line-height: 1.12 !important;
-    letter-spacing: -0.02em !important;
+    font-size: 0.9rem !important;
+    font-weight: 800 !important;
+    line-height: 1.05 !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
+  }
+  
+  .conversation-page .conversation-chat-user small {
+    color: #6f7973 !important;
+    font-size: 0.62rem !important;
+    font-weight: 650 !important;
+    line-height: 1 !important;
   }
 
   .conversation-page .conversation-messages {
