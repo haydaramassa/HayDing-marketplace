@@ -493,14 +493,20 @@ function ConversationDetails() {
                 </div>
 
                 <textarea
+                  className="conversation-message-input"
                   value={messageText}
-                  onChange={(event) => setMessageText(event.target.value)}
+                  onChange={(event) => {
+                    setMessageText(event.target.value);
+
+                    event.target.style.height = "38px";
+                    event.target.style.height = `${Math.min(event.target.scrollHeight, 88)}px`;
+                  }}
                   placeholder={text(
                     "Schreibe eine Nachricht...",
                     "اكتب رسالة...",
                     "Write a message..."
                   )}
-                  rows="2"
+                  rows="1"
                 />
 
                 <button

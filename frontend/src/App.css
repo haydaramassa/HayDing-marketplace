@@ -10310,7 +10310,7 @@ font-size: 1.05rem;
   }
 
   .conversation-page .conversation-shell {
-    margin-top: 40px !important;
+    margin-top: 28px !important;
     width: 100% !important;
     display: grid !important;
     grid-template-columns: 1fr !important;
@@ -10387,8 +10387,8 @@ font-size: 1.05rem;
   .conversation-page .conversation-chat {
     width: 100% !important;
     min-width: 0 !important;
-    height: min(64dvh, 520px) !important;
-    min-height: 430px !important;
+    height: 560px !important;
+    min-height: 0 !important;
     border-radius: 22px !important;
     background: rgba(255, 255, 255, 0.92) !important;
     border: 1px solid rgba(230, 222, 209, 0.95) !important;
@@ -10397,7 +10397,6 @@ font-size: 1.05rem;
     grid-template-rows: auto minmax(0, 1fr) auto !important;
     overflow: hidden !important;
   }
-
   .conversation-page .conversation-chat-header {
     padding: 10px 12px !important;
     border-bottom: 1px solid rgba(230, 222, 209, 0.75) !important;
@@ -10448,14 +10447,17 @@ font-size: 1.05rem;
 
   .conversation-page .conversation-messages {
     min-height: 0 !important;
-    padding: 12px 10px !important;
+    height: 100% !important;
+    padding: 14px 10px 16px !important;
     overflow-y: auto !important;
+    overflow-x: hidden !important;
     display: flex !important;
     flex-direction: column !important;
     gap: 8px !important;
     background:
       radial-gradient(circle at top left, rgba(201, 154, 46, 0.08), transparent 38%),
       rgba(255, 250, 242, 0.45) !important;
+    scrollbar-width: thin !important;
   }
 
   .conversation-page .conversation-empty {
@@ -10565,19 +10567,20 @@ font-size: 1.05rem;
     opacity: 0.68 !important;
     white-space: nowrap !important;
   }
-
   .conversation-page .conversation-form {
     position: relative !important;
-    padding: 9px !important;
+    padding: 8px !important;
     border-top: 1px solid rgba(230, 222, 209, 0.78) !important;
     background: rgba(255, 252, 247, 0.96) !important;
     display: grid !important;
-    grid-template-columns: 34px minmax(0, 1fr) auto !important;
+    grid-template-columns: 34px minmax(0, 1fr) 68px !important;
     gap: 7px !important;
-    align-items: end !important;
+    align-items: center !important;
   }
 
   .conversation-page .conversation-input-tools {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
     position: relative !important;
     width: 34px !important;
     height: 34px !important;
@@ -10625,35 +10628,109 @@ font-size: 1.05rem;
     background: rgba(248, 245, 239, 0.9) !important;
     font-size: 0.95rem !important;
   }
-
-  .conversation-page .conversation-form textarea {
+  .conversation-page .conversation-form textarea,
+  .conversation-page .conversation-message-input {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
     width: 100% !important;
-    min-height: 34px !important;
-    max-height: 86px !important;
-    padding: 9px 11px !important;
-    border-radius: 16px !important;
+    min-width: 0 !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 88px !important;
+    padding: 10px 12px !important;
+    border-radius: 19px !important;
     border: 1px solid rgba(230, 222, 209, 0.95) !important;
     background: #ffffff !important;
     color: #17211c !important;
     font-size: 0.82rem !important;
-    line-height: 1.32 !important;
+    line-height: 1.25 !important;
     resize: none !important;
     outline: none !important;
     overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scrollbar-width: thin !important;
   }
 
-  .conversation-page .conversation-form textarea:focus {
-    border-color: rgba(183, 75, 60, 0.48) !important;
-    box-shadow: 0 0 0 3px rgba(183, 75, 60, 0.08) !important;
-  }
+  .conversation-page .conversation-messages::-webkit-scrollbar,
+.conversation-page .conversation-message-input::-webkit-scrollbar,
+.conversation-page .conversation-form textarea::-webkit-scrollbar {
+  width: 4px !important;
+}
 
-  .conversation-page .conversation-form .btn {
-    min-width: 58px !important;
-    min-height: 34px !important;
-    padding: 8px 10px !important;
-    border-radius: 999px !important;
-    font-size: 0.74rem !important;
-    line-height: 1 !important;
-    box-shadow: 0 10px 22px rgba(32, 38, 36, 0.14) !important;
-  }
+.conversation-page .conversation-messages::-webkit-scrollbar-thumb,
+.conversation-page .conversation-message-input::-webkit-scrollbar-thumb,
+.conversation-page .conversation-form textarea::-webkit-scrollbar-thumb {
+  background: rgba(23, 33, 28, 0.22) !important;
+  border-radius: 999px !important;
+}
+
+.conversation-page .conversation-messages::-webkit-scrollbar-track,
+.conversation-page .conversation-message-input::-webkit-scrollbar-track,
+.conversation-page .conversation-form textarea::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.conversation-page .conversation-chat .conversation-form {
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 8px !important;
+  border-top: 1px solid rgba(230, 222, 209, 0.78) !important;
+  background: rgba(255, 252, 247, 0.96) !important;
+  display: grid !important;
+  grid-template-columns: 34px minmax(0, 1fr) 66px !important;
+  grid-template-rows: auto !important;
+  gap: 7px !important;
+  align-items: end !important;
+}
+
+.conversation-page .conversation-chat .conversation-input-tools {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  width: 34px !important;
+  height: 38px !important;
+  align-self: end !important;
+}
+
+.conversation-page .conversation-chat .emoji-toggle {
+  width: 34px !important;
+  height: 38px !important;
+  min-width: 34px !important;
+  min-height: 38px !important;
+}
+
+.conversation-page .conversation-chat .conversation-message-input,
+.conversation-page .conversation-chat .conversation-form textarea {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  max-height: 88px !important;
+  padding: 10px 12px !important;
+  border-radius: 19px !important;
+  resize: none !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  align-self: end !important;
+}
+
+.conversation-page .conversation-chat .conversation-form > .btn,
+.conversation-page .conversation-chat .conversation-form > .btn.btn-primary {
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  width: 66px !important;
+  min-width: 66px !important;
+  max-width: 66px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  max-height: 38px !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  font-size: 0.68rem !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  align-self: end !important;
+  justify-self: end !important;
+}
 }
