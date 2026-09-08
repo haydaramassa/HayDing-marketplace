@@ -10733,4 +10733,92 @@ font-size: 1.05rem;
   align-self: end !important;
   justify-self: end !important;
 }
+
+/***********************************************************************************************************************/
+.conversation-page .conversation-product-card {
+  padding: 9px 12px !important;
+  border-radius: 18px !important;
+}
+
+.conversation-page .conversation-product-card .conversation-label {
+  font-size: 0.54rem !important;
+  margin-bottom: 1px !important;
+}
+
+.conversation-page .conversation-product-card h2 {
+  font-size: 0.9rem !important;
+  line-height: 1.08 !important;
+}
+
+.conversation-page .conversation-product-card p {
+  font-size: 0.68rem !important;
+}
+
+.conversation-page .conversation-product-card strong {
+  font-size: 0.9rem !important;
+}
+
+.conversation-page .message-avatar-button {
+  display: none !important;
+}
+
+.conversation-page .message-row {
+  gap: 0 !important;
+}
+
+.conversation-page .message-bubble {
+  max-width: min(82%, 285px) !important;
+  padding: 8px 10px !important;
+  border-radius: 17px !important;
+  box-shadow: 0 6px 14px rgba(32, 38, 36, 0.035) !important;
+}
+
+.conversation-page .message-row.mine .message-bubble {
+  background: #22342b !important;
+  color: #fffaf2 !important;
+}
+
+.conversation-page .message-row.theirs .message-bubble {
+  background: rgba(255, 255, 255, 0.94) !important;
+  color: #17211c !important;
+}
+
+.conversation-page .message-bubble p {
+  font-size: 0.8rem !important;
+  line-height: 1.38 !important;
+}
+
+.conversation-page .message-meta-line {
+  margin-top: 3px !important;
+}
+
+.conversation-page .message-meta-line time {
+  font-size: 0.54rem !important;
+  opacity: 0.58 !important;
+}
+
+.conversation-page .message-row.mine .message-bubble {
+  background: #17211c !important;
+  color: #fffaf2 !important;
+  box-shadow: 0 8px 18px rgba(23, 33, 28, 0.1) !important;
+}
+
+.conversation-page .message-row.theirs .message-bubble {
+  background: #ffffff !important;
+  color: #17211c !important;
+  border: 1px solid rgba(230, 222, 209, 0.9) !important;
+  box-shadow: 0 6px 14px rgba(32, 38, 36, 0.025) !important;
+}
+
+.conversation-page .message-row.mine .message-bubble p {
+  color: #fffaf2 !important;
+}
+
+.conversation-page .message-row.mine .message-meta-line time {
+  color: rgba(255, 250, 242, 0.62) !important;
+}
+
+.conversation-page .message-row.theirs .message-meta-line time {
+  color: rgba(23, 33, 28, 0.48) !important;
+}
 }
